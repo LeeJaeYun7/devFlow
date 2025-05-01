@@ -7,12 +7,12 @@
 FROM docker.io/node:lts-alpine
 
 ENV HOST=0.0.0.0
-ENV PORT=3000
+ENV PORT=4600
 
 WORKDIR /app
 
 RUN addgroup --system backend && \
-          adduser --system -G backend backend
+  adduser --system -G backend backend
 
 COPY apps/backend/dist backend/
 RUN chown -R backend:backend .

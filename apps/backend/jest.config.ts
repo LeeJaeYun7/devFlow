@@ -9,6 +9,7 @@ const swcJestConfig = JSON.parse(
 // Disable .swcrc look-up by SWC core because we're passing in swcJestConfig ourselves
 swcJestConfig.swcrc = false;
 
+
 export default {
   displayName: 'backend',
   preset: '../../jest.preset.js',
