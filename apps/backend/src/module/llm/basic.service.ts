@@ -7,16 +7,19 @@ import { ChatModel } from 'openai/resources/shared';
 @Injectable()
 export class LlmBasicService {
   private readonly openai: OpenAI;
+  private readonly defaultModel: ChatModel;
 
   constructor(private readonly configService: ConfigService) {
     this.openai = new OpenAI({
       apiKey: this.configService.get('OPENAI_API_KEY'),
     });
+
+    this.defaultModel = this.configService.get('NODE_ENV') === 'production' ? 'gpt-4o' : 'gpt-3.5-turbo';
   }
 
   public async chat(messages: ChatCompletionMessageParam[], options: ChatOption = {}) {
     const response = await this.openai.chat.completions.create({
-      model: options.model ?? 'gpt-3.5-turbo',
+      model: options.model ?? this.defaultModel,
       messages,
       tools: options.tools,
       temperature: 0.7,
@@ -28,7 +31,7 @@ export class LlmBasicService {
 
   public async streamChat(messages: ChatCompletionMessageParam[], options: ChatOption = {}) {
     const response = await this.openai.chat.completions.create({
-      model: options.model ?? 'gpt-3.5-turbo',
+      model: options.model ?? this.defaultModel,
       messages,
       tools: options.tools,
       temperature: 0.7,
