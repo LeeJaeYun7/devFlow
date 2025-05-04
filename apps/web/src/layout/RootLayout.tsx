@@ -20,6 +20,7 @@ export function RootLayout({ sidebar }: RootLayoutProps) {
       {/* 메인 컨텐츠 영역 */}
       <Box sx={{ display: 'flex', flex: 1 }}>
         {sidebar}
+
         <Box
           sx={{
             flex: 1,
@@ -27,9 +28,10 @@ export function RootLayout({ sidebar }: RootLayoutProps) {
             display: 'flex',
             flexDirection: 'column',
             marginLeft: isNotMobile ? `${sidebarWidth}px` : 0,
+            marginTop: isNotMobile ? 0 : `48px`,
           }}
         >
-          <Box sx={{ flex: 1 }}>
+          <Box sx={{ flex: 1, p: { xs: 1, sm: 2 }, width: '100%' }}>
             <Outlet />
           </Box>
           <RootFooter />
@@ -38,7 +40,7 @@ export function RootLayout({ sidebar }: RootLayoutProps) {
       {/* 다크모드 토글 플로팅 버튼 */}
       <Fab
         color="primary"
-        size="medium"
+        size="small"
         sx={{
           position: 'fixed',
           top: 24,
@@ -47,7 +49,11 @@ export function RootLayout({ sidebar }: RootLayoutProps) {
         }}
         onClick={colorMode.toggleColorMode}
       >
-        {theme.palette.mode === 'dark' ? <WbSunny /> : <NightsStay />}
+        {theme.palette.mode === 'dark' ? (
+          <WbSunny sx={{ fontSize: '1.2rem' }} />
+        ) : (
+          <NightsStay sx={{ fontSize: '1.2rem' }} />
+        )}
       </Fab>
     </Box>
   );

@@ -17,13 +17,15 @@ import { Menu, Close, Person } from '@mui/icons-material';
 import ManageSearchIcon from '@mui/icons-material/ManageSearch';
 import AddToPhotosIcon from '@mui/icons-material/AddToPhotos';
 import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { AdminUrlMap } from './Path.constant';
 
 export default function AdminSidebar() {
   const theme = useTheme();
+  const location = useLocation();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const [open, setOpen] = useState(isMobile ? false : true);
 
+  const [open, setOpen] = useState(isMobile ? false : true);
   const handleDrawerClose = () => setOpen(false);
 
   useEffect(() => {
@@ -75,25 +77,37 @@ export default function AdminSidebar() {
           </Toolbar>
           <List>
             <ListItem disablePadding sx={{ display: 'block' }}>
-              <ListItemButton component={Link} to="/admin/user">
+              <ListItemButton component={Link} to={AdminUrlMap.user} selected={location.pathname === AdminUrlMap.user}>
                 <ListItemIcon>
                   <Person />
                 </ListItemIcon>
                 <ListItemText primary="유저" />
               </ListItemButton>
-              <ListItemButton component={Link} to="/admin/chat-history">
+              <ListItemButton
+                component={Link}
+                to={AdminUrlMap.chatHistory}
+                selected={location.pathname === AdminUrlMap.chatHistory}
+              >
                 <ListItemIcon>
                   <ManageSearchIcon />
                 </ListItemIcon>
                 <ListItemText primary="채팅 기록" />
               </ListItemButton>
-              <ListItemButton component={Link} to="/admin/collect-stork-data">
+              <ListItemButton
+                component={Link}
+                to={AdminUrlMap.collectStorkData}
+                selected={location.pathname === AdminUrlMap.collectStorkData}
+              >
                 <ListItemIcon>
                   <AddToPhotosIcon />
                 </ListItemIcon>
                 <ListItemText primary="수집 데이터" />
               </ListItemButton>
-              <ListItemButton component={Link} to="/admin/system-prompt">
+              <ListItemButton
+                component={Link}
+                to={AdminUrlMap.systemPrompt}
+                selected={location.pathname === AdminUrlMap.systemPrompt}
+              >
                 <ListItemIcon>
                   <SettingsSuggestIcon />
                 </ListItemIcon>

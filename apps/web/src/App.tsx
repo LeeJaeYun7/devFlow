@@ -9,6 +9,7 @@ import { SystemPromptMain } from './components/admin/systemPrompt/Main';
 import { RootLayout } from './layout/RootLayout';
 import { ServiceRootSidebar } from './layout/service/Sidebar';
 import AdminSidebar from './layout/admin/Sidebar';
+import { AdminUrlMap } from './layout/admin/Path.constant';
 
 export default function App() {
   return (
@@ -20,11 +21,11 @@ export default function App() {
             <Route path="/" element={<ChatMain />} />
           </Route>
           <Route path="/admin" element={<RootLayout sidebar={<AdminSidebar />} />}>
-            <Route path="/admin" element={<Navigate to="/admin/user" />} />
-            <Route path="/admin/user" element={<UserMain />} />
-            <Route path="/admin/system-prompt" element={<SystemPromptMain />} />
-            <Route path="/admin/collect-stork-data" element={<CollectStorkDataMain />} />
-            <Route path="/admin/chat-history" element={<ChatHistoryMain />} />
+            <Route path="/admin" element={<Navigate to={AdminUrlMap.user} />} />
+            <Route path={AdminUrlMap.user} element={<UserMain />} />
+            <Route path={AdminUrlMap.systemPrompt} element={<SystemPromptMain />} />
+            <Route path={AdminUrlMap.collectStorkData} element={<CollectStorkDataMain />} />
+            <Route path={AdminUrlMap.chatHistory} element={<ChatHistoryMain />} />
           </Route>
         </Routes>
       </StyledEngineProvider>
