@@ -1,13 +1,16 @@
 import { Box, Fab, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { useContext } from 'react';
-import { ColorModeContext } from '../../Theme';
+import { ColorModeContext } from '../Theme';
 import { Outlet } from 'react-router-dom';
 import { WbSunny, NightsStay } from '@mui/icons-material';
-import { ServiceRootSidebar } from './RootSidebar';
 
 const sidebarWidth = 250;
 
-export function ServiceRootLayout() {
+interface RootLayoutProps {
+  sidebar?: React.ReactNode;
+}
+
+export function RootLayout({ sidebar }: RootLayoutProps) {
   const theme = useTheme();
   const isNotMobile = useMediaQuery(theme.breakpoints.up('sm'));
   const colorMode = useContext(ColorModeContext);
@@ -16,7 +19,7 @@ export function ServiceRootLayout() {
     <Box sx={{ display: 'flex', minHeight: '100vh', flexDirection: 'column' }}>
       {/* 메인 컨텐츠 영역 */}
       <Box sx={{ display: 'flex', flex: 1 }}>
-        <ServiceRootSidebar />
+        {sidebar}
         <Box
           sx={{
             flex: 1,
