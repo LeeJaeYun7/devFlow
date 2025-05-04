@@ -1,7 +1,6 @@
-import { Box, Card, CardContent, Typography, Paper, useTheme, Grid, Chip } from '@mui/material';
-import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import { Box, Typography, Paper, Grid, Chip } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
+import { StatisticsCard } from '../../base/card/Statistics';
 
 // 상단 요약 카드용 mock 데이터
 type Metric = {
@@ -61,45 +60,13 @@ const users: User[] = [
 ];
 
 export function UserMain() {
-  const theme = useTheme();
-
   return (
     <Box>
       {/* 상단 요약 카드 */}
       <Grid container spacing={2} mb={4}>
-        {metrics.map((metric) => {
-          const isUp = metric.diff > 0;
-          const isDown = metric.diff < 0;
-          return (
-            <Grid component="div" key={metric.label}>
-              <Card sx={{ height: '100%' }}>
-                <CardContent>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    {metric.label}
-                  </Typography>
-                  <Typography variant="h5" fontWeight={700} mb={1}>
-                    {metric.label.includes('Retention') ? `${metric.value.toFixed(1)}%` : metric.value.toLocaleString()}
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    {isUp && <ArrowDropUpIcon sx={{ color: theme.palette.success.main }} />}
-                    {isDown && <ArrowDropDownIcon sx={{ color: theme.palette.error.main }} />}
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: isUp ? theme.palette.success.main : isDown ? theme.palette.error.main : 'text.secondary',
-                        fontWeight: 600,
-                      }}
-                    >
-                      {metric.diff > 0 ? '+' : ''}
-                      {metric.diff} ({metric.diffPercent > 0 ? '+' : ''}
-                      {metric.diffPercent.toFixed(2)}%)
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-          );
-        })}
+        {metrics.map((metric) => (
+          <StatisticsCard key={metric.label} {...metric} />
+        ))}
       </Grid>
 
       {/* 유저 테이블 */}
