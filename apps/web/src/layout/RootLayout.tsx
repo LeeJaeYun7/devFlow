@@ -31,7 +31,7 @@ export function RootLayout({ sidebar }: RootLayoutProps) {
             marginTop: isNotMobile ? 0 : `48px`,
           }}
         >
-          <Box sx={{ flex: 1, p: { xs: 1, sm: 2 }, width: '100%' }}>
+          <Box sx={{ flex: 1, width: '100%' }}>
             <Outlet />
           </Box>
           <RootFooter />
