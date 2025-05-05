@@ -13,6 +13,7 @@
     "module": "ESNext",
     "moduleResolution": "node",
     "noEmitOnError": true,
+    "esModuleInterop": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
@@ -20,6 +21,7 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
+    "sourceMap": true,
     "baseUrl": ".",
     "paths": {
       "@lia/api/*": [

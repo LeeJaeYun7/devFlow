@@ -19,7 +19,7 @@ module.exports = {
       compiler: 'swc',
       main: './src/main.ts',
       tsConfig: './tsconfig.app.json',
-      optimization: false,
+      optimization: true,
       outputHashing: 'none',
       generatePackageJson: true,
     }),
