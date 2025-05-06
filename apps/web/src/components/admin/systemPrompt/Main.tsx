@@ -1,8 +1,15 @@
 import { Box, Button, Paper, TextField, Typography } from '@mui/material';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSystemPrompt, usePatchSystemPrompt } from '../../../hooks/useSystemPrompt';
 
 export function SystemPromptMain() {
-  const [prompt, setPrompt] = useState('');
+  const { data: prompt, isLoading } = useSystemPrompt();
+  const [input, setInput] = useState('');
+  const patchMutation = usePatchSystemPrompt();
+
+  useEffect(() => {
+    if (prompt) setInput(prompt);
+  }, [prompt]);
 
   return (
     <Box>
@@ -19,18 +26,23 @@ export function SystemPromptMain() {
           minRows={8}
           maxRows={20}
           fullWidth
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
           placeholder="시스템 프롬프트를 입력하세요..."
         />
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
           <Typography variant="caption" color="text.secondary">
-            {getTokenCount(prompt)} tokens / 8,192 tokens
+            {getTokenCount(input)} tokens / 8,192 tokens
           </Typography>
         </Box>
       </Paper>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-        <Button variant="contained" color="primary">
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => patchMutation.mutate(input)}
+          disabled={patchMutation.isPending}
+        >
           저장
         </Button>
       </Box>

@@ -9,7 +9,7 @@ import { AuthSsoMap } from '@lia/api/auth/auth.constant';
 export class SsoKakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
   constructor(private readonly configService: ConfigService) {
     super({
-      clientID: configService.get('KAKAO_OAUTH_CLIENT_ID') ?? '',
+      clientID: configService.get('KAKAO_OAUTH_CLIENT_ID') ?? 'default',
       callbackURL: 'http://localhost:4600/api/auth/kakao/callback',
       passReqToCallback: true,
     });

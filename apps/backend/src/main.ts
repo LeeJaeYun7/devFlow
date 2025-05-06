@@ -15,6 +15,12 @@ async function bootstrap() {
   app.setGlobalPrefix(globalPrefix);
   const port = process.env.PORT || 4600;
 
+  app.enableCors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type'],
+  });
+
   const config = new DocumentBuilder()
     .setTitle('LIA API')
     .setDescription('LIA API description')

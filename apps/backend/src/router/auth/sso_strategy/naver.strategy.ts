@@ -9,7 +9,7 @@ import { Profile, Strategy } from 'passport-naver-v2';
 export class SsoNaverStrategy extends PassportStrategy<any>(Strategy, 'naver') {
   constructor(private readonly configService: ConfigService) {
     super({
-      clientID: configService.get('NAVER_OAUTH_CLIENT_ID') ?? '',
+      clientID: configService.get('NAVER_OAUTH_CLIENT_ID') ?? 'default',
       clientSecret: configService.get('NAVER_OAUTH_CLIENT_SECRET') ?? '',
       callbackURL: 'http://localhost:4600/api/auth/naver/callback',
     });

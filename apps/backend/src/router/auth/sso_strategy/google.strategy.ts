@@ -10,7 +10,7 @@ import { AuthSsoMap } from '@lia/api/auth/auth.constant';
 export class SsoGoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(private readonly configService: ConfigService) {
     super({
-      clientID: configService.get('GOOGLE_OAUTH_CLIENT_ID') ?? '',
+      clientID: configService.get('GOOGLE_OAUTH_CLIENT_ID') ?? 'default',
       clientSecret: configService.get('GOOGLE_OAUTH_CLIENT_SECRET') ?? '',
       callbackURL: 'http://localhost:4600/api/auth/google/callback',
       passReqToCallback: true,
