@@ -1,4 +1,4 @@
-import { useState, useMemo, createContext } from 'react';
+import { useState, useMemo, createContext, useEffect } from 'react';
 import { createCustomTheme, ColorModeContext } from '../Theme';
 import { Theme, ThemeProvider } from '@mui/material';
 
@@ -15,6 +15,14 @@ export function DarkModeProvider({ children }: { children: React.ReactNode }) {
   );
 
   const theme = useMemo(() => createCustomTheme(mode), [mode]);
+
+  useEffect(() => {
+    const darkMode = localStorage.getItem('darkMode');
+    if (darkMode) {
+      setMode(darkMode === 'true' ? 'dark' : 'light');
+      localStorage.setItem('darkMode', darkMode);
+    }
+  }, []);
 
   return (
     <DarkModeContext.Provider value={{ mode, setMode, theme }}>

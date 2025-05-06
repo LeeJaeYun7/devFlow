@@ -1,8 +1,9 @@
-import { Box, Fab, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Button, Fab, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { useContext } from 'react';
 import { ColorModeContext } from '../Theme';
 import { Outlet } from 'react-router-dom';
 import { WbSunny, NightsStay } from '@mui/icons-material';
+import { useUser } from '../context/UserProvider';
 
 const sidebarWidth = 250;
 
@@ -14,6 +15,7 @@ export function RootLayout({ sidebar }: RootLayoutProps) {
   const theme = useTheme();
   const isNotMobile = useMediaQuery(theme.breakpoints.up('sm'));
   const colorMode = useContext(ColorModeContext);
+  const { isLogin } = useUser();
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', flexDirection: 'column' }}>
@@ -37,6 +39,53 @@ export function RootLayout({ sidebar }: RootLayoutProps) {
           <RootFooter />
         </Box>
       </Box>
+
+      {/* 로그인 버튼 */}
+      {!isLogin && (
+        <Button
+          color="inherit"
+          size="small"
+          variant="contained"
+          sx={{
+            position: 'fixed',
+            top: 24,
+            right: 80,
+            zIndex: 2000,
+            display: 'flex',
+            height: '40px',
+            gap: 1,
+            borderRadius: '100px',
+            px: 2,
+          }}
+          onClick={() => (window.location.href = '/login')}
+        >
+          <Typography sx={{ fontSize: '0.875rem' }}>로그인</Typography>
+        </Button>
+      )}
+
+      {/* 로그아웃 버튼 */}
+      {isLogin && (
+        <Button
+          color="inherit"
+          size="small"
+          variant="contained"
+          sx={{
+            position: 'fixed',
+            top: 24,
+            right: 80,
+            zIndex: 2000,
+            display: 'flex',
+            height: '40px',
+            gap: 1,
+            borderRadius: '100px',
+            px: 2,
+          }}
+          onClick={() => (window.location.href = '/logout')}
+        >
+          <Typography sx={{ fontSize: '0.875rem' }}>로그아웃</Typography>
+        </Button>
+      )}
+
       {/* 다크모드 토글 플로팅 버튼 */}
       <Fab
         color="primary"

@@ -11,29 +11,36 @@ import { ServiceRootSidebar } from './layout/service/Sidebar';
 import AdminSidebar from './layout/admin/Sidebar';
 import { AdminUrlMap } from './layout/admin/Path.constant';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { LoginMain } from './components/login/LoginMain';
+import { UserProvider } from './context/UserProvider';
 
 const queryClient = new QueryClient();
 
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <DarkModeProvider>
-        <StyledEngineProvider injectFirst>
-          <CssBaseline />
-          <Routes>
-            <Route path="/" element={<RootLayout sidebar={<ServiceRootSidebar />} />}>
-              <Route path="/" element={<ChatMain />} />
-            </Route>
-            <Route path="/admin" element={<RootLayout sidebar={<AdminSidebar />} />}>
-              <Route path="/admin" element={<Navigate to={AdminUrlMap.user} />} />
-              <Route path={AdminUrlMap.user} element={<UserMain />} />
-              <Route path={AdminUrlMap.systemPrompt} element={<SystemPromptMain />} />
-              <Route path={AdminUrlMap.collectStorkData} element={<CollectStorkDataMain />} />
-              <Route path={AdminUrlMap.chatHistory} element={<ChatHistoryMain />} />
-            </Route>
-          </Routes>
-        </StyledEngineProvider>
-      </DarkModeProvider>
+      <UserProvider>
+        <DarkModeProvider>
+          <StyledEngineProvider injectFirst>
+            <CssBaseline />
+            <Routes>
+              <Route path="/" element={<RootLayout sidebar={<ServiceRootSidebar />} />}>
+                <Route path="/" element={<ChatMain />} />
+              </Route>
+              <Route>
+                <Route path="/login" element={<LoginMain />} />
+              </Route>
+              <Route path="/admin" element={<RootLayout sidebar={<AdminSidebar />} />}>
+                <Route path="/admin" element={<Navigate to={AdminUrlMap.user} />} />
+                <Route path={AdminUrlMap.user} element={<UserMain />} />
+                <Route path={AdminUrlMap.systemPrompt} element={<SystemPromptMain />} />
+                <Route path={AdminUrlMap.collectStorkData} element={<CollectStorkDataMain />} />
+                <Route path={AdminUrlMap.chatHistory} element={<ChatHistoryMain />} />
+              </Route>
+            </Routes>
+          </StyledEngineProvider>
+        </DarkModeProvider>
+      </UserProvider>
     </QueryClientProvider>
   );
 }

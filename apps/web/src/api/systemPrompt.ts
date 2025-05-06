@@ -1,8 +1,9 @@
 import axios from 'axios';
 import { SystemPromptGetResponse } from '@lia/api/admin/system_prompt/get.dto';
 import { SystemPromptPatchDto, SystemPromptPatchResponse } from '@lia/api/admin/system_prompt/patch.dto';
+import { BASE_API_URL } from './api.constant';
 
-const BASE_URL = 'http://localhost:4600/api/admin/system-prompt';
+const BASE_URL = `${BASE_API_URL}/api/admin/system-prompt`;
 
 export async function getSystemPrompt() {
   const res = await axios.get<SystemPromptGetResponse>(BASE_URL);

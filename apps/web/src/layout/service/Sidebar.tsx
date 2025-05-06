@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Chat, Menu, Close, Person } from '@mui/icons-material';
+import { useUser } from '../../context/UserProvider';
 const chatList = Array.from({ length: 100 }, (_, index) => `채팅방 ${index + 1}`);
 
 export function ServiceRootSidebar() {
@@ -79,12 +80,7 @@ export function ServiceRootSidebar() {
                 </ListItemIcon>
                 <ListItemText primary="채팅" />
               </ListItemButton>
-              <ListItemButton>
-                <ListItemIcon>
-                  <Person />
-                </ListItemIcon>
-                <ListItemText primary="마이 페이지" />
-              </ListItemButton>
+              <MyPageList />
             </ListItem>
           </List>
         </Box>
@@ -105,5 +101,22 @@ export function ServiceRootSidebar() {
         </Box>
       </Drawer>
     </>
+  );
+}
+
+function MyPageList() {
+  const { isLogin } = useUser();
+
+  if (!isLogin) {
+    return <></>;
+  }
+
+  return (
+    <ListItemButton>
+      <ListItemIcon>
+        <Person />
+      </ListItemIcon>
+      <ListItemText primary="마이 페이지" />
+    </ListItemButton>
   );
 }
