@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
-import { MessageRoleList } from '@lia/api/message/message.constant';
-import type { MessageRole } from '@lia/api/message/message.constant';
+import { MessageRoleList } from '@lia/api/conversation/message/message.constant';
+import type { MessageRole } from '@lia/api/conversation/message/message.constant';
 
 type MessageContent = string | null;
 
