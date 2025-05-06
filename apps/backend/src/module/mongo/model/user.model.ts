@@ -16,6 +16,9 @@ export class UserModel extends Document<string> {
 
   @Prop({ required: false })
   name?: string;
+
+  createdAt!: Date;
+  updatedAt!: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(UserModel);

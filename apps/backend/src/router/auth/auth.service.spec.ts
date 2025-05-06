@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthService } from './auth.service';
 import { UserModel, UserSchema } from '../../module/mongo/model/user.model';
 import { AuthSsoMap } from '@lia/api/auth/auth.constant';
+import { MetricModule } from '../../module/metric/metric.module';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -26,6 +27,7 @@ describe('AuthService', () => {
           }),
         }),
         MongooseModule.forFeature([{ name: UserModel.name, schema: UserSchema }]),
+        MetricModule,
       ],
       providers: [AuthService],
     }).compile();

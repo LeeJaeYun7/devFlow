@@ -7,8 +7,10 @@ import { UserModel, UserSchema } from '../../module/mongo/model/user.model';
 import { AuthService } from './auth.service';
 import { SsoKakaoStrategy } from './sso_strategy/kakao.strategy';
 import { SsoNaverStrategy } from './sso_strategy/naver.strategy';
+import { MetricModule } from '../../module/metric/metric.module';
+
 @Module({
-  imports: [PassportModule, MongooseModule.forFeature([{ name: UserModel.name, schema: UserSchema }])],
+  imports: [PassportModule, MongooseModule.forFeature([{ name: UserModel.name, schema: UserSchema }]), MetricModule],
   controllers: [AuthController],
   providers: [SsoGoogleStrategy, SsoNaverStrategy, SsoKakaoStrategy, AuthService],
   exports: [AuthService],
