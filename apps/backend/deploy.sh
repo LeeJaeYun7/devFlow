@@ -7,10 +7,8 @@ docker buildx build \
   --cache-from=type=local,src=/tmp/.buildx-cache \
   --cache-to=type=local,dest=/tmp/.buildx-cache \
   -t ${REPO}:latest \
+  -t ${REPO}:${SHA_TAG} \
   -f apps/backend/Dockerfile \
+  --push \
   .
 
-docker tag ${REPO}:latest ${REPO}:${SHA_TAG}
-
-docker push ${REPO}:${SHA_TAG}
-docker push ${REPO}:latest
