@@ -1,0 +1,50 @@
+name: Terraform Cloud
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - '**'
+permissions:
+  id-token: write
+  contents: read 
+jobs:
+  terraform:
+    name: 'Terraform Plan & Apply'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::731219764596:role/GitHubAction
+        aws-region: ap-northeast-2        
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.11.4
+    - name: Terraform Init
+      working-directory: infra
+      env:
+        TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+      run: terraform init
+
+    - name: Terraform Plan
+      working-directory: infra
+      env:
+        TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+      run: terraform plan
+
+    - name: Terraform Apply
+      working-directory: infra
+      if: github.ref == 'refs/heads/main'
+      env:
+        TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+      run: terraform apply -auto-approve
