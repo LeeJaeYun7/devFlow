@@ -2,7 +2,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-export default defineConfig(() => ({
+export default defineConfig(({ mode }) => ({
   root: __dirname,
   cacheDir: '../../node_modules/.vite/apps/web',
   server: {
@@ -25,5 +25,10 @@ export default defineConfig(() => ({
     commonjsOptions: {
       transformMixedEsModules: true,
     },
+  },
+  define: {
+    'import.meta.env.VITE_BASE_API_URL': JSON.stringify(
+      mode === 'development' ? 'http://localhost:4600' : 'https://api.asklia.io'
+    ),
   },
 }));

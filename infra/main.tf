@@ -11,6 +11,7 @@ provider "aws" {
   region = "ap-northeast-2"
 }
 
-resource "aws_ecr_repository" "backend" {
-  name = "backend"
-} 
+provider "aws" {
+  alias  = "virginia"
+  region = "us-east-1"
+}

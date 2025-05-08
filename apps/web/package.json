@@ -1,5 +1,19 @@
 {
   "name": "@lia/web",
   "version": "0.0.1",
-  "private": true
+  "private": true,
+  "nx": {
+    "name": "web",
+    "targets": {
+      "deploy": {
+        "dependsOn": [
+          "build"
+        ],
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "bash apps/web/deploy.sh"
+        }
+      }
+    }
+  }
 }

@@ -1,0 +1,53 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::731219764596:role/GitHubAction
+          aws-region: ap-northeast-2        
+
+      - name: Setup Node 22.13
+        uses: actions/setup-node@v2
+        with:
+          node-version: 22.13.0
+
+      - name: Install pnpm
+        run: npm install -g pnpm@9.15
+
+      - name: Install dependencies (pnpm i)
+        run: pnpm i
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: ECR Login
+        run: aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 731219764596.dkr.ecr.ap-northeast-2.amazonaws.com
+        
+      - name: Build and Deploy
+        run: pnpm dlx nx run-many --target=build,deploy
+

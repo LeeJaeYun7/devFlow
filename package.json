@@ -39,6 +39,7 @@
     "reflect-metadata": "^0.1.13",
     "remark-gfm": "^4.0.1",
     "rxjs": "^7.8.0",
+    "@swc/helpers": "~0.5.11",
     "source-map-support": "^0.5.21"
   },
   "devDependencies": {
@@ -59,7 +60,6 @@
     "@swc-node/register": "~1.9.1",
     "@swc/cli": "~0.6.0",
     "@swc/core": "~1.5.7",
-    "@swc/helpers": "~0.5.11",
     "@swc/jest": "~0.2.36",
     "@types/express": "^5.0.1",
     "@types/jest": "^29.5.12",
