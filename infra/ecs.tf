@@ -83,3 +83,90 @@ resource "aws_security_group" "api_ecs" {
   }
 }
 
+resource "aws_security_group" "mongo_ecs" {
+  name        = "mongo-ecs-sg"
+  description = "Allow backend ECS to access MongoDB"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port       = 27017
+    to_port         = 27017
+    protocol        = "tcp"
+    security_groups = [aws_security_group.api_ecs.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_ecs_task_definition" "mongo" {
+  family                   = "mongo-task"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "512"
+  memory                   = "1024"
+  execution_role_arn       = aws_iam_role.ecs_task_execution.arn
+  task_role_arn            = aws_iam_role.ecs_task.arn
+
+  container_definitions = jsonencode([
+    {
+      name      = "mongodb"
+      image     = "mongo:latest"
+      portMappings = [{ containerPort = 27017, hostPort = 27017 }]
+      environment = [
+        { name = "MONGO_INITDB_ROOT_USERNAME", value = "root" },
+        { name = "MONGO_INITDB_ROOT_PASSWORD", value = "password" }
+      ]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.mongo.name
+          awslogs-region        = "ap-northeast-2"
+          awslogs-stream-prefix = "mongo"
+        }
+      }
+    }
+  ])
+}
+
+resource "aws_service_discovery_private_dns_namespace" "main" {
+  name        = "local"
+  description = "Private DNS namespace for service discovery"
+  vpc         = aws_vpc.main.id
+}
+
+resource "aws_service_discovery_service" "mongo" {
+  name = "mongodb"
+  dns_config {
+    namespace_id = aws_service_discovery_private_dns_namespace.main.id
+    dns_records {
+      type = "A"
+      ttl  = 10
+    }
+    routing_policy = "MULTIVALUE"
+  }
+  health_check_custom_config {
+    failure_threshold = 1
+  }
+}
+
+resource "aws_ecs_service" "mongo" {
+  name            = "mongo-service"
+  cluster         = aws_ecs_cluster.api.id
+  task_definition = aws_ecs_task_definition.mongo.arn
+  launch_type     = "FARGATE"
+  desired_count   = 1
+  network_configuration {
+    subnets          = data.aws_subnets.private.ids
+    security_groups  = [aws_security_group.mongo_ecs.id]
+    assign_public_ip = false
+  }
+  service_registries {
+    registry_arn = aws_service_discovery_service.mongo.arn
+  }
+}
+
