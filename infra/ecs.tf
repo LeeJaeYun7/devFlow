@@ -161,7 +161,7 @@ resource "aws_ecs_service" "mongo" {
   launch_type     = "FARGATE"
   desired_count   = 1
   network_configuration {
-    subnets          = data.aws_subnets.private.ids
+    subnets          = aws_subnet.private[*].id
     security_groups  = [aws_security_group.mongo_ecs.id]
     assign_public_ip = false
   }
