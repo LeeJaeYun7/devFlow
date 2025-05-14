@@ -31,6 +31,9 @@ export class MessageModel extends Document<string> {
 
   @Prop({ required: false })
   name?: string;
+
+  readonly createdAt!: Date;
+  readonly updatedAt!: Date;
 }
 
 export const MessageSchema = SchemaFactory.createForClass(MessageModel);

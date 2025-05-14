@@ -22,7 +22,7 @@ export class LlmBasicService {
       model: options.model ?? this.defaultModel,
       messages,
       tools: options.tools,
-      temperature: 0.7,
+      temperature: 0.3,
       top_p: 0.9,
     });
 
@@ -34,7 +34,7 @@ export class LlmBasicService {
       model: options.model ?? this.defaultModel,
       messages,
       tools: options.tools,
-      temperature: 0.7,
+      temperature: 0.3,
       top_p: 0.9,
       stream: true,
     });

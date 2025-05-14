@@ -27,7 +27,7 @@
     "class-validator": "^0.14.1",
     "express": "^5.1.0",
     "mongoose": "^8.14.1",
-    "openai": "^4.96.2",
+    "openai": "^4.33.0",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "passport-kakao": "^1.0.1",

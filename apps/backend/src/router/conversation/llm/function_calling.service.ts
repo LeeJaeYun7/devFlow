@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { FunctionCalling } from './function_calling/function.type';
-import { FunctionGetStockPriceStrategy } from './function_calling/get_stock_price.strategy';
+import { FunctionGetStockPriceStrategy } from './function_calling/get_stock_price_strategy';
 import { ClassConstructor } from 'class-transformer';
 import OpenAI from 'openai';
 
