@@ -20,4 +20,17 @@ variable "backend_ecr_repo" {
   description = "백엔드 ECR 리포지토리명"
   type        = string
   default     = "backend"
-} 
+}
+
+# 환경 변ㅜ
+variable "MONGODB_URI" {
+  description = "MongoDB connection URI"
+  type        = string
+  sensitive   = true
+}
+
+variable "OPENAI_API_KEY" {
+  description = "OpenAI API key"
+  type        = string
+  sensitive   = true
+}

@@ -16,9 +16,9 @@ resource "aws_ecs_task_definition" "api" {
       name      = "api"
       image     = "${aws_ecr_repository.backend.repository_url}:latest"
       portMappings = [{ containerPort = 4600, hostPort = 4600 }]
-      environment = []
       secrets = [
-        { name = "BACKEND_ENV", valueFrom = aws_ssm_parameter.backend_env.arn }
+        { name = "MONGO_URI", valueFrom = var.MONGODB_URI },
+        { name = "OPENAI_API_KEY", valueFrom = var.OPENAI_API_KEY }
       ]
       logConfiguration = {
         logDriver = "awslogs"
