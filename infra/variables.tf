@@ -22,7 +22,7 @@ variable "backend_ecr_repo" {
   default     = "backend"
 }
 
-# 환경 변ㅜ
+# 환경 변수
 variable "MONGODB_URI" {
   description = "MongoDB connection URI"
   type        = string
@@ -34,3 +34,22 @@ variable "OPENAI_API_KEY" {
   type        = string
   sensitive   = true
 }
+
+variable "GOOGLE_OAUTH_CLIENT_ID" {
+  description = "Google OAuth client ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "GOOGLE_OAUTH_CLIENT_SECRET" {
+  description = "Google OAuth client secret"
+  type        = string
+  sensitive   = true
+}
+
+variable "KAKAO_OAUTH_CLIENT_ID" {
+  description = "Kakao OAuth client ID"
+  type        = string
+  sensitive   = true
+}
+

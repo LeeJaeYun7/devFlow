@@ -18,7 +18,10 @@ resource "aws_ecs_task_definition" "api" {
       portMappings = [{ containerPort = 4600, hostPort = 4600 }]
       environment = [
         { name = "MONGODB_URI", value = var.MONGODB_URI },
-        { name = "OPENAI_API_KEY", value = var.OPENAI_API_KEY }
+        { name = "OPENAI_API_KEY", value = var.OPENAI_API_KEY },
+        { name = "GOOGLE_OAUTH_CLIENT_ID", value = var.GOOGLE_OAUTH_CLIENT_ID },
+        { name = "GOOGLE_OAUTH_CLIENT_SECRET", value = var.GOOGLE_OAUTH_CLIENT_SECRET },
+        { name = "KAKAO_OAUTH_CLIENT_ID", value = var.KAKAO_OAUTH_CLIENT_ID }
       ]
       logConfiguration = {
         logDriver = "awslogs"
@@ -33,7 +36,7 @@ resource "aws_ecs_task_definition" "api" {
         interval    = 30
         timeout     = 5
         retries     = 3
-        startPeriod = 10
+        startPeriod = 30
       }
     }
   ])
