@@ -14,16 +14,36 @@ import {
   ListItemIcon,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { Chat, Menu, Close, Person } from '@mui/icons-material';
+import { Chat, Menu, Close, Person, Add } from '@mui/icons-material';
 import { useUser } from '../../context/UserProvider';
-const chatList = Array.from({ length: 100 }, (_, index) => `채팅방 ${index + 1}`);
+import { useChatList, useCreateChat } from '../../hooks/useChat';
 
 export function ServiceRootSidebar() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [open, setOpen] = useState(isMobile ? false : true);
-
+  const { mutateAsync: createChat } = useCreateChat();
+  const { data: chatList, isLoading: isChatListLoading } = useChatList({ page: 1, limit: 50 });
+  const { nowChatId, setNowChatId } = useUser();
   const handleDrawerClose = () => setOpen(false);
+
+  const handleCreateChat = async () => {
+    const chat = await createChat();
+    setNowChatId(chat.data.chatId);
+  };
+
+  useEffect(() => {
+    if (!nowChatId && !isChatListLoading) {
+      const [firstChat] = chatList?.data?.data ?? [];
+      if (firstChat) {
+        setNowChatId(firstChat.chatId);
+      } else {
+        createChat().then((chat) => {
+          setNowChatId(chat.data.chatId);
+        });
+      }
+    }
+  }, [chatList, isChatListLoading, nowChatId, setNowChatId]);
 
   useEffect(() => {
     if (isMobile) {
@@ -74,7 +94,7 @@ export function ServiceRootSidebar() {
           </Toolbar>
           <List>
             <ListItem disablePadding sx={{ display: 'block' }}>
-              <ListItemButton>
+              <ListItemButton selected>
                 <ListItemIcon>
                   <Chat />
                 </ListItemIcon>
@@ -87,16 +107,24 @@ export function ServiceRootSidebar() {
         <Divider sx={{ fontSize: '0.8rem' }}>채팅 목록</Divider>
         <Box sx={{ height: '60%', display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
           <List>
-            {chatList.map((chat) => (
-              <ListItem key={chat} disablePadding sx={{ display: 'block' }}>
-                <ListItemButton>
+            {(chatList?.data?.data ?? []).map((chat) => (
+              <ListItem key={chat.chatId} disablePadding sx={{ display: 'block' }}>
+                <ListItemButton onClick={() => setNowChatId(chat.chatId)} selected={nowChatId === chat.chatId}>
                   <ListItemIcon>
                     <Chat />
                   </ListItemIcon>
-                  <ListItemText primary={chat} />
+                  <ListItemText primary={chat.title} />
                 </ListItemButton>
               </ListItem>
             ))}
+            <ListItem disablePadding sx={{ display: 'block' }}>
+              <ListItemButton onClick={handleCreateChat}>
+                <ListItemIcon>
+                  <Add />
+                </ListItemIcon>
+                <ListItemText primary="새 채팅" />
+              </ListItemButton>
+            </ListItem>
           </List>
         </Box>
       </Drawer>

@@ -1,19 +1,13 @@
+import type { MessageListResponse } from '@lia/api/conversation/message/list.dto';
 import { Box, Avatar, Paper, Typography, useTheme } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-interface Message {
-  id: string;
-  role: 'user' | 'assistant';
-  createdAt: string;
-  content: string;
-}
-
 interface ChatContentProps {
-  messageList: Message[];
+  messageData: MessageListResponse['data'] | undefined;
 }
 
-export function ChatContent({ messageList }: ChatContentProps) {
+export function ChatContent({ messageData }: ChatContentProps) {
   const theme = useTheme();
 
   return (
@@ -27,7 +21,7 @@ export function ChatContent({ messageList }: ChatContentProps) {
         gap: 2,
       }}
     >
-      {messageList.map((msg, idx) => {
+      {(messageData?.data ?? []).map((msg, idx) => {
         return (
           <Box
             key={`${msg.id}-${idx}`}

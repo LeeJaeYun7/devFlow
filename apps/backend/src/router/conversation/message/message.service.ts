@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { LlmService } from '../llm/llm.service';
-import { MessageResponse, MessageListResponse } from '@lia/api/conversation/message/message.dto';
+import { MessageCreateDto, MessageCreateResponse } from '@lia/api/conversation/message/create.dto';
+import { MessageListDto, MessageListResponse } from '@lia/api/conversation/message/list.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { MessageModel } from '../../../module/mongo/model/message.model';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import { ServiceReturnType } from '@lia/api/types/base.type';
 
 @Injectable()
@@ -14,28 +15,40 @@ export class MessageService {
     private readonly messageModel: Model<MessageModel>
   ) {}
 
-  async createMessage(chatId: string, content: string): ServiceReturnType<MessageResponse> {
-    const { aiResponse, createdAt } = await this.llmService.sendMessage(chatId, content);
-    return {
-      aiResponse,
-      createdAt,
-    };
-  }
+  public async getChatMessageList(dto: MessageListDto): ServiceReturnType<MessageListResponse> {
+    const { chatId, page, limit } = dto;
+    const offset = (page - 1) * limit;
 
-  async getChatMessages(chatId: string): ServiceReturnType<MessageListResponse> {
-    const messages = await this.messageModel
-      .find({
-        chatId,
-        role: { $in: ['user', 'assistant'] },
-        content: { $ne: '[function_call]' },
-      })
-      .sort({ createdAt: 1 });
+    const conditions: FilterQuery<MessageModel> = {
+      chatId,
+      role: { $in: ['user', 'assistant'] },
+      content: { $ne: '[function_call]' },
+    };
+
+    const messages = await this.messageModel.find(conditions).sort({ createdAt: -1 }).skip(offset).limit(limit).lean();
+    const total = await this.messageModel.countDocuments(conditions);
+
+    const totalPages = Math.ceil(total / limit);
+
     return {
-      messages: messages.map((message) => ({
+      data: messages.map((message) => ({
+        id: message._id,
         content: message.content ?? '',
         role: message.role,
         createdAt: message.createdAt,
       })),
+      meta: {
+        totalPages,
+        total,
+      },
+    };
+  }
+
+  public async createMessage(dto: MessageCreateDto): ServiceReturnType<MessageCreateResponse> {
+    const { aiResponse, createdAt } = await this.llmService.sendMessage(dto.chatId, dto.content);
+    return {
+      aiResponse,
+      createdAt,
     };
   }
 }

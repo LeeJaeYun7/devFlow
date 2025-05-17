@@ -1,32 +1,24 @@
-import { Box, IconButton, Paper, TextField } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { Box, CircularProgress, IconButton, Paper, TextField } from '@mui/material';
+import { useState } from 'react';
 import SendIcon from '@mui/icons-material/Send';
 import { ChatContent } from '../../base/chat/Content';
-
-const dumpList = [
-  { id: '123456', role: 'user', createdAt: '2025-05-04 12:00:00', content: '지금 삼전 들어가도 돼?' },
-  { id: '123457', role: 'assistant', createdAt: '2025-05-04 12:00:01', content: '삼전 들어가도 돼요' },
-  { id: '123458', role: 'user', createdAt: '2025-05-04 12:00:02', content: '근거가 뭐야?' },
-  {
-    id: '123459',
-    role: 'assistant',
-    createdAt: '2025-05-04 12:00:03',
-    content: '근거는 최근 주가 동향을 보면 알 수 있어요.',
-  },
-].reverse();
+import { useCreateMessage, useMessageList } from '../../../hooks/useMessage';
+import { useUser } from '../../../context/UserProvider';
 
 export function ChatMain() {
+  const { nowChatId } = useUser();
   const [message, setMessage] = useState('');
-  const [messageList, setMessageList] = useState<any[]>([]);
+  const { data: messageList } = useMessageList({
+    chatId: nowChatId,
+    page: 1,
+    limit: 50,
+  });
+  const { mutateAsync: createMessage, isPending } = useCreateMessage();
 
-  const handleSendMessage = () => {
-    console.log(message);
+  const handleSendMessage = async () => {
+    await createMessage({ chatId: nowChatId, content: message });
     setMessage('');
   };
-
-  useEffect(() => {
-    setMessageList(dumpList);
-  }, []);
 
   return (
     <Box
@@ -38,7 +30,7 @@ export function ChatMain() {
       }}
     >
       {/* 채팅 목록 */}
-      <ChatContent messageList={messageList} />
+      <ChatContent messageData={messageList?.data} />
 
       {/* 입력 영역 */}
       <Paper
@@ -56,6 +48,7 @@ export function ChatMain() {
             multiline
             maxRows={4}
             value={message}
+            disabled={isPending}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
@@ -63,18 +56,22 @@ export function ChatMain() {
                 handleSendMessage();
               }
             }}
-            placeholder="메시지를 입력하세요..."
+            placeholder="주식과 투자 관련된 질문을 해보세요!"
             variant="outlined"
             size="small"
           />
-          <IconButton
-            color="primary"
-            onClick={handleSendMessage}
-            disabled={!message.trim()}
-            sx={{ alignSelf: 'flex-end' }}
-          >
-            <SendIcon />
-          </IconButton>
+          {isPending ? (
+            <CircularProgress color="secondary" />
+          ) : (
+            <IconButton
+              color="primary"
+              onClick={handleSendMessage}
+              disabled={!message.trim() || isPending}
+              sx={{ alignSelf: 'flex-end' }}
+            >
+              <SendIcon />
+            </IconButton>
+          )}
         </Box>
       </Paper>
     </Box>
