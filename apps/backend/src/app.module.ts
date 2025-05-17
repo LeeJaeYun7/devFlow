@@ -4,6 +4,9 @@ import { MongoModule } from './module/mongo/mongo.module';
 import { ConfigModule } from '@nestjs/config';
 import { HttpLoggerMiddleware } from './common/middleware/http-logger.middleware';
 import { ScheduleModule } from '@nestjs/schedule';
+import { APP_FILTER } from '@nestjs/core';
+import { BaseExceptionFilter } from './common/filter/base.filter';
+import { SlackModule } from './module/slack/slack.module';
 
 @Module({
   imports: [
@@ -14,6 +17,13 @@ import { ScheduleModule } from '@nestjs/schedule';
     }),
     RouterModule,
     MongoModule,
+    SlackModule,
+  ],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: BaseExceptionFilter,
+    },
   ],
 })
 export class AppModule implements NestModule {
