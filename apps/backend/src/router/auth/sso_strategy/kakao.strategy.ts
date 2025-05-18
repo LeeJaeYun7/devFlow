@@ -8,9 +8,11 @@ import { AuthSsoMap } from '@lia/api/auth/auth.constant';
 @Injectable()
 export class SsoKakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
   constructor(private readonly configService: ConfigService) {
+    const isProduction = configService.get('NODE_ENV') === 'production';
+    const baseUrl = isProduction ? 'https://api.lia.ai' : 'http://localhost:4600';
     super({
       clientID: configService.get('KAKAO_OAUTH_CLIENT_ID') ?? 'default',
-      callbackURL: 'http://localhost:4600/api/auth/kakao/callback',
+      callbackURL: `${baseUrl}/api/auth/kakao/callback`,
       passReqToCallback: true,
     });
   }

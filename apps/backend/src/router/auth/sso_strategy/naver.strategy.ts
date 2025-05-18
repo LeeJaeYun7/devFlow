@@ -8,10 +8,12 @@ import { Profile, Strategy } from 'passport-naver-v2';
 @Injectable()
 export class SsoNaverStrategy extends PassportStrategy<any>(Strategy, 'naver') {
   constructor(private readonly configService: ConfigService) {
+    const isProduction = configService.get('NODE_ENV') === 'production';
+    const baseUrl = isProduction ? 'https://api.lia.ai' : 'http://localhost:4600';
     super({
       clientID: configService.get('NAVER_OAUTH_CLIENT_ID') ?? 'default',
       clientSecret: configService.get('NAVER_OAUTH_CLIENT_SECRET') ?? '',
-      callbackURL: 'http://localhost:4600/api/auth/naver/callback',
+      callbackURL: `${baseUrl}/api/auth/naver/callback`,
     });
   }
 

@@ -9,10 +9,12 @@ import { AuthSsoMap } from '@lia/api/auth/auth.constant';
 @Injectable()
 export class SsoGoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(private readonly configService: ConfigService) {
+    const isProduction = configService.get('NODE_ENV') === 'production';
+    const baseUrl = isProduction ? 'https://api.lia.ai' : 'http://localhost:4600';
     super({
       clientID: configService.get('GOOGLE_OAUTH_CLIENT_ID') ?? 'default',
       clientSecret: configService.get('GOOGLE_OAUTH_CLIENT_SECRET') ?? '',
-      callbackURL: 'http://localhost:4600/api/auth/google/callback',
+      callbackURL: `${baseUrl}/api/auth/google/callback`,
       passReqToCallback: true,
       scope: ['email', 'profile'],
     });
