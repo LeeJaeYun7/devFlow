@@ -6,12 +6,15 @@ import { AuthService } from './auth.service';
 import { UserModel, UserSchema } from '../../module/mongo/model/user.model';
 import { AuthSsoMap } from '@lia/api/auth/auth.constant';
 import { MetricModule } from '../../module/metric/metric.module';
+import { JwtModule, JwtService } from '@nestjs/jwt';
+import { JWT_SECRET } from '../../constants/jwt.constant';
 
 describe('AuthService', () => {
   let service: AuthService;
   let mongod: MongoMemoryServer;
   let mongoConnection: Connection;
   let userModel: Model<UserModel>;
+  let jwtService: JwtService;
 
   beforeAll(async () => {
     mongod = await MongoMemoryServer.create();
@@ -28,11 +31,15 @@ describe('AuthService', () => {
         }),
         MongooseModule.forFeature([{ name: UserModel.name, schema: UserSchema }]),
         MetricModule,
+        JwtModule.register({
+          secret: JWT_SECRET,
+        }),
       ],
       providers: [AuthService],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
+    jwtService = module.get<JwtService>(JwtService);
   });
 
   afterAll(async () => {
@@ -52,10 +59,11 @@ describe('AuthService', () => {
 
       const result = await service.loginUser(ssoUser);
 
-      expect(result.email).toBe(ssoUser.email);
-      expect(result.provider).toBe(ssoUser.provider);
-      expect(result.providerId).toBe(ssoUser.id);
-      expect(result.name).toBe(ssoUser.name);
+      expect(result).toBeDefined();
+      const decoded = jwtService.verify(result);
+      expect(decoded.email).toBe(ssoUser.email);
+      expect(decoded.provider).toBe(ssoUser.provider);
+      expect(decoded.name).toBe(ssoUser.name);
     });
 
     it('이미 존재하는 사용자를 반환해야 합니다', async () => {
@@ -75,11 +83,11 @@ describe('AuthService', () => {
 
       const result = await service.loginUser(ssoUser);
 
-      expect(result.id).toBe(existingUser.id);
-      expect(result.email).toBe(existingUser.email);
-      expect(result.provider).toBe(existingUser.provider);
-      expect(result.providerId).toBe(existingUser.providerId);
-      expect(result.name).toBe(existingUser.name);
+      expect(result).toBeDefined();
+      const decoded = jwtService.verify(result);
+      expect(decoded.email).toBe(existingUser.email);
+      expect(decoded.provider).toBe(existingUser.provider);
+      expect(decoded.name).toBe(existingUser.name);
     });
   });
 });

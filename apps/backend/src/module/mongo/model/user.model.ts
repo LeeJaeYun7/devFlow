@@ -5,7 +5,7 @@ import type { AuthSso } from '@lia/api/auth/auth.constant';
 
 @Schema({ collection: 'users', timestamps: true })
 export class UserModel extends Document<string> {
-  @Prop({ required: true, unique: true, index: true })
+  @Prop({ required: true, index: true })
   email!: string;
 
   @Prop({ type: String, required: true, enum: AuthSsoList })

@@ -4,6 +4,10 @@ import { MongoModule } from './module/mongo/mongo.module';
 import { ConfigModule } from '@nestjs/config';
 import { HttpLoggerMiddleware } from './common/middleware/http-logger.middleware';
 import { ScheduleModule } from '@nestjs/schedule';
+import { JwtModule } from '@nestjs/jwt';
+import { JWT_SECRET } from './constants/jwt.constant';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './common/guard/auth.guard';
 import { APP_FILTER } from '@nestjs/core';
 import { BaseExceptionFilter } from './common/filter/base.filter';
 import { SlackModule } from './module/slack/slack.module';
@@ -17,9 +21,18 @@ import { SlackModule } from './module/slack/slack.module';
     }),
     RouterModule,
     MongoModule,
+    JwtModule.register({
+      global: true,
+      secret: JWT_SECRET,
+      signOptions: { expiresIn: '1d' },
+    }),
     SlackModule,
   ],
   providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
     {
       provide: APP_FILTER,
       useClass: BaseExceptionFilter,
