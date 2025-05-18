@@ -10,7 +10,7 @@ import { AuthSsoMap } from '@lia/api/auth/auth.constant';
 export class SsoGoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(private readonly configService: ConfigService) {
     const isProduction = configService.get('NODE_ENV') === 'production';
-    const baseUrl = isProduction ? 'https://api.lia.io' : 'http://localhost:4600';
+    const baseUrl = isProduction ? 'https://api.asklia.io' : 'http://localhost:4600';
     super({
       clientID: configService.get('GOOGLE_OAUTH_CLIENT_ID') ?? 'default',
       clientSecret: configService.get('GOOGLE_OAUTH_CLIENT_SECRET') ?? '',
