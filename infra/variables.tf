@@ -53,3 +53,26 @@ variable "KAKAO_OAUTH_CLIENT_ID" {
   sensitive   = true
 }
 
+variable "OPENROUTER_URL" {
+  description = "OpenRouter URL"
+  type        = string
+  sensitive   = true
+}
+
+variable "OPENROUTER_API_KEY" {
+  description = "OpenRouter API key"
+  type        = string
+  sensitive   = true
+}
+
+variable "OPENROUTER_MODEL" {
+  description = "OpenRouter model"
+  type        = string
+  sensitive   = true
+}
+
+variable "OPENROUTER_TEMPERATURE" {
+  description = "OpenRouter temperature"
+  type        = string
+  sensitive   = true
+}

@@ -9,7 +9,7 @@ import { AuthSsoMap } from '@lia/api/auth/auth.constant';
 export class SsoKakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
   constructor(private readonly configService: ConfigService) {
     const isProduction = configService.get('NODE_ENV') === 'production';
-    const baseUrl = isProduction ? 'https://api.lia.ai' : 'http://localhost:4600';
+    const baseUrl = isProduction ? 'https://api.lia.io' : 'http://localhost:4600';
     super({
       clientID: configService.get('KAKAO_OAUTH_CLIENT_ID') ?? 'default',
       callbackURL: `${baseUrl}/api/auth/kakao/callback`,
