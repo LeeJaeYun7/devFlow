@@ -1,14 +1,20 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LlmService } from './llm.service';
-import { LlmBasicService } from './basic.service';
-import { FunctionCallingService } from './function_calling.service';
-import { MongooseModule } from '@nestjs/mongoose';
-import { MessageModel, MessageSchema } from '../../../module/mongo/model/message.model';
-import { FunctionGetStockPriceStrategy } from './function_calling/get_stock_price_strategy';
+import { FinanceModule } from '../../finance/finance.module';
+import { FinanceService } from '../../finance/finance.service';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: MessageModel.name, schema: MessageSchema }])],
-  providers: [LlmService, LlmBasicService, FunctionCallingService, FunctionGetStockPriceStrategy],
+  imports: [ConfigModule, FinanceModule],
+  providers: [
+    {
+      provide: LlmService,
+      useFactory: (configService: ConfigService, financeService: FinanceService) => {
+        return new LlmService(configService, financeService);
+      },
+      inject: [ConfigService, FinanceService],
+    },
+  ],
   exports: [LlmService],
 })
 export class LlmModule {}

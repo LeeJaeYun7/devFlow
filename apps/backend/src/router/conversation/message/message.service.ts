@@ -6,13 +6,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { MessageModel } from '../../../module/mongo/model/message.model';
 import { FilterQuery, Model } from 'mongoose';
 import { ServiceReturnType } from '@lia/api/types/base.type';
+import { MessageRoleMap } from '@lia/api/conversation/message/message.constant';
 
 @Injectable()
 export class MessageService {
   constructor(
-    private readonly llmService: LlmService,
     @InjectModel(MessageModel.name)
-    private readonly messageModel: Model<MessageModel>
+    private readonly messageModel: Model<MessageModel>,
+    private readonly llmService: LlmService
   ) {}
 
   public async getChatMessageList(dto: MessageListDto): ServiceReturnType<MessageListResponse> {
@@ -21,7 +22,7 @@ export class MessageService {
 
     const conditions: FilterQuery<MessageModel> = {
       chatId,
-      role: { $in: ['user', 'assistant'] },
+      role: { $in: [MessageRoleMap.user, MessageRoleMap.assistant] },
       content: { $ne: '[function_call]' },
     };
 
@@ -45,10 +46,40 @@ export class MessageService {
   }
 
   public async createMessage(dto: MessageCreateDto): ServiceReturnType<MessageCreateResponse> {
-    const { aiResponse, createdAt } = await this.llmService.sendMessage(dto.chatId, dto.content);
+    const data = await this.analyze(dto.chatId, dto.content);
     return {
-      aiResponse,
-      createdAt,
+      aiResponse: data.content,
+      createdAt: data.createdAt,
     };
   }
+
+  private async analyze(chatId: string, content: string): Promise<{ content: string; createdAt: Date }> {
+    const messages = await this.messageModel
+      .find({
+        chatId,
+        role: { $in: [MessageRoleMap.user, MessageRoleMap.assistant] },
+        content: { $ne: '[function_call]' },
+      })
+      .sort({ createdAt: 1 });
+
+    await this.messageModel.create({
+      chatId,
+      content,
+      role: MessageRoleMap.user,
+    });
+
+    const aiResponse = await this.llmService.getAnalysis(content, messages);
+
+    const assistantMessage = await this.messageModel.create({
+      chatId,
+      content: aiResponse,
+      role: MessageRoleMap.assistant,
+    });
+
+    return {
+      content: aiResponse ?? '',
+      createdAt: assistantMessage.createdAt,
+    };
+  }
+
 }
