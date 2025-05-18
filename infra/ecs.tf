@@ -17,6 +17,7 @@ resource "aws_ecs_task_definition" "api" {
       image     = "${aws_ecr_repository.backend.repository_url}:latest"
       portMappings = [{ containerPort = 4600, hostPort = 4600 }]
       environment = [
+        { name = "MONGODB_URI", value = var.MONGODB_URI },
         { name = "OPENAI_API_KEY", value = var.OPENAI_API_KEY },
         { name = "GOOGLE_OAUTH_CLIENT_ID", value = var.GOOGLE_OAUTH_CLIENT_ID },
         { name = "GOOGLE_OAUTH_CLIENT_SECRET", value = var.GOOGLE_OAUTH_CLIENT_SECRET },
