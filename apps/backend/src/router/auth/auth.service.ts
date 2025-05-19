@@ -5,11 +5,16 @@ import { Model } from 'mongoose';
 import { SsoUser } from './auth.type';
 import { UserMetricService } from '../../module/metric/user_metric.service';
 import { JwtService } from '@nestjs/jwt';
+import { UserMessageQuotaModel } from '../../module/mongo/model/user_message_quota.model';
+import { DEFAULT_MESSAGE_FIRST_QUOTA } from '../../constants/message.constant';
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel(UserModel.name)
     private readonly userModel: Model<UserModel>,
+
+    @InjectModel(UserMessageQuotaModel.name)
+    private readonly userMessageQuotaModel: Model<UserMessageQuotaModel>,
 
     private readonly userMetricService: UserMetricService,
 
@@ -31,6 +36,11 @@ export class AuthService {
       });
 
       await this.userMetricService.createNewUser(userData._id);
+      await this.userMessageQuotaModel.create({
+        userId: userData._id,
+        remainingMessages: DEFAULT_MESSAGE_FIRST_QUOTA,
+        lastReset: new Date(),
+      });
     }
 
     const payload = {

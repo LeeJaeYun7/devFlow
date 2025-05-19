@@ -11,6 +11,8 @@ import { AuthGuard } from './common/guard/auth.guard';
 import { APP_FILTER } from '@nestjs/core';
 import { BaseExceptionFilter } from './common/filter/base.filter';
 import { SlackModule } from './module/slack/slack.module';
+import { CustomRequestContextModule } from './module/custom_request_context/custom_request_context.module';
+import { CustomRequestContextMiddleware } from './common/middleware/custom_request_context.middleware';
 
 @Module({
   imports: [
@@ -27,6 +29,7 @@ import { SlackModule } from './module/slack/slack.module';
       signOptions: { expiresIn: '1d' },
     }),
     SlackModule,
+    CustomRequestContextModule,
   ],
   providers: [
     {
@@ -42,5 +45,6 @@ import { SlackModule } from './module/slack/slack.module';
 export class AppModule implements NestModule {
   public configure(consumer: MiddlewareConsumer) {
     consumer.apply(HttpLoggerMiddleware).forRoutes('*');
+    consumer.apply(CustomRequestContextMiddleware).forRoutes('*');
   }
 }

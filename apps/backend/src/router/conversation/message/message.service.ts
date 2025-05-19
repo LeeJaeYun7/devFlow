@@ -7,13 +7,23 @@ import { MessageModel } from '../../../module/mongo/model/message.model';
 import { FilterQuery, Model } from 'mongoose';
 import { ServiceReturnType } from '@lia/api/types/base.type';
 import { MessageRoleMap } from '@lia/api/conversation/message/message.constant';
+import { UserMessageQuotaModel } from '../../../module/mongo/model/user_message_quota.model';
+import { DEFAULT_MESSAGE_QUOTA } from '../../../constants/message.constant';
+import { MessageQuotaNotEnoughError } from './message.error';
+import { CustomRequestContextService } from '../../../module/custom_request_context/custom_request_context.service';
 
 @Injectable()
 export class MessageService {
   constructor(
     @InjectModel(MessageModel.name)
     private readonly messageModel: Model<MessageModel>,
-    private readonly llmService: LlmService
+
+    @InjectModel(UserMessageQuotaModel.name)
+    private readonly userMessageQuotaModel: Model<UserMessageQuotaModel>,
+
+    private readonly llmService: LlmService,
+
+    private readonly customRequestContext: CustomRequestContextService
   ) {}
 
   public async getChatMessageList(dto: MessageListDto): ServiceReturnType<MessageListResponse> {
@@ -46,11 +56,30 @@ export class MessageService {
   }
 
   public async createMessage(dto: MessageCreateDto): ServiceReturnType<MessageCreateResponse> {
+    await this.checkUserMessageQuota();
+
     const data = await this.analyze(dto.chatId, dto.content);
     return {
       aiResponse: data.content,
       createdAt: data.createdAt,
     };
+  }
+
+  private async checkUserMessageQuota(): Promise<boolean> {
+    const user = this.customRequestContext.get('user');
+    const userId = user.id;
+    const userMessageQuota = await this.userMessageQuotaModel.findOne({ userId });
+
+    if (userMessageQuota?.lastReset && userMessageQuota.lastReset.getDate() !== new Date().getDate()) {
+      await this.userMessageQuotaModel.updateOne(
+        { userId },
+        { $set: { remainingMessages: DEFAULT_MESSAGE_QUOTA, lastReset: new Date() } }
+      );
+    } else if (!userMessageQuota || userMessageQuota.remainingMessages <= 0) {
+      throw new MessageQuotaNotEnoughError();
+    }
+
+    return true;
   }
 
   private async analyze(chatId: string, content: string): Promise<{ content: string; createdAt: Date }> {
@@ -81,5 +110,4 @@ export class MessageService {
       createdAt: assistantMessage.createdAt,
     };
   }
-
 }

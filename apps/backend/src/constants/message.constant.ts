@@ -1,0 +1,2 @@
+export const DEFAULT_MESSAGE_FIRST_QUOTA = 20;
+export const DEFAULT_MESSAGE_QUOTA = 10;

@@ -8,6 +8,9 @@ import { AuthSsoMap } from '@lia/api/auth/auth.constant';
 import { MetricModule } from '../../module/metric/metric.module';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { JWT_SECRET } from '../../constants/jwt.constant';
+import { UserMessageQuotaModel } from '../../module/mongo/model/user_message_quota.model';
+import { UserMessageQuotaSchema } from '../../module/mongo/model/user_message_quota.model';
+import { DEFAULT_MESSAGE_QUOTA } from '../../constants/message.constant';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -15,13 +18,13 @@ describe('AuthService', () => {
   let mongoConnection: Connection;
   let userModel: Model<UserModel>;
   let jwtService: JwtService;
-
+  let userMessageQuotaModel: Model<UserMessageQuotaModel>;
   beforeAll(async () => {
     mongod = await MongoMemoryServer.create();
     const uri = mongod.getUri();
     mongoConnection = (await connect(uri)).connection;
     userModel = mongoConnection.model(UserModel.name, UserSchema);
-
+    userMessageQuotaModel = mongoConnection.model(UserMessageQuotaModel.name, UserMessageQuotaSchema);
     const module: TestingModule = await Test.createTestingModule({
       imports: [
         MongooseModule.forRootAsync({
@@ -30,6 +33,7 @@ describe('AuthService', () => {
           }),
         }),
         MongooseModule.forFeature([{ name: UserModel.name, schema: UserSchema }]),
+        MongooseModule.forFeature([{ name: UserMessageQuotaModel.name, schema: UserMessageQuotaSchema }]),
         MetricModule,
         JwtModule.register({
           secret: JWT_SECRET,
@@ -64,6 +68,11 @@ describe('AuthService', () => {
       expect(decoded.email).toBe(ssoUser.email);
       expect(decoded.provider).toBe(ssoUser.provider);
       expect(decoded.name).toBe(ssoUser.name);
+
+      // 생성 이후 메시지 할당량 확인
+      const userMessageQuota = await userMessageQuotaModel.findOne({ userId: decoded.id });
+      expect(userMessageQuota).toBeDefined();
+      expect(userMessageQuota?.remainingChats).toBe(DEFAULT_MESSAGE_QUOTA);
     });
 
     it('이미 존재하는 사용자를 반환해야 합니다', async () => {

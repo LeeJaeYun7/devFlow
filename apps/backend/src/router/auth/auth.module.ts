@@ -8,9 +8,16 @@ import { AuthService } from './auth.service';
 import { SsoKakaoStrategy } from './sso_strategy/kakao.strategy';
 import { SsoNaverStrategy } from './sso_strategy/naver.strategy';
 import { MetricModule } from '../../module/metric/metric.module';
+import { UserMessageQuotaModel } from '../../module/mongo/model/user_message_quota.model';
+import { UserMessageQuotaSchema } from '../../module/mongo/model/user_message_quota.model';
 
 @Module({
-  imports: [PassportModule, MongooseModule.forFeature([{ name: UserModel.name, schema: UserSchema }]), MetricModule],
+  imports: [
+    MongooseModule.forFeature([{ name: UserMessageQuotaModel.name, schema: UserMessageQuotaSchema }]),
+    MongooseModule.forFeature([{ name: UserModel.name, schema: UserSchema }]),
+    PassportModule,
+    MetricModule,
+  ],
   controllers: [AuthController],
   providers: [SsoGoogleStrategy, SsoNaverStrategy, SsoKakaoStrategy, AuthService],
   exports: [AuthService],
