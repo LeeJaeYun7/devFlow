@@ -11,7 +11,7 @@ import { CustomRequestContextService } from '../../../module/custom_request_cont
 export class ChatService {
   constructor(
     @InjectModel(ChatModel.name) private readonly chatModel: Model<ChatModel>,
-    private readonly customRequestContext: CustomRequestContextService,
+    private readonly customRequestContext: CustomRequestContextService
   ) {}
 
   public async listChats(dto: ChatListDto): ServiceReturnType<ChatListResponse> {

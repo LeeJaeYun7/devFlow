@@ -13,7 +13,9 @@ import {
   ListItemIcon,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { Menu, Close, Person } from '@mui/icons-material';
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
+import PersonIcon from '@mui/icons-material/Person';
 import ManageSearchIcon from '@mui/icons-material/ManageSearch';
 import AddToPhotosIcon from '@mui/icons-material/AddToPhotos';
 import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
@@ -50,7 +52,7 @@ export default function AdminSidebar() {
             boxShadow: 1,
           }}
         >
-          <Menu />
+          <MenuIcon />
         </IconButton>
       )}
       <Drawer variant={isMobile ? 'temporary' : 'persistent'} open={open} onClose={handleDrawerClose}>
@@ -66,7 +68,7 @@ export default function AdminSidebar() {
               boxShadow: 1,
             }}
           >
-            <Close />
+            <CloseIcon />
           </IconButton>
         )}
         <Box sx={{ height: '40%', display: 'flex', flexDirection: 'column' }}>
@@ -79,7 +81,7 @@ export default function AdminSidebar() {
             <ListItem disablePadding sx={{ display: 'block' }}>
               <ListItemButton component={Link} to={AdminUrlMap.user} selected={location.pathname === AdminUrlMap.user}>
                 <ListItemIcon>
-                  <Person />
+                  <PersonIcon />
                 </ListItemIcon>
                 <ListItemText primary="유저" />
               </ListItemButton>

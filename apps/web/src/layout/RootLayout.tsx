@@ -2,8 +2,9 @@ import { Box, Button, Fab, Typography, useMediaQuery, useTheme } from '@mui/mate
 import { useContext } from 'react';
 import { ColorModeContext } from '../Theme';
 import { Outlet } from 'react-router-dom';
-import { WbSunny, NightsStay } from '@mui/icons-material';
 import { useUser } from '../context/UserProvider';
+import WbSunnyIcon from '@mui/icons-material/WbSunny';
+import NightsStayIcon from '@mui/icons-material/NightsStay';
 
 const sidebarWidth = 250;
 
@@ -99,9 +100,9 @@ export function RootLayout({ sidebar }: RootLayoutProps) {
         onClick={colorMode.toggleColorMode}
       >
         {theme.palette.mode === 'dark' ? (
-          <WbSunny sx={{ fontSize: '1.2rem' }} />
+          <WbSunnyIcon sx={{ fontSize: '1.2rem' }} />
         ) : (
-          <NightsStay sx={{ fontSize: '1.2rem' }} />
+          <NightsStayIcon sx={{ fontSize: '1.2rem' }} />
         )}
       </Fab>
     </Box>

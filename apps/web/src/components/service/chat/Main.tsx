@@ -4,9 +4,12 @@ import SendIcon from '@mui/icons-material/Send';
 import { ChatContent } from '../../base/chat/Content';
 import { useCreateMessage, useMessageList } from '../../../hooks/useMessage';
 import { useUser } from '../../../context/UserProvider';
+import { useUserMySelf } from '../../../hooks/useUser';
+import { enqueueSnackbar } from 'notistack';
 
 export function ChatMain() {
   const { nowChatId } = useUser();
+  const { refetch: refetchUserMySelf, data: userMySelf } = useUserMySelf();
   const [message, setMessage] = useState('');
   const { data: messageList } = useMessageList({
     chatId: nowChatId,
@@ -16,7 +19,16 @@ export function ChatMain() {
   const { mutateAsync: createMessage, isPending } = useCreateMessage();
 
   const handleSendMessage = async () => {
+    if ((userMySelf?.data?.remainMessageQuota ?? 0) === 0) {
+      enqueueSnackbar('오늘 메시지 전송 횟수를 초과했습니다.', {
+        variant: 'error',
+        autoHideDuration: 3000,
+      });
+      return;
+    }
+
     await createMessage({ chatId: nowChatId, content: message });
+    await refetchUserMySelf();
     setMessage('');
   };
 

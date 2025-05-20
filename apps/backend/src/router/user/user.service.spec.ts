@@ -48,10 +48,7 @@ describe('UserService', () => {
           { name: UserMessageQuotaModel.name, schema: UserMessageQuotaSchema },
         ]),
       ],
-      providers: [
-        UserService,
-        { provide: CustomRequestContextService, useValue: mockCustomRequestContextService },
-      ],
+      providers: [UserService, { provide: CustomRequestContextService, useValue: mockCustomRequestContextService }],
     }).compile();
 
     service = module.get<UserService>(UserService);

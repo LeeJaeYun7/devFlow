@@ -14,12 +14,17 @@ import {
   ListItemIcon,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { Chat, Menu, Close, Person, Add } from '@mui/icons-material';
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
+import ChatIcon from '@mui/icons-material/Chat';
+import AddIcon from '@mui/icons-material/Add';
+import PersonIcon from '@mui/icons-material/Person';
 import { useUser } from '../../context/UserProvider';
 import { useChatList, useCreateChat } from '../../hooks/useChat';
-
+import { useUserMySelf } from '../../hooks/useUser';
 export function ServiceRootSidebar() {
   const theme = useTheme();
+  const { data: userMySelf } = useUserMySelf();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [open, setOpen] = useState(isMobile ? false : true);
   const { mutateAsync: createChat } = useCreateChat();
@@ -67,7 +72,7 @@ export function ServiceRootSidebar() {
             boxShadow: 1,
           }}
         >
-          <Menu />
+          <MenuIcon />
         </IconButton>
       )}
       <Drawer variant={isMobile ? 'temporary' : 'persistent'} open={open} onClose={handleDrawerClose}>
@@ -83,7 +88,7 @@ export function ServiceRootSidebar() {
               boxShadow: 1,
             }}
           >
-            <Close />
+            <CloseIcon />
           </IconButton>
         )}
         <Box sx={{ height: '40%', display: 'flex', flexDirection: 'column' }}>
@@ -96,9 +101,9 @@ export function ServiceRootSidebar() {
             <ListItem disablePadding sx={{ display: 'block' }}>
               <ListItemButton selected>
                 <ListItemIcon>
-                  <Chat />
+                  <ChatIcon />
                 </ListItemIcon>
-                <ListItemText primary="채팅" />
+                <ListItemText primary={`채팅 (남은 수: ${userMySelf?.data?.remainMessageQuota ?? 0})`} />
               </ListItemButton>
               <MyPageList />
             </ListItem>
@@ -111,7 +116,7 @@ export function ServiceRootSidebar() {
               <ListItem key={chat.chatId} disablePadding sx={{ display: 'block' }}>
                 <ListItemButton onClick={() => setNowChatId(chat.chatId)} selected={nowChatId === chat.chatId}>
                   <ListItemIcon>
-                    <Chat />
+                    <ChatIcon />
                   </ListItemIcon>
                   <ListItemText primary={chat.title} />
                 </ListItemButton>
@@ -120,7 +125,7 @@ export function ServiceRootSidebar() {
             <ListItem disablePadding sx={{ display: 'block' }}>
               <ListItemButton onClick={handleCreateChat}>
                 <ListItemIcon>
-                  <Add />
+                  <AddIcon />
                 </ListItemIcon>
                 <ListItemText primary="새 채팅" />
               </ListItemButton>
@@ -142,7 +147,7 @@ function MyPageList() {
   return (
     <ListItemButton>
       <ListItemIcon>
-        <Person />
+        <PersonIcon />
       </ListItemIcon>
       <ListItemText primary="마이 페이지" />
     </ListItemButton>

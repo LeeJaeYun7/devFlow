@@ -1,7 +1,7 @@
-import { Controller, Get, HttpStatus, Query } from "@nestjs/common";
-import { ApiResponse, ApiTags } from "@nestjs/swagger";
-import { UserService } from "./user.service";
-import { UserGetMySelfDto, UserGetMySelfResponse } from "@lia/api/user/myself.dto";
+import { Controller, Get, HttpStatus, Query } from '@nestjs/common';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { UserService } from './user.service';
+import { UserGetMySelfDto, UserGetMySelfResponse } from '@lia/api/user/myself.dto';
 
 @ApiTags('User')
 @Controller('/user')

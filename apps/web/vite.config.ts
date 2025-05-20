@@ -30,12 +30,12 @@ export default defineConfig(({ mode }) => ({
             type: 'image/png',
           },
           {
-            src: '/icon/lia_logo192.png',
+            src: '/icon/lia_logo_192.png',
             sizes: '192x192',
             type: 'image/png',
           },
           {
-            src: '/icon/lia_logo512.png',
+            src: '/icon/lia_logo_512.png',
             sizes: '512x512',
             type: 'image/png',
           },

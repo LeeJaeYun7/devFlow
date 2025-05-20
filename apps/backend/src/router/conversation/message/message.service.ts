@@ -58,11 +58,17 @@ export class MessageService {
   public async createMessage(dto: MessageCreateDto): ServiceReturnType<MessageCreateResponse> {
     await this.checkUserMessageQuota();
 
-    const data = await this.analyze(dto.chatId, dto.content);
-    return {
-      aiResponse: data.content,
-      createdAt: data.createdAt,
-    };
+    try {
+      const data = await this.analyze(dto.chatId, dto.content);
+      return {
+        aiResponse: data.content,
+        createdAt: data.createdAt,
+      };
+    } finally {
+      const user = this.customRequestContext.get('user');
+      const userId = user.id;
+      await this.userMessageQuotaModel.updateOne({ userId }, { $inc: { remainingMessages: -1 } });
+    }
   }
 
   private async checkUserMessageQuota(): Promise<boolean> {
