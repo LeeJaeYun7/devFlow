@@ -8,27 +8,34 @@ import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser';
+import { JWT_SECRET } from './constants/jwt.constant';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
+  const isProd = process.env.NODE_ENV === 'production';
   const port = process.env.PORT || 4600;
 
+  app.use(cookieParser(JWT_SECRET));
   app.enableCors({
-    origin: '*',
+    origin: isProd ? 'https://asklia.io' : 'http://localhost:4500',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
   });
 
-  const config = new DocumentBuilder()
-    .setTitle('LIA API')
-    .setDescription('LIA API description')
-    .setVersion('1.0')
-    .addTag('lia')
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('/api/docs', app, document);
+  if (!isProd) {
+    const config = new DocumentBuilder()
+      .setTitle('LIA API')
+      .setDescription('LIA API description')
+      .setVersion('1.0')
+      .addTag('lia')
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('/api/docs', app, document);
+  }
 
   await app.listen(port);
 

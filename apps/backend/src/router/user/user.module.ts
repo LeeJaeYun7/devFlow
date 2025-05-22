@@ -1,12 +1,15 @@
-import { Module } from "@nestjs/common";
-import { UserController } from "./user.controller";
-import { UserService } from "./user.service";
-import { MongooseModule } from "@nestjs/mongoose";
-import { UserModel, UserSchema } from "../../module/mongo/model/user.model";
-import { UserMessageQuotaModel, UserMessageQuotaSchema } from "../../module/mongo/model/user_message_quota.model";
+import { Module } from '@nestjs/common';
+import { UserController } from './user.controller';
+import { UserService } from './user.service';
+import { MongooseModule } from '@nestjs/mongoose';
+import { UserModel, UserSchema } from '../../module/mongo/model/user.model';
+import { UserMessageQuotaModel, UserMessageQuotaSchema } from '../../module/mongo/model/user_message_quota.model';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: UserModel.name, schema: UserSchema }]), MongooseModule.forFeature([{ name: UserMessageQuotaModel.name, schema: UserMessageQuotaSchema }])],
+  imports: [
+    MongooseModule.forFeature([{ name: UserModel.name, schema: UserSchema }]),
+    MongooseModule.forFeature([{ name: UserMessageQuotaModel.name, schema: UserMessageQuotaSchema }]),
+  ],
   controllers: [UserController],
   providers: [UserService],
 })

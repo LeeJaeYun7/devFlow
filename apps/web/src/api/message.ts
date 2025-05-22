@@ -1,8 +1,8 @@
-import { api, BASE_API_URL } from './api.constant';
+import { api } from './api.constant';
 import type { MessageListDto, MessageListResponse } from '@lia/api/conversation/message/list.dto';
 import type { MessageCreateDto, MessageCreateResponse } from '@lia/api/conversation/message/create.dto';
 
-const BASE_URL = `${BASE_API_URL}/api/conversation/message`;
+const BASE_URL = `/api/conversation/message`;
 
 export async function getMessageList(dto: MessageListDto) {
   const res = await api.get<MessageListResponse>(`${BASE_URL}/list`, { params: dto });

@@ -3,12 +3,9 @@ import axios from 'axios';
 export const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
 
 export const api = axios.create({
+  baseURL: BASE_API_URL,
   headers: {
-    Authorization: `Bearer ${
-      document.cookie
-        .split('; ')
-        .find((row) => row.startsWith('authorization='))
-        ?.split('=')[1] ?? ''
-    }`,
+    'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });

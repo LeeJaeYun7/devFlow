@@ -1,8 +1,8 @@
 import { SystemPromptGetResponse } from '@lia/api/admin/system_prompt/get.dto';
 import { SystemPromptPatchDto, SystemPromptPatchResponse } from '@lia/api/admin/system_prompt/patch.dto';
-import { api, BASE_API_URL } from './api.constant';
+import { api } from './api.constant';
 
-const BASE_URL = `${BASE_API_URL}/api/admin/system-prompt`;
+const BASE_URL = `/api/admin/system-prompt`;
 
 export async function getSystemPrompt() {
   const res = await api.get<SystemPromptGetResponse>(BASE_URL);

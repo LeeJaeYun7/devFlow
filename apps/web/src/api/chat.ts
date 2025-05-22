@@ -1,8 +1,8 @@
-import { api, BASE_API_URL } from './api.constant';
+import { api } from './api.constant';
 import type { ChatListDto, ChatListResponse } from '@lia/api/conversation/chat/list.dto';
 import type { ChatResponse } from '@lia/api/conversation/chat/create.dto';
 
-const BASE_URL = `${BASE_API_URL}/api/conversation/chat`;
+const BASE_URL = `/api/conversation/chat`;
 
 export async function getChatList(dto: ChatListDto) {
   const res = await api.get<ChatListResponse>(`${BASE_URL}/list`, { params: dto });

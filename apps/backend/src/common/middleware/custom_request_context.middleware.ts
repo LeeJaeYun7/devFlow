@@ -12,12 +12,10 @@ export class CustomRequestContextMiddleware implements NestMiddleware {
   ) {}
 
   public use(req: Request, res: Response, next: NextFunction) {
-    const authorization = req.headers.authorization;
-    const accessToken = authorization?.split(' ')[1];
-
     const context: Partial<CustomRequestContext> = {};
 
     try {
+      const accessToken = this.extractTokenFromHeader(req);
       const decoded = this.jwtService.verify<SsoUser>(accessToken ?? '');
       context.user = decoded;
     } catch {
@@ -27,5 +25,15 @@ export class CustomRequestContextMiddleware implements NestMiddleware {
     this.customRequestContextService.run(context as CustomRequestContext, () => {
       next();
     });
+  }
+
+  private extractTokenFromHeader(request: Request): string | undefined {
+    const cookieAuthorization = request.cookies.authorization;
+    if (cookieAuthorization) {
+      return cookieAuthorization;
+    }
+
+    const [type, token] = request.headers.authorization?.split(' ') ?? [];
+    return type === 'Bearer' ? token : undefined;
   }
 }

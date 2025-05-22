@@ -26,7 +26,7 @@ import { CustomRequestContextMiddleware } from './common/middleware/custom_reque
     JwtModule.register({
       global: true,
       secret: JWT_SECRET,
-      signOptions: { expiresIn: '1d' },
+      signOptions: { expiresIn: '1d', algorithm: 'HS256' },
     }),
     SlackModule,
     CustomRequestContextModule,

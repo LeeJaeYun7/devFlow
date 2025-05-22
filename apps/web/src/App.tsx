@@ -14,6 +14,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { LoginMain } from './components/login/LoginMain';
 import { UserProvider } from './context/UserProvider';
 import { SnackbarProvider } from 'notistack';
+import CallbackMain from './components/login/callback/Main';
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ export default function App() {
                 <Route>
                   <Route path="/login" element={<LoginMain />} />
                 </Route>
+                <Route path="/login/callback" element={<CallbackMain />} />
                 <Route path="/admin" element={<RootLayout sidebar={<AdminSidebar />} />}>
                   <Route path="/admin" element={<Navigate to={AdminUrlMap.user} />} />
                   <Route path={AdminUrlMap.user} element={<UserMain />} />
