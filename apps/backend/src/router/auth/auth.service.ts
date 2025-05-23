@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { UserModel } from '../../module/mongo/model/user.model';
+import { UserModel } from '../../module/mongo/model/user/models/user.model';
 import { Model } from 'mongoose';
 import { SsoUser } from './auth.type';
 import { UserMetricService } from '../../module/metric/user_metric.service';
 import { JwtService } from '@nestjs/jwt';
-import { UserMessageQuotaModel } from '../../module/mongo/model/user_message_quota.model';
+import { UserMessageQuotaModel } from '../../module/mongo/model/user/models/user_message_quota.model';
 import { DEFAULT_MESSAGE_FIRST_QUOTA } from '../../constants/message.constant';
 @Injectable()
 export class AuthService {

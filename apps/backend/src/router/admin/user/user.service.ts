@@ -2,17 +2,17 @@ import { MetricData, UserMetricDto, UserMetricResponse } from '@lia/api/admin/us
 import { UserListDto, UserListResponse } from '@lia/api/admin/user/list.dto';
 import { ServiceReturnType } from '@lia/api/types/base.type';
 import { Injectable } from '@nestjs/common';
-import { UserModel } from '../../../module/mongo/model/user.model';
+import { UserModel } from '../../../module/mongo/model/user/models/user.model';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { DailyMetricModel } from '../../../module/mongo/model/metric/daily_metric.model';
-import { TotalMetricModel } from '../../../module/mongo/model/metric/total_metric.model';
+import { DailyMetricModel } from '../../../module/mongo/model/metric/models/daily_metric.model';
+import { TotalMetricModel } from '../../../module/mongo/model/metric/models/total_metric.model';
 import {
   DailyMetric,
   DailyMetricList,
   DailyMetricMap,
   TotalMetricMap,
-} from '../../../module/mongo/model/metric/metric.constant';
+} from '../../../module/mongo/model/metric/interfaces/metric.constant';
 import { getDateKey } from '../../../util/date';
 
 @Injectable()

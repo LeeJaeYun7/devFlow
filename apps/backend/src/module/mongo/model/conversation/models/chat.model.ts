@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
-import { UserModel } from './user.model';
+import { UserModel } from '../../user/models/user.model';
 
 @Schema({ collection: 'chats', timestamps: true })
 export class ChatModel extends Document<string> {

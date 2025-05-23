@@ -4,7 +4,7 @@ import { Connection, connect, Model, Types } from 'mongoose';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserService } from './user.service';
 import { UserModel, UserSchema } from '../../module/mongo/model/user.model';
-import { UserMessageQuotaModel, UserMessageQuotaSchema } from '../../module/mongo/model/user_message_quota.model';
+import { UserMessageQuotaModel, UserMessageQuotaSchema } from '../../module/mongo/model/user/models/user_message_quota.model';
 import { CustomRequestContextService } from '../../module/custom_request_context/custom_request_context.service';
 import { UserError } from '../../util/base.error';
 import { AuthSsoMap } from '@lia/api/auth/auth.constant';

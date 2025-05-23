@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { DailyMetricList, type DailyMetric } from './metric.constant';
-import { getDateKey } from '../../../../util/date';
+import { DailyMetricList, type DailyMetric } from '../interfaces/metric.constant';
+import { getDateKey } from '../../../../../util/date';
 
 @Schema({ collection: 'daily_metrics' })
 export class DailyMetricModel extends Document<string> {

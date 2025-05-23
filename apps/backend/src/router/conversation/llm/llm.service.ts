@@ -8,8 +8,7 @@ import {
 } from 'libs/api/src/lia/lia-prompt-template.constant';
 import { ConfigService } from '@nestjs/config';
 import { tools } from 'libs/api/src/llm/tools/lia-tools.constant';
-import { FinanceService } from '../../finance/finance.service';
-
+import { YahooFinanceService } from '../../finance/yahoo/yahoo-finance.service';
 @Injectable()
 export class LlmService {
   private readonly logger = new Logger(LlmService.name);
@@ -20,7 +19,7 @@ export class LlmService {
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly financeService: FinanceService
+    private readonly yahooFinanceService: YahooFinanceService
   ) {
     this.openRouterUrl = this.configService.get<string>('OPENROUTER_URL') ?? 'https://api.openrouter.ai/api/v1/chat/completions';
     this.openRouterApiKey = this.configService.get<string>('OPENROUTER_API_KEY') ?? '';
@@ -48,10 +47,10 @@ export class LlmService {
   ): Promise<string> {
     const toolFunctions = {
       get_technical_data: async (args: any) => {
-        return this.financeService.getTechnicalData(args.symbol);
+        return this.yahooFinanceService.getTechnicalData(args.symbol);
       },
       get_fundamental_data: async (args: any) => {
-        return this.financeService.getFundamentalData(args.symbol);
+        return this.yahooFinanceService.getFundamentalData(args.symbol);
       },
     };
 

@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { DailyMetricModel } from '../mongo/model/metric/daily_metric.model';
-import { TotalMetricModel } from '../mongo/model/metric/total_metric.model';
-import { DauMetricModel } from '../mongo/model/metric/dau.model';
+import { DailyMetricModel } from '../mongo/model/metric/models/daily_metric.model';
+import { TotalMetricModel } from '../mongo/model/metric/models/total_metric.model';
+import { DauMetricModel } from '../mongo/model/metric/models/dau.model';
 import { UserMetricService } from './user_metric.service';
-import { DailyMetricSchema } from '../mongo/model/metric/daily_metric.model';
-import { TotalMetricSchema } from '../mongo/model/metric/total_metric.model';
-import { DauMetricSchema } from '../mongo/model/metric/dau.model';
-import { UserModel, UserSchema } from '../mongo/model/user.model';
+import { DailyMetricSchema } from '../mongo/model/metric/models/daily_metric.model';
+import { TotalMetricSchema } from '../mongo/model/metric/models/total_metric.model';
+import { DauMetricSchema } from '../mongo/model/metric/models/dau.model';
+import { UserModel, UserSchema } from '../mongo/model/user/models/user.model';
 
 @Module({
   imports: [

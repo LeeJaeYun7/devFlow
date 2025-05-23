@@ -1,18 +1,18 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LlmService } from './llm.service';
-import { FinanceModule } from '../../finance/finance.module';
-import { FinanceService } from '../../finance/finance.service';
+import { YahooFinanceModule } from '../../finance/yahoo/yahoo-finance.module';
+import { YahooFinanceService } from '../../finance/yahoo/yahoo-finance.service';
 
 @Module({
-  imports: [ConfigModule, FinanceModule],
+  imports: [ConfigModule, YahooFinanceModule],
   providers: [
     {
       provide: LlmService,
-      useFactory: (configService: ConfigService, financeService: FinanceService) => {
-        return new LlmService(configService, financeService);
+      useFactory: (configService: ConfigService, yahooFinanceService: YahooFinanceService) => {
+        return new LlmService(configService, yahooFinanceService);
       },
-      inject: [ConfigService, FinanceService],
+      inject: [ConfigService, YahooFinanceService],
     },
   ],
   exports: [LlmService],

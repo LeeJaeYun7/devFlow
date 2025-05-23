@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
-import { UserModel } from '../user.model';
-import { getDateKey } from '../../../../util/date';
+import { UserModel } from '../../user/models/user.model';
+import { getDateKey } from '../../../../../util/date';
 
 @Schema({ collection: 'dau_metrics' })
 export class DauMetricModel extends Document<string> {

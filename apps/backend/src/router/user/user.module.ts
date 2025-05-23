@@ -3,7 +3,7 @@ import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserModel, UserSchema } from '../../module/mongo/model/user.model';
-import { UserMessageQuotaModel, UserMessageQuotaSchema } from '../../module/mongo/model/user_message_quota.model';
+import { UserMessageQuotaModel, UserMessageQuotaSchema } from '../../module/mongo/model/user/models/user_message_quota.model';
 
 @Module({
   imports: [

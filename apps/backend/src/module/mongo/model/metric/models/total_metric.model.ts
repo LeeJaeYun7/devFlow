@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { TotalMetricList, type TotalMetric } from './metric.constant';
+import { TotalMetricList, type TotalMetric } from '../interfaces/metric.constant';
 
 @Schema({ collection: 'total_metrics' })
 export class TotalMetricModel extends Document<string> {

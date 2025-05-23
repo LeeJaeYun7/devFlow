@@ -3,13 +3,13 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import { Connection, connect, Model } from 'mongoose';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthService } from './auth.service';
-import { UserModel, UserSchema } from '../../module/mongo/model/user.model';
+import { UserModel, UserSchema } from '../../module/mongo/model/user/models/user.model';
 import { AuthSsoMap } from '@lia/api/auth/auth.constant';
 import { MetricModule } from '../../module/metric/metric.module';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { JWT_SECRET } from '../../constants/jwt.constant';
-import { UserMessageQuotaModel } from '../../module/mongo/model/user_message_quota.model';
-import { UserMessageQuotaSchema } from '../../module/mongo/model/user_message_quota.model';
+import { UserMessageQuotaModel } from '../../module/mongo/model/user/models/user_message_quota.model';
+import { UserMessageQuotaSchema } from '../../module/mongo/model/user/models/user_message_quota.model';
 import { DEFAULT_MESSAGE_QUOTA } from '../../constants/message.constant';
 
 describe('AuthService', () => {

@@ -2,12 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Model } from 'mongoose';
-import { DailyMetricModel } from '../mongo/model/metric/daily_metric.model';
-import { DauMetricModel } from '../mongo/model/metric/dau.model';
-import { TotalMetricModel } from '../mongo/model/metric/total_metric.model';
-import { DailyMetric, DailyMetricMap, TotalMetricMap } from '../mongo/model/metric/metric.constant';
+import { DailyMetricModel } from '../mongo/model/metric/models/daily_metric.model';
+import { DauMetricModel } from '../mongo/model/metric/models/dau.model';
+import { TotalMetricModel } from '../mongo/model/metric/models/total_metric.model';
+import { DailyMetric, DailyMetricMap, TotalMetricMap } from '../mongo/model/metric/interfaces/metric.constant';
 import { getDateKey } from '../../util/date';
-import { UserModel } from '../mongo/model/user.model';
+import { UserModel } from '../mongo/model/user/models/user.model';
 
 @Injectable()
 export class UserMetricService {

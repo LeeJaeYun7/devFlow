@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { DEFAULT_MESSAGE_FIRST_QUOTA } from '../../../constants/message.constant';
+import { DEFAULT_MESSAGE_FIRST_QUOTA } from '../../../../../constants/message.constant';
 import { UserModel } from './user.model';
 
 @Schema({ collection: 'user_message_quotas' })

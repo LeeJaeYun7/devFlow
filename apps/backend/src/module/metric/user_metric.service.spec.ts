@@ -3,11 +3,11 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import { Connection, connect, Model, Types } from 'mongoose';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserMetricService } from './user_metric.service';
-import { UserModel, UserSchema } from '../mongo/model/user.model';
-import { DailyMetricModel, DailyMetricSchema } from '../mongo/model/metric/daily_metric.model';
-import { TotalMetricModel, TotalMetricSchema } from '../mongo/model/metric/total_metric.model';
-import { DauMetricModel, DauMetricSchema } from '../mongo/model/metric/dau.model';
-import { DailyMetricMap, TotalMetricMap } from '../mongo/model/metric/metric.constant';
+import { UserModel, UserSchema } from '../mongo/model/user/models/user.model';
+import { DailyMetricModel, DailyMetricSchema } from '../mongo/model/metric/models/daily_metric.model';
+import { TotalMetricModel, TotalMetricSchema } from '../mongo/model/metric/models/total_metric.model';
+import { DauMetricModel, DauMetricSchema } from '../mongo/model/metric/models/dau.model';
+import { DailyMetricMap, TotalMetricMap } from '../mongo/model/metric/interfaces/metric.constant';
 import { AuthSsoMap } from '@lia/api/auth/auth.constant';
 
 describe('UserMetricService', () => {

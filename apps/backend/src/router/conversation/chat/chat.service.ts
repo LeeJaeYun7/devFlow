@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { ChatModel } from '../../../module/mongo/model/chat.model';
+import { ChatModel } from '../../../module/mongo/model/conversation/models/chat.model';
 import { Model } from 'mongoose';
 import { ServiceReturnType } from '@lia/api/types/base.type';
 import { ChatResponse, CreateChatDto } from '@lia/api/conversation/chat/create.dto';
