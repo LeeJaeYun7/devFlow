@@ -24,6 +24,7 @@ export interface YahooDefaultKeyStatistics {
   legalType: string | null;
   lastFiscalYearEnd: Date;
   nextFiscalYearEnd: Date;
+  trailingEps: number;
 } 
 
 export interface YahooSummaryDetail {
@@ -37,6 +38,11 @@ export interface YahooSummaryDetail {
   regularMarketOpen: number;
   regularMarketDayLow: number;
   regularMarketDayHigh: number;
+  regularMarketPrice: number;
+  regularMarketChangePercent: number;
+  marketCap: number;
+  fiftyTwoWeekHigh: number;
+  fiftyTwoWeekLow: number;
   dividendRate: number;
   dividendYield: number;
   exDividendDate: Date;

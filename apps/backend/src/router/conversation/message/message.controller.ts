@@ -3,7 +3,6 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MessageService } from './message.service';
 import { MessageCreateDto, MessageCreateResponse } from '@lia/api/conversation/message/create.dto';
 import { MessageListDto, MessageListResponse } from '@lia/api/conversation/message/list.dto';
-
 @ApiTags('Message')
 @Controller('/conversation/message')
 export class MessageController {

@@ -2,8 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import YahooFinance from 'yahoo-finance2';
 import dayjs from 'dayjs';
 import { YahooStockService } from '../yahoo-stock.service';
+import { YahooStockNews } from '../../../../module/mongo/model/yahoo/models/yahoo-stock-news.model';
+import { YahooStockHistory } from '../../../../module/mongo/model/yahoo/models/yahoo-stock-history.model';
+import { YahooStockInfo } from '../../../../module/mongo/model/yahoo/models/yahoo-stock-info.model';
+import type { YahooStockNewsItem } from '../../../../module/mongo/model/yahoo/interfaces/yahoo-stock-news-interface';
+import { YahooStockAnalysis } from '../../../../module/mongo/model/yahoo/models/yahoo-stock-analysis.model';
 import axios from 'axios';
-import * as cheerio from 'cheerio'; 
+import * as cheerio from 'cheerio';
 
 @Injectable()
 export class YahooFinanceFetcherService {
@@ -11,12 +16,12 @@ export class YahooFinanceFetcherService {
 
   constructor(private readonly yahooStockService: YahooStockService) {}
 
-  public async fetchAnalysis(symbol: string): Promise<any> {
+  public async fetchAnalysis(symbol: string): Promise<YahooStockAnalysis | null> {
     try {
       // Check MongoDB first
-      const existingAnalysis = await this.yahooStockService.getStockAnalysis(symbol);
-      if (existingAnalysis) {
-        return existingAnalysis;
+      const cached = await this.yahooStockService.getStockAnalysis(symbol);
+      if (cached) {
+        return cached;
       }
 
       // If not in MongoDB, fetch from Yahoo Finance
@@ -24,50 +29,47 @@ export class YahooFinanceFetcherService {
         modules: ['earningsTrend', 'recommendationTrend', 'earningsHistory', 'earnings'],
       });
 
-      console.log("data", data);
-
       // Save to MongoDB
-      await this.yahooStockService.saveStockAnalysis(symbol, data);
-      return data;
-    } catch (error: any) {
-      this.logger.error(`Error fetching analysis for ${symbol}: ${error.message}`);
-      return {};
+      return await this.yahooStockService.saveStockAnalysis(symbol, data);
+    } catch (error: unknown) {
+      this.logger.error(
+        `Error fetching analysis for ${symbol}: ${error instanceof Error ? error.message : String(error)}`
+      );
+      return null;
     }
   }
 
-  public async fetchInfo(symbol: string): Promise<any> {
+  public async fetchInfo(symbol: string): Promise<YahooStockInfo | null> {
     try {
       // Check MongoDB first
-      const existingData = await this.yahooStockService.getStockInfo(symbol);
-      if (existingData) {
-        return {
-          summaryDetail: existingData.summaryDetail,
-          defaultKeyStatistics: existingData.defaultKeyStatistics,
-          financialData: existingData.financialData,
-        };
+      const cached = await this.yahooStockService.getStockInfo(symbol);
+      if (cached) {
+        return cached;
       }
 
       // If not in MongoDB, fetch from Yahoo Finance
       const data = await YahooFinance.quoteSummary(symbol, {
         modules: ['summaryDetail', 'defaultKeyStatistics', 'financialData'],
       });
-      
-      // Save to MongoDB
-      await this.yahooStockService.saveStockInfo(symbol, data);
-      return data;
-    } catch (error: any) {
-      this.logger.error(`Error fetching info for ${symbol}: ${error.message}`);
-      return {};
+       // Save to MongoDB
+      return await this.yahooStockService.saveStockInfo(symbol, data);
+    } catch (error: unknown) {
+      this.logger.error(`Error fetching info for ${symbol}: ${error instanceof Error ? error.message : String(error)}`);
+      return null;
     }
   }
 
-  public async fetchHistory(symbol: string, _period = '3mo', interval: '1d' | '1wk' | '1mo' = '1d'): Promise<any> {
+  public async fetchHistory(
+    symbol: string,
+    _period = '3mo',
+    interval: '1d' | '1wk' | '1mo' = '1d'
+  ): Promise<YahooStockHistory | null> {
     try {
       // Check MongoDB first
-      const existingHistory = await this.yahooStockService.getStockHistory(symbol, interval);
-      
-      if (existingHistory) {
-        return existingHistory;
+      const cached = await this.yahooStockService.getStockHistory(symbol, interval);
+  
+      if (cached) {
+        return cached;
       }
 
       // If not in MongoDB, fetch from Yahoo Finance
@@ -77,23 +79,23 @@ export class YahooFinanceFetcherService {
       });
 
       // Save to MongoDB
-      await this.yahooStockService.saveStockHistory(symbol, data, interval);
-      return data;
-    } catch (error: any) {
-      this.logger.error(`Error fetching history for ${symbol}: ${error.message}`);
-      return [];
+      return await this.yahooStockService.saveStockHistory(symbol, data, interval);
+    } catch (error: unknown) {
+      this.logger.error(
+        `Error fetching history for ${symbol}: ${error instanceof Error ? error.message : String(error)}`
+      );
+      return null;
     }
   }
 
-  public async fetchNews(symbol: string): Promise<any[]> {
+  public async fetchNews(symbol: string): Promise<YahooStockNews | null> {
     try {
       // Check MongoDB first
-      const existingNews = await this.yahooStockService.getStockNews(symbol);
+      const cached = await this.yahooStockService.getStockNews(symbol);
 
-      if (existingNews) {
-        return existingNews.news;
+      if (cached) {
+        return cached;
       }
-
       // If not in MongoDB, fetch from Yahoo Finance
       const result = await YahooFinance.search(symbol);
       const news = result?.news ?? [];
@@ -116,16 +118,11 @@ export class YahooFinanceFetcherService {
           };
         })
       );
-  
       // 4. MongoDB 저장
-      await this.yahooStockService.saveStockNews(symbol, newsWithContent);
-  
-      return newsWithContent;
-
-      return news;
-    } catch (error: any) {
-      this.logger.error(`Error fetching news for ${symbol}: ${error.message}`);
-      return [];
+      return await this.yahooStockService.saveStockNews(symbol, newsWithContent);
+    } catch (error: unknown) {
+      this.logger.error(`Error fetching news for ${symbol}: ${error instanceof Error ? error.message : String(error)}`);
+      return null;
     }
   }
 
@@ -150,37 +147,40 @@ export class YahooFinanceFetcherService {
   }
   
 
-  public extractContentInfo(item: any): Record<string, string> {
-    const fields = ['title', 'description', 'summary', 'pubDate'];
-    const content = item.content || {};
-    return fields.reduce(
-      (acc, key) => {
-        acc[key] = content[key] || '';
-        return acc;
-      },
-      {} as Record<string, string>
-    );
+  public formatNewsItem(item: YahooStockNewsItem): Record<string, string> {
+    return {
+      title: item.title || '',
+      content: item.content || '',
+      relatedTickers: item.relatedTickers?.join(', ') || '',
+      pubDate: item.pubDate || '',
+    };
   }
 
   public async getNews(symbol: string): Promise<Record<string, string>[]> {
-    const news = await this.fetchNews(symbol);
-    return news.map((article) => this.extractContentInfo(article));
+    const yahooStocknews = await this.fetchNews(symbol);
+    if (!yahooStocknews) return [];
+    const news = yahooStocknews.news ?? [];
+    return news.map((item) => this.formatNewsItem(item));
   }
 
-  public async getAnalysis(symbol: string): Promise<any> {
+  public async getAnalysis(symbol: string): Promise<any>{
     try {
-      const analysis = await this.fetchAnalysis(symbol);
-      const epsTrend = analysis?.epsTrend?.trend;
+      const yahooStockAnalysis = await this.fetchAnalysis(symbol);
+      if (!yahooStockAnalysis) return {};
+
+      const epsTrend = yahooStockAnalysis.earningsTrend?.trend;
       if (!epsTrend) return {};
 
       return {
         eps_trend_of_next_quarter: {
-          current: epsTrend[0]?.eps || null,
-          sevenDaysAgo: epsTrend[1]?.eps || null,
+          current: epsTrend[0]?.epsTrend?.current || null,
+          sevenDaysAgo: epsTrend[1]?.epsTrend?.sevenDaysAgo || null,
         },
       };
-    } catch (error: any) {
-      this.logger.error(`Error fetching analysis for ${symbol}: ${error.message}`);
+    } catch (error: unknown) {
+      this.logger.error(
+        `Error fetching analysis for ${symbol}: ${error instanceof Error ? error.message : String(error)}`
+      );
       return {};
     }
   }
@@ -203,7 +203,7 @@ export class YahooFinanceFetcherService {
   public async getQuote(symbol: string): Promise<any> {
     const info = await this.fetchInfo(symbol);
     return {
-      currentPrice: info?.summaryDetail?.regularMarketPrice,
+      currentPrice: info?.summaryDetail?.regularMarketOpen,
       changePercent: info?.summaryDetail?.regularMarketChangePercent,
       marketCap: info?.summaryDetail?.marketCap,
       high52Week: info?.summaryDetail?.fiftyTwoWeekHigh,
@@ -211,11 +211,11 @@ export class YahooFinanceFetcherService {
     };
   }
 
-  public async getOhlcvAndIndicators(symbol: string): Promise<any> {
+  public async getOhlcvAndIndicators(symbol: string): Promise<Record<string, any>> {
     const data = await this.fetchHistory(symbol);
-    if (!data || !Array.isArray(data) || data.length === 0) return {};
+    if (!data || !data.data) return {};
 
-    const df = data.map((item) => ({
+    const df = data.data.map((item) => ({
       date: dayjs(item.date).format('YYYY-MM-DD'),
       open: item.open,
       high: item.high,

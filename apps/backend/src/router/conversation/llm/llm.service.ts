@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { technicalAnalysisExamples, fundamentalAnalysisExamples, AnalysisExample } from './example.constant';
 import { tools } from './open_router/lia-tools.constant';
+
 import { YahooFinanceService } from '../../finance/yahoo/yahoo-finance.service';
 import { OpenRouterService } from './open_router/open_router.service';
 import { OpenRouterMessage, OpenRouterStreamChunk } from './open_router/open_router.type';
@@ -77,7 +77,7 @@ export class LlmService {
 
     const newMessages: OpenRouterMessage[] = [{ role: 'system', content: systemPrompt }];
 
-    technicalAnalysisExamples.forEach((example: AnalysisExample) => {
+    /* technicalAnalysisExamples.forEach((example: AnalysisExample) => {
       newMessages.push({ role: 'user', content: example.input });
       newMessages.push({ role: 'assistant', content: example.output });
     });
@@ -86,7 +86,7 @@ export class LlmService {
       newMessages.push({ role: 'user', content: example.input });
       newMessages.push({ role: 'assistant', content: example.output });
     });
-
+    */
     messages.forEach((message) => {
       if (
         (message.role === 'user' || message.role === 'assistant') &&
