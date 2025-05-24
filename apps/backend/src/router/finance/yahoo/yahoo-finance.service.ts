@@ -1,12 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { YahooFinanceFetcherService } from './fetchers/yahoo-finance-fetcher.service';
 import { TechnicalResponse } from './dto/technical-data.dto';
 import { FundamentalResponse } from './dto/fundamental-data.dto';
 
 @Injectable()
 export class YahooFinanceService {
-  private readonly logger = new Logger(YahooFinanceService.name);
-
   constructor(private readonly yahooFetcherService: YahooFinanceFetcherService) {}
 
   public getTechnicalData = async (symbol: string): Promise<TechnicalResponse> => {

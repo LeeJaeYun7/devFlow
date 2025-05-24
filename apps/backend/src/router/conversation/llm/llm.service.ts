@@ -1,50 +1,19 @@
 import { Injectable, Logger } from '@nestjs/common';
-import axios from 'axios';
-import { 
-  systemPrompt, 
-  technicalAnalysisExamples, 
-  fundamentalAnalysisExamples,
-  AnalysisExample
-} from 'libs/api/src/lia/lia-prompt-template.constant';
-import { ConfigService } from '@nestjs/config';
-import { tools } from 'libs/api/src/llm/tools/lia-tools.constant';
+import { technicalAnalysisExamples, fundamentalAnalysisExamples, AnalysisExample } from './example.constant';
+import { tools } from './open_router/lia-tools.constant';
 import { YahooFinanceService } from '../../finance/yahoo/yahoo-finance.service';
+import { OpenRouterService } from './open_router/open_router.service';
+import { OpenRouterMessage } from './open_router/open_router.type';
 @Injectable()
 export class LlmService {
   private readonly logger = new Logger(LlmService.name);
-  private readonly openRouterUrl: string;
-  private readonly openRouterApiKey: string;
-  private readonly model: string;
-  private readonly temperature: number;
 
   constructor(
-    private readonly configService: ConfigService,
-    private readonly yahooFinanceService: YahooFinanceService
-  ) {
-    this.openRouterUrl = this.configService.get<string>('OPENROUTER_URL') ?? 'https://api.openrouter.ai/api/v1/chat/completions';
-    this.openRouterApiKey = this.configService.get<string>('OPENROUTER_API_KEY') ?? '';
-    this.model = this.configService.get<string>('OPENROUTER_MODEL') ?? '';
-    this.temperature = Number(this.configService.get<string>('OPENROUTER_TEMPERATURE')) || 0.7;
+    private readonly yahooFinanceService: YahooFinanceService,
+    private readonly openRouterService: OpenRouterService
+  ) {}
 
-    if (!this.openRouterApiKey) {
-      throw new Error('OPENROUTER_API_KEY is not set');
-    }
-    if (!this.model) {
-      throw new Error('OPENROUTER_MODEL is not set');
-    }
-  }
-
-  private get openRouterHeaders() {
-    return {
-      Authorization: `Bearer ${this.openRouterApiKey}`,
-      'Content-Type': 'application/json',
-    };
-  }
-
-  public async getAnalysis(
-    content: string,
-    messages: any[]
-  ): Promise<string> {
+  public async getAnalysis(content: string, messages: any[]): Promise<string> {
     const toolFunctions = {
       get_technical_data: async (args: any) => {
         return this.yahooFinanceService.getTechnicalData(args.symbol);
@@ -54,7 +23,7 @@ export class LlmService {
       },
     };
 
-    const newMessages: any[] = [{ role: 'system', content: systemPrompt }];
+    const newMessages: OpenRouterMessage[] = [{ role: 'system', content: systemPrompt }];
 
     technicalAnalysisExamples.forEach((example: AnalysisExample) => {
       newMessages.push({ role: 'user', content: example.input });
@@ -68,7 +37,9 @@ export class LlmService {
 
     messages.forEach((message) => {
       if (
-        (message.role === 'user' || message.role === 'assistant') && message.content && message.content !== '[function_call]'
+        (message.role === 'user' || message.role === 'assistant') &&
+        message.content &&
+        message.content !== '[function_call]'
       ) {
         newMessages.push({ role: message.role, content: message.content });
       }
@@ -77,17 +48,10 @@ export class LlmService {
     newMessages.push({ role: 'user', content: content });
 
     // 1차 API 호출 (tool call 예측)
-    const firstResponse = await axios.post(
-      this.openRouterUrl,
-      {
-        model: this.model,
-        messages: newMessages,
-        tools,
-        tool_choice: 'auto',
-        temperature: this.temperature,
-      },
-      { headers: this.openRouterHeaders },
-    );
+    const firstResponse = await this.openRouterService.chat({
+      messages: newMessages,
+      tools,
+    });
 
     if (!firstResponse.data.choices || firstResponse.data.choices.length === 0) {
       throw new Error('OpenRouter API 응답에 choices가 없습니다. API 응답: ' + JSON.stringify(firstResponse.data));
@@ -97,11 +61,7 @@ export class LlmService {
     this.logger.log({ content, assistantMessage });
 
     if (!assistantMessage.tool_calls || assistantMessage.tool_calls.length === 0) {
-      // 첫 번째 응답에서도 태그 제거
-      return assistantMessage.content
-        .replace(/<thinking>[\s\S]*?<\/thinking>/g, '')
-        .replace(/<result>([\s\S]*?)<\/result>/g, '$1')
-        .trim();
+      return this.removeThinkingAndResultTags(assistantMessage.content);
     }
 
     newMessages.push(assistantMessage);
@@ -130,27 +90,45 @@ export class LlmService {
     }
 
     // 2차 API 호출 (tool result 포함)
-    const finalResponse = await axios.post(
-      this.openRouterUrl,
-      {
-        model: this.model,
-        messages: newMessages,
-        tools,
-        tool_choice: 'auto',
-        temperature: this.temperature,
-      },
-      { headers: this.openRouterHeaders },
-    );
+    const finalResponse = await this.openRouterService.chat({
+      messages: newMessages,
+      tools,
+    });
 
-    let finalResult = finalResponse.data.choices[0].message.content;
+    const finalResult = finalResponse.data.choices[0].message.content;
     this.logger.log({ content, finalResult });
 
-    // <thinking> 태그와 <result> 태그 제거
-    finalResult = finalResult
+    return this.removeThinkingAndResultTags(finalResult);
+  }
+
+  // <thinking> 태그와 <result> 태그 제거
+  private removeThinkingAndResultTags(content: string) {
+    return content
       .replace(/<thinking>[\s\S]*?<\/thinking>/g, '')
       .replace(/<result>([\s\S]*?)<\/result>/g, '$1')
       .trim();
-
-    return finalResult;
   }
 }
+
+const systemPrompt = `당신은 금융 분석 전문가입니다. 사용자의 질문에 대해 기술적 분석과 기본적 분석을 제공합니다.
+
+기술적 분석은 주가, 거래량, 이동평균선 등의 차트 데이터를 기반으로 합니다.
+기본적 분석은 재무제표, 실적, 뉴스 등의 데이터를 기반으로 합니다.
+
+분석 시 다음 도구들을 사용할 수 있습니다:
+1. get_technical_data: 기술적 분석 데이터 조회
+2. get_fundamental_data: 기본적 분석 데이터 조회
+
+중요: 주가 상승/하락 원인을 분석할 때는 반드시 get_technical_data와 get_fundamental_data를 동시에 호출해야 합니다.
+두 함수를 순차적으로 호출하지 말고, 한 번의 tool_calls에 두 함수를 모두 포함시켜야 합니다.
+
+응답 형식:
+1. 기술적 분석
+2. 기본적 분석
+3. 종합 분석 및 투자 제안
+
+주의사항:
+- 답변은 한국어로 작성해주세요.
+- 사용자의 대화 히스토리는 참고용입니다.
+- Tool Call 및 응답 생성 시에는 반드시 가장 마지막 사용자의 질문을 기준으로 분석하고 응답하세요.
+`;

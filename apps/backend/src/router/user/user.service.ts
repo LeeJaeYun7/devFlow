@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CustomRequestContextService } from '../../module/custom_request_context/custom_request_context.service';
 import { ServiceReturnType } from '@lia/api/types';
 import { UserGetMySelfDto, UserGetMySelfResponse } from '@lia/api/user/myself.dto';
-import { UserModel } from '../../module/mongo/model/user.model';
+import { UserModel } from '../../module/mongo/model/user/models/user.model';
 import { UserMessageQuotaModel } from '../../module/mongo/model/user/models/user_message_quota.model';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';

@@ -39,10 +39,13 @@ export function ChatMain() {
         display: 'flex',
         flexDirection: 'column',
         bgcolor: 'background.default',
+        overflow: 'hidden',
       }}
     >
       {/* 채팅 목록 */}
-      <ChatContent messageData={messageList?.data} />
+      <Box sx={{ flexGrow: 1, minHeight: 0, position: 'relative', height: '200px', overflowY: 'auto' }}>
+        <ChatContent messageData={messageList?.data} />
+      </Box>
 
       {/* 입력 영역 */}
       <Paper

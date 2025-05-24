@@ -98,4 +98,3 @@ export interface EarningsHistory {
   }>;
   maxAge: number;
 }
-  

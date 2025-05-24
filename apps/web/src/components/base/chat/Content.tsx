@@ -14,11 +14,12 @@ export function ChatContent({ messageData }: ChatContentProps) {
     <Box
       sx={{
         flexGrow: 1,
-        overflow: 'auto',
         p: 2,
         display: 'flex',
         flexDirection: 'column-reverse',
         gap: 2,
+        height: '100%',
+        overflowY: 'auto',
       }}
     >
       {(messageData?.data ?? []).map((msg, idx) => {

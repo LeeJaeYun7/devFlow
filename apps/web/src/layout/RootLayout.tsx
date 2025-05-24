@@ -1,10 +1,11 @@
 import { Box, Button, Fab, Typography, useMediaQuery, useTheme } from '@mui/material';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { ColorModeContext } from '../Theme';
 import { Outlet } from 'react-router-dom';
 import { useUser } from '../context/UserProvider';
 import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import NightsStayIcon from '@mui/icons-material/NightsStay';
+import { useUserMySelf } from '../hooks/useUser';
 
 const sidebarWidth = 250;
 
@@ -16,7 +17,19 @@ export function RootLayout({ sidebar }: RootLayoutProps) {
   const theme = useTheme();
   const isNotMobile = useMediaQuery(theme.breakpoints.up('sm'));
   const colorMode = useContext(ColorModeContext);
-  const { isLogin } = useUser();
+  const { isLogin, setIsLogin } = useUser();
+
+  // myself에서 401이 발생하면 로그인으로 이동
+  const { error } = useUserMySelf();
+
+  useEffect(() => {
+    if (error) {
+      setIsLogin(false);
+      window.location.href = '/login';
+    } else {
+      setIsLogin(true);
+    }
+  }, [error]);
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', flexDirection: 'column' }}>
@@ -74,7 +87,7 @@ export function RootLayout({ sidebar }: RootLayoutProps) {
             position: 'fixed',
             top: 24,
             right: 80,
-            zIndex: 2000,
+            zIndex: 1000,
             display: 'flex',
             height: '40px',
             gap: 1,
@@ -95,7 +108,7 @@ export function RootLayout({ sidebar }: RootLayoutProps) {
           position: 'fixed',
           top: 24,
           right: 24,
-          zIndex: 2000,
+          zIndex: 1000,
         }}
         onClick={colorMode.toggleColorMode}
       >

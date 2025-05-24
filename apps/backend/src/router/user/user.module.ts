@@ -2,8 +2,11 @@ import { Module } from '@nestjs/common';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UserModel, UserSchema } from '../../module/mongo/model/user.model';
-import { UserMessageQuotaModel, UserMessageQuotaSchema } from '../../module/mongo/model/user/models/user_message_quota.model';
+import { UserModel, UserSchema } from '../../module/mongo/model/user/models/user.model';
+import {
+  UserMessageQuotaModel,
+  UserMessageQuotaSchema,
+} from '../../module/mongo/model/user/models/user_message_quota.model';
 
 @Module({
   imports: [

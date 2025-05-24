@@ -51,6 +51,7 @@
     "remark-gfm": "^4.0.1",
     "rxjs": "^7.8.0",
     "source-map-support": "^0.5.21",
+    "trading-signals": "^6.8.0",
     "yahoo-finance2": "^2.13.3"
   },
   "devDependencies": {

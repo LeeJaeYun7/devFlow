@@ -9,7 +9,7 @@ import type {
   RecommendationTrend,
   Earnings,
   EarningsTrend,
-  EarningsHistory
+  EarningsHistory,
 } from '../../../module/mongo/model/yahoo/interfaces/yahoo-stock-analysis-interface';
 
 @Injectable()
@@ -200,4 +200,4 @@ export class YahooStockService {
       throw error;
     }
   }
-} 
+}
