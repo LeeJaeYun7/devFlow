@@ -1,20 +1,31 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { Suspense } from 'react';
 import { CssBaseline, StyledEngineProvider } from '@mui/material';
 import { DarkModeProvider } from './context/DarkModeProvider';
-import { ChatMain } from './components/service/chat/Main';
-import { ChatHistoryMain } from './components/admin/chatHistory/Main';
-import { CollectStorkDataMain } from './components/admin/collectStorkData/Main';
-import { UserMain } from './components/admin/user/Main';
-import { SystemPromptMain } from './components/admin/systemPrompt/Main';
 import { RootLayout } from './layout/RootLayout';
 import { ServiceRootSidebar } from './layout/service/Sidebar';
 import AdminSidebar from './layout/admin/Sidebar';
 import { AdminUrlMap } from './layout/admin/Path.constant';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { LoginMain } from './components/login/LoginMain';
 import { UserProvider } from './context/UserProvider';
 import { SnackbarProvider } from 'notistack';
-import CallbackMain from './components/login/callback/Main';
+import { SSEProvider } from './context/SSEContext';
+import { lazy } from 'react';
+
+// Lazy loading으로 컴포넌트 import
+const ChatMain = lazy(() => import('./components/service/chat/Main').then((module) => ({ default: module.ChatMain })));
+const ChatHistoryMain = lazy(() =>
+  import('./components/admin/chatHistory/Main').then((module) => ({ default: module.ChatHistoryMain }))
+);
+const CollectStorkDataMain = lazy(() =>
+  import('./components/admin/collectStorkData/Main').then((module) => ({ default: module.CollectStorkDataMain }))
+);
+const UserMain = lazy(() => import('./components/admin/user/Main').then((module) => ({ default: module.UserMain })));
+const SystemPromptMain = lazy(() =>
+  import('./components/admin/systemPrompt/Main').then((module) => ({ default: module.SystemPromptMain }))
+);
+const LoginMain = lazy(() => import('./components/login/LoginMain').then((module) => ({ default: module.LoginMain })));
+const CallbackMain = lazy(() => import('./components/login/callback/Main'));
 
 const queryClient = new QueryClient();
 
@@ -24,25 +35,29 @@ export default function App() {
       <UserProvider>
         <DarkModeProvider>
           <StyledEngineProvider injectFirst>
-            <SnackbarProvider>
-              <CssBaseline />
-              <Routes>
-                <Route path="/" element={<RootLayout sidebar={<ServiceRootSidebar />} />}>
-                  <Route path="/" element={<ChatMain />} />
-                </Route>
-                <Route>
-                  <Route path="/login" element={<LoginMain />} />
-                </Route>
-                <Route path="/login/callback" element={<CallbackMain />} />
-                <Route path="/admin" element={<RootLayout sidebar={<AdminSidebar />} />}>
-                  <Route path="/admin" element={<Navigate to={AdminUrlMap.user} />} />
-                  <Route path={AdminUrlMap.user} element={<UserMain />} />
-                  <Route path={AdminUrlMap.systemPrompt} element={<SystemPromptMain />} />
-                  <Route path={AdminUrlMap.collectStorkData} element={<CollectStorkDataMain />} />
-                  <Route path={AdminUrlMap.chatHistory} element={<ChatHistoryMain />} />
-                </Route>
-              </Routes>
-            </SnackbarProvider>
+            <SSEProvider>
+              <SnackbarProvider>
+                <CssBaseline />
+                <Suspense fallback={<div>로딩중...</div>}>
+                  <Routes>
+                    <Route path="/" element={<RootLayout sidebar={<ServiceRootSidebar />} />}>
+                      <Route path="/" element={<ChatMain />} />
+                    </Route>
+                    <Route>
+                      <Route path="/login" element={<LoginMain />} />
+                    </Route>
+                    <Route path="/login/callback" element={<CallbackMain />} />
+                    <Route path="/admin" element={<RootLayout sidebar={<AdminSidebar />} />}>
+                      <Route path="/admin" element={<Navigate to={AdminUrlMap.user} />} />
+                      <Route path={AdminUrlMap.user} element={<UserMain />} />
+                      <Route path={AdminUrlMap.systemPrompt} element={<SystemPromptMain />} />
+                      <Route path={AdminUrlMap.collectStorkData} element={<CollectStorkDataMain />} />
+                      <Route path={AdminUrlMap.chatHistory} element={<ChatHistoryMain />} />
+                    </Route>
+                  </Routes>
+                </Suspense>
+              </SnackbarProvider>
+            </SSEProvider>
           </StyledEngineProvider>
         </DarkModeProvider>
       </UserProvider>

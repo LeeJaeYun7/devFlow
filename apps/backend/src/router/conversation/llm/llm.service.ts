@@ -3,7 +3,7 @@ import { technicalAnalysisExamples, fundamentalAnalysisExamples, AnalysisExample
 import { tools } from './open_router/lia-tools.constant';
 import { YahooFinanceService } from '../../finance/yahoo/yahoo-finance.service';
 import { OpenRouterService } from './open_router/open_router.service';
-import { OpenRouterMessage } from './open_router/open_router.type';
+import { OpenRouterMessage, OpenRouterStreamChunk } from './open_router/open_router.type';
 @Injectable()
 export class LlmService {
   private readonly logger = new Logger(LlmService.name);
@@ -12,6 +12,58 @@ export class LlmService {
     private readonly yahooFinanceService: YahooFinanceService,
     private readonly openRouterService: OpenRouterService
   ) {}
+
+  public async getTitleStream(
+    message: string,
+    cb: (content: string) => void,
+    endCb: (finalTitle: string) => Promise<void>
+  ) {
+    const res = await this.openRouterService.chatStream({
+      messages: [
+        {
+          role: 'system',
+          content: systemPromptForTitle,
+        },
+        {
+          role: 'user',
+          content: message,
+        },
+      ],
+    });
+    const stream = res.data;
+    let title = '';
+    let lastSentTitle = '';
+
+    stream.on('data', (chunk: Buffer) => {
+      const chunkString = chunk.toString();
+      const data = chunkString.split('data: ')[1];
+
+      try {
+        const parsed = JSON.parse(data) as OpenRouterStreamChunk;
+        const content = parsed.choices[0]?.delta?.content;
+        if (content) {
+          title += content;
+          // 누적된 제목이 이전에 보낸 제목과 다를 때만 전송
+          if (title !== lastSentTitle) {
+            lastSentTitle = title;
+            cb(title);
+          }
+        }
+      } catch {
+        // ignore
+      }
+    });
+
+    stream.on('end', () => {
+      console.log('final title', title);
+      if (title && title !== lastSentTitle) {
+        cb(title);
+      }
+      if (title) {
+        endCb(title);
+      }
+    });
+  }
 
   public async getAnalysis(content: string, messages: any[]): Promise<string> {
     const toolFunctions = {
@@ -131,4 +183,10 @@ const systemPrompt = `당신은 금융 분석 전문가입니다. 사용자의 �
 - 답변은 한국어로 작성해주세요.
 - 사용자의 대화 히스토리는 참고용입니다.
 - Tool Call 및 응답 생성 시에는 반드시 가장 마지막 사용자의 질문을 기준으로 분석하고 응답하세요.
+`;
+
+const systemPromptForTitle = `
+이 서비스는 주식 추천 서비스야. 사용자 질문에 대해서 너는 제목을 만들어야 해.
+응답은 제목만 보내주면 되고, 10글자 내외로 만들어줘.
+언어는 사용자의 질문에 맞는 언어로 해줘
 `;

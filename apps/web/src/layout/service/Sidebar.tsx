@@ -22,6 +22,9 @@ import PersonIcon from '@mui/icons-material/Person';
 import { useUser } from '../../context/UserProvider';
 import { useChatList, useCreateChat } from '../../hooks/useChat';
 import { useUserMySelf } from '../../hooks/useUser';
+import { useSSEEvent } from '../../context/SSEContext';
+import { useQueryClient } from '@tanstack/react-query';
+
 export function ServiceRootSidebar() {
   const theme = useTheme();
   const { data: userMySelf } = useUserMySelf();
@@ -30,6 +33,7 @@ export function ServiceRootSidebar() {
   const { mutateAsync: createChat } = useCreateChat();
   const { data: chatList, isLoading: isChatListLoading } = useChatList({ page: 1, limit: 50 });
   const { nowChatId, setNowChatId } = useUser();
+  const queryClient = useQueryClient();
   const handleDrawerClose = () => setOpen(false);
 
   const handleCreateChat = async () => {
@@ -57,6 +61,25 @@ export function ServiceRootSidebar() {
       setOpen(true);
     }
   }, [isMobile]);
+
+  useSSEEvent('chatTitle', (event) => {
+    const data = JSON.parse(event.data) as { chatId: string; title: string };
+    queryClient.setQueryData(['chatList', { page: 1, limit: 50 }], (oldData: any) => {
+      if (!oldData) return oldData;
+      return {
+        ...oldData,
+        data: {
+          ...oldData.data,
+          data: oldData.data.data.map((chat: any) => {
+            if (chat.chatId === data.chatId) {
+              return { ...chat, title: data.title };
+            }
+            return chat;
+          }),
+        },
+      };
+    });
+  });
 
   return (
     <>
@@ -114,11 +137,23 @@ export function ServiceRootSidebar() {
           <List>
             {(chatList?.data?.data ?? []).map((chat) => (
               <ListItem key={chat.chatId} disablePadding sx={{ display: 'block' }}>
-                <ListItemButton onClick={() => setNowChatId(chat.chatId)} selected={nowChatId === chat.chatId}>
-                  <ListItemIcon>
-                    <ChatIcon />
+                <ListItemButton
+                  onClick={() => setNowChatId(chat.chatId)}
+                  selected={nowChatId === chat.chatId}
+                  sx={{ py: 0.5 }}
+                >
+                  <ListItemIcon sx={{ minWidth: 36 }}>
+                    <ChatIcon sx={{ fontSize: '1.2rem' }} />
                   </ListItemIcon>
-                  <ListItemText primary={chat.title} />
+                  <ListItemText
+                    primary={chat.title}
+                    sx={{
+                      '& .MuiTypography-root': {
+                        fontSize: '0.8rem',
+                      },
+                      my: 0,
+                    }}
+                  />
                 </ListItemButton>
               </ListItem>
             ))}

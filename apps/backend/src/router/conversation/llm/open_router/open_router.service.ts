@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { OpenRouterRequestBody, OpenRouterResponseBody } from './open_router.type';
+import { Readable } from 'node:stream';
 
 @Injectable()
 export class OpenRouterService {
@@ -40,6 +41,27 @@ export class OpenRouterService {
           Authorization: `Bearer ${this.openRouterApiKey}`,
           'Content-Type': 'application/json',
         },
+      }
+    );
+  }
+
+  public async chatStream(body: OpenRouterRequestBody) {
+    return await axios.post<Readable>(
+      this.openRouterUrl,
+      {
+        model: this.model,
+        messages: body.messages,
+        tools: body.tools,
+        tool_choice: 'auto',
+        temperature: this.temperature,
+        stream: true,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${this.openRouterApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        responseType: 'stream',
       }
     );
   }

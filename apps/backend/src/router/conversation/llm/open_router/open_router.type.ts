@@ -22,7 +22,7 @@ export interface OpenRouterTool {
 
 export interface OpenRouterRequestBody {
   messages: OpenRouterMessage[];
-  tools: OpenRouterTool[];
+  tools?: OpenRouterTool[];
 }
 
 /*
@@ -50,4 +50,23 @@ interface OpenRouterResponseChoice {
 
 export interface OpenRouterResponseBody {
   choices: OpenRouterResponseChoice[];
+}
+
+// Stream Response Body 정의
+
+export interface OpenRouterStreamChunk {
+  id: string;
+  provider: string;
+  model: string;
+  object: string;
+  created: number;
+  choices: OpenRouterStreamChunkChoice[];
+}
+
+interface OpenRouterStreamChunkChoice {
+  index: number;
+  delta: OpenRouterResponseMessage;
+  finish_reason?: string | null;
+  native_finish_reason?: string | null;
+  logprobs?: any;
 }

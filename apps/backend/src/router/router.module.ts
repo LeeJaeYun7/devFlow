@@ -7,8 +7,19 @@ import { MessageModule } from './conversation/message/message.module';
 import { LlmModule } from './conversation/llm/llm.module';
 import { HealthCheckModule } from './health-check/health_check.module';
 import { UserModule } from './user/user.module';
+import { SseModule } from './sse/sse.module';
 
 @Module({
-  imports: [AuthModule, SampleModule, AdminModule, ChatModule, MessageModule, LlmModule, HealthCheckModule, UserModule],
+  imports: [
+    AuthModule,
+    SampleModule,
+    AdminModule,
+    ChatModule,
+    MessageModule,
+    LlmModule,
+    HealthCheckModule,
+    UserModule,
+    SseModule,
+  ],
 })
 export class RouterModule {}
