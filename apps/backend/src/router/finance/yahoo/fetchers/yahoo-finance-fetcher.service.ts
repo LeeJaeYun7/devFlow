@@ -212,10 +212,10 @@ export class YahooFinanceFetcherService {
   }
 
   public async getOhlcvAndIndicators(symbol: string): Promise<Record<string, any>> {
-    const data = await this.fetchHistory(symbol);
-    if (!data || !data.data) return {};
+    const history = await this.fetchHistory(symbol);
+    if (!history || !history.data) return {};
 
-    const df = data.data.map((item) => ({
+    const df = history.data.map((item) => ({
       date: dayjs(item.date).format('YYYY-MM-DD'),
       open: item.open,
       high: item.high,
