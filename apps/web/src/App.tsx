@@ -11,9 +11,12 @@ import { UserProvider } from './context/UserProvider';
 import { SnackbarProvider } from 'notistack';
 import { SSEProvider } from './context/SSEContext';
 import { lazy } from 'react';
+import { ChatMain } from './components/service/chat/Main';
+import { LoginMain } from './components/login/LoginMain';
+import { ProfileMain } from './components/service/profile/Main';
+import { FaqMain } from './components/service/faq/Main';
 
 // Lazy loading으로 컴포넌트 import
-const ChatMain = lazy(() => import('./components/service/chat/Main').then((module) => ({ default: module.ChatMain })));
 const ChatHistoryMain = lazy(() =>
   import('./components/admin/chatHistory/Main').then((module) => ({ default: module.ChatHistoryMain }))
 );
@@ -24,7 +27,6 @@ const UserMain = lazy(() => import('./components/admin/user/Main').then((module)
 const SystemPromptMain = lazy(() =>
   import('./components/admin/systemPrompt/Main').then((module) => ({ default: module.SystemPromptMain }))
 );
-const LoginMain = lazy(() => import('./components/login/LoginMain').then((module) => ({ default: module.LoginMain })));
 const CallbackMain = lazy(() => import('./components/login/callback/Main'));
 
 const queryClient = new QueryClient();
@@ -42,6 +44,8 @@ export default function App() {
                   <Routes>
                     <Route path="/" element={<RootLayout sidebar={<ServiceRootSidebar />} />}>
                       <Route path="/" element={<ChatMain />} />
+                      <Route path="/profile" element={<ProfileMain />} />
+                      <Route path="/faq" element={<FaqMain />} />
                     </Route>
                     <Route>
                       <Route path="/login" element={<LoginMain />} />

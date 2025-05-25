@@ -8,38 +8,44 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
-  Toolbar,
-  Typography,
   IconButton,
   ListItemIcon,
+  Button,
+  Typography,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import ChatIcon from '@mui/icons-material/Chat';
 import AddIcon from '@mui/icons-material/Add';
-import PersonIcon from '@mui/icons-material/Person';
 import { useUser } from '../../context/UserProvider';
 import { useChatList, useCreateChat } from '../../hooks/useChat';
 import { useUserMySelf } from '../../hooks/useUser';
 import { useSSEEvent } from '../../context/SSEContext';
 import { useQueryClient } from '@tanstack/react-query';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import WbSunnyIcon from '@mui/icons-material/WbSunnyOutlined';
+import NightsStayIcon from '@mui/icons-material/NightsStayOutlined';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import LaunchIcon from '@mui/icons-material/Launch';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { ServiceSidebarMenu, ServiceSidebarMenuProps } from './SidebarMenu';
+import { ColorModeContext } from '../../Theme';
+import { logout } from '../../api/auth';
+import { useNavigate } from 'react-router-dom';
 
 export function ServiceRootSidebar() {
+  const navigate = useNavigate();
   const theme = useTheme();
   const { data: userMySelf } = useUserMySelf();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const colorMode = useContext(ColorModeContext);
   const [open, setOpen] = useState(isMobile ? false : true);
   const { mutateAsync: createChat } = useCreateChat();
   const { data: chatList, isLoading: isChatListLoading } = useChatList({ page: 1, limit: 50 });
   const { nowChatId, setNowChatId } = useUser();
   const queryClient = useQueryClient();
   const handleDrawerClose = () => setOpen(false);
-
-  const handleCreateChat = async () => {
-    const chat = await createChat();
-    setNowChatId(chat.data.chatId);
-  };
 
   useEffect(() => {
     if (!nowChatId && !isChatListLoading) {
@@ -55,12 +61,38 @@ export function ServiceRootSidebar() {
   }, [chatList, isChatListLoading, nowChatId, setNowChatId]);
 
   useEffect(() => {
-    if (isMobile) {
-      setOpen(false);
-    } else {
-      setOpen(true);
-    }
+    setOpen(isMobile ? false : true);
   }, [isMobile]);
+
+  const MenuList: ServiceSidebarMenuProps[] = [
+    {
+      title: 'Clear conversations',
+      icon: <DeleteOutlineIcon />,
+    },
+    {
+      title: `${theme.palette.mode === 'dark' ? 'Light' : 'Dark'} mode`,
+      icon: theme.palette.mode === 'dark' ? <WbSunnyIcon /> : <NightsStayIcon />,
+      onClick: colorMode.toggleColorMode,
+    },
+    {
+      title: `My account (${userMySelf?.data?.remainMessageQuota ?? 0})`,
+      icon: <PersonOutlineIcon />,
+      onClick: () => navigate('/profile'),
+    },
+    {
+      title: 'Updates & FAQ',
+      icon: <LaunchIcon />,
+      onClick: () => navigate('/faq'),
+    },
+    {
+      title: 'Log out',
+      icon: <LogoutIcon />,
+      onClick: async () => {
+        await logout();
+        navigate('/login');
+      },
+    },
+  ];
 
   useSSEEvent('chatTitle', (event) => {
     const data = JSON.parse(event.data) as { chatId: string; title: string };
@@ -88,83 +120,70 @@ export function ServiceRootSidebar() {
           onClick={() => setOpen(true)}
           sx={{
             position: 'fixed',
-            top: 16,
-            left: 0,
+            top: 8,
+            left: 8,
             zIndex: (theme) => theme.zIndex.drawer + 1,
-            borderRadius: '0 4px 4px 0',
-            boxShadow: 1,
+            borderRadius: '8px',
+            bgcolor: 'background.paper',
+            padding: '6px',
+            boxShadow: 2,
+            '&:hover': {
+              bgcolor: 'background.paper',
+              boxShadow: 3,
+            },
           }}
         >
-          <MenuIcon />
+          <MenuIcon fontSize="small" />
         </IconButton>
       )}
-      <Drawer variant={isMobile ? 'temporary' : 'persistent'} open={open} onClose={handleDrawerClose}>
+      <Drawer
+        variant={isMobile ? 'temporary' : 'persistent'}
+        open={open}
+        onClose={handleDrawerClose}
+        sx={{
+          '& .MuiDrawer-paper': {
+            bgcolor: 'background.paper',
+            borderRight: 'none',
+            boxShadow: 'none',
+            width: 256,
+          },
+        }}
+      >
         {open && isMobile && (
           <IconButton
             onClick={handleDrawerClose}
             sx={{
               position: 'absolute',
-              top: 8,
-              right: 8,
+              top: 12,
+              right: 12,
               zIndex: 1,
-              borderRadius: '50%',
-              boxShadow: 1,
+              borderRadius: '12px',
+              bgcolor: 'background.paper',
+              boxShadow: 2,
+              '&:hover': {
+                bgcolor: 'background.paper',
+                boxShadow: 3,
+              },
             }}
           >
             <CloseIcon />
           </IconButton>
         )}
-        <Box sx={{ height: '40%', display: 'flex', flexDirection: 'column' }}>
-          <Toolbar>
-            <Typography variant="h6" noWrap component="div">
-              Lia
-            </Typography>
-          </Toolbar>
-          <List>
-            <ListItem disablePadding sx={{ display: 'block' }}>
-              <ListItemButton selected>
-                <ListItemIcon>
-                  <ChatIcon />
-                </ListItemIcon>
-                <ListItemText primary={`채팅 (남은 수: ${userMySelf?.data?.remainMessageQuota ?? 0})`} />
-              </ListItemButton>
-              <MyPageList />
-            </ListItem>
-          </List>
-        </Box>
-        <Divider sx={{ fontSize: '0.8rem' }}>채팅 목록</Divider>
-        <Box sx={{ height: '60%', display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
-          <List>
-            {(chatList?.data?.data ?? []).map((chat) => (
-              <ListItem key={chat.chatId} disablePadding sx={{ display: 'block' }}>
-                <ListItemButton
-                  onClick={() => setNowChatId(chat.chatId)}
-                  selected={nowChatId === chat.chatId}
-                  sx={{ py: 0.5 }}
-                >
-                  <ListItemIcon sx={{ minWidth: 36 }}>
-                    <ChatIcon sx={{ fontSize: '1.2rem' }} />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={chat.title}
-                    sx={{
-                      '& .MuiTypography-root': {
-                        fontSize: '0.8rem',
-                      },
-                      my: 0,
-                    }}
-                  />
-                </ListItemButton>
-              </ListItem>
+        <Box
+          sx={{
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            p: 1,
+          }}
+        >
+          <CreateChatButton />
+          <ChatList />
+          <Divider sx={{ mt: 1 }} />
+          <List sx={{ mt: 1, mb: 1 }}>
+            {MenuList.map((menu) => (
+              <ServiceSidebarMenu key={menu.title} title={menu.title} icon={menu.icon} onClick={menu.onClick} />
             ))}
-            <ListItem disablePadding sx={{ display: 'block' }}>
-              <ListItemButton onClick={handleCreateChat}>
-                <ListItemIcon>
-                  <AddIcon />
-                </ListItemIcon>
-                <ListItemText primary="새 채팅" />
-              </ListItemButton>
-            </ListItem>
           </List>
         </Box>
       </Drawer>
@@ -172,19 +191,82 @@ export function ServiceRootSidebar() {
   );
 }
 
-function MyPageList() {
-  const { isLogin } = useUser();
-
-  if (!isLogin) {
-    return <></>;
-  }
+function ChatList() {
+  const navigate = useNavigate();
+  const { data: chatList } = useChatList({ page: 1, limit: 50 });
+  const { nowChatId, setNowChatId } = useUser();
 
   return (
-    <ListItemButton>
-      <ListItemIcon>
-        <PersonIcon />
-      </ListItemIcon>
-      <ListItemText primary="마이 페이지" />
-    </ListItemButton>
+    <Box sx={{ flex: 1, overflow: 'auto', mt: 1 }}>
+      <List>
+        {(chatList?.data?.data ?? []).map((chat) => (
+          <ListItem key={chat.chatId} disablePadding>
+            <ListItemButton
+              onClick={() => {
+                setNowChatId(chat.chatId);
+                navigate('/');
+              }}
+              selected={nowChatId === chat.chatId}
+              sx={{
+                py: 1,
+                mb: 0.5,
+                bgcolor: nowChatId === chat.chatId ? 'rgba(0, 0, 0, 0.7)' : 'transparent',
+              }}
+            >
+              <ListItemIcon sx={{ minWidth: 32 }}>
+                <ChatIcon sx={{ fontSize: '1rem' }} />
+              </ListItemIcon>
+              <ListItemText
+                primary={chat.title}
+                slotProps={{
+                  primary: {
+                    fontSize: '0.875rem',
+                    fontWeight: 400,
+                    noWrap: true,
+                  },
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+    </Box>
+  );
+}
+
+function CreateChatButton() {
+  const navigate = useNavigate();
+  const { mutateAsync: createChat } = useCreateChat();
+  const { setNowChatId } = useUser();
+
+  const handleCreateChat = async () => {
+    const chat = await createChat();
+    setNowChatId(chat.data.chatId);
+    navigate('/');
+  };
+
+  return (
+    <Button
+      onClick={handleCreateChat}
+      type="button"
+      variant="contained"
+      color="primary"
+      sx={{
+        borderRadius: 1,
+        mt: 1,
+        py: 1,
+        mx: 1,
+      }}
+    >
+      <AddIcon sx={{ fontSize: '1rem' }} />
+      <Typography
+        sx={{
+          fontSize: '0.875rem',
+          fontWeight: 500,
+        }}
+      >
+        New Chat
+      </Typography>
+    </Button>
   );
 }

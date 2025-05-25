@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
@@ -52,6 +52,12 @@ export class AuthController {
   @UseGuards(AuthGuard('naver'))
   public async naverAuthRedirect(@Req() req: Request, @Res() res: Response) {
     await this.setTokenCookie(req, res);
+  }
+
+  @Delete('/logout')
+  public async logout(@Res() res: Response) {
+    res.clearCookie('authorization');
+    res.redirect(`${this.redirectMainUrl}/login`);
   }
 
   @Post('/callback')

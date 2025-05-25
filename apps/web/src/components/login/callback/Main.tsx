@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../../../api/api.constant';
 
 export default function Main() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   const setCookie = async () => {
@@ -12,7 +13,7 @@ export default function Main() {
       await api.post('/api/auth/callback', { token });
     }
 
-    window.location.href = '/';
+    navigate('/');
   };
 
   useEffect(() => {
