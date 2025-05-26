@@ -1,8 +1,19 @@
 export interface OpenRouterMessage {
   role: 'system' | 'user' | 'assistant' | 'tool';
-  content: string;
+  content: string | null;
   tool_call_id?: string;
+  tool_calls?: OpenRouterToolCall[];
   name?: string;
+}
+
+interface OpenRouterToolCall {
+  id: string;
+  index: number;
+  type: 'function';
+  function: {
+    name: string;
+    arguments: string;
+  };
 }
 
 interface OpenRouterFunction {
@@ -65,8 +76,24 @@ export interface OpenRouterStreamChunk {
 
 interface OpenRouterStreamChunkChoice {
   index: number;
-  delta: OpenRouterResponseMessage;
+  delta: OpenRouterStreamChunkDelta;
   finish_reason?: string | null;
   native_finish_reason?: string | null;
   logprobs?: any;
+}
+
+interface OpenRouterStreamChunkDelta {
+  role: 'assistant';
+  content: string;
+  tool_calls?: OpenRouterStreamChunkToolCall[];
+}
+
+export interface OpenRouterStreamChunkToolCall {
+  id: string;
+  index: number;
+  type: 'function';
+  function: {
+    name: string;
+    arguments: string;
+  };
 }

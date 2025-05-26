@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useCallback, useRef, ReactNode } from 'react';
-import { useSSE } from '../hooks/useSSE';
+import { BASE_API_URL } from '../api/api.constant';
 
 type EventCallback = (event: MessageEvent) => void;
 
@@ -18,6 +18,7 @@ interface SSEProviderProps {
 export const SSEProvider = ({ children }: SSEProviderProps) => {
   // 이벤트 핸들러들을 저장할 ref
   const handlersRef = useRef<{ [key: string]: Set<EventCallback> }>({});
+  const eventSourceRef = useRef<EventSource | null>(null);
 
   // 이벤트 발생 시 해당 타입의 모든 콜백 실행
   const handleEvent = useCallback((eventType: string, event: MessageEvent) => {
@@ -27,15 +28,33 @@ export const SSEProvider = ({ children }: SSEProviderProps) => {
     }
   }, []);
 
+  // 각 이벤트 타입별 핸들러를 메모이제이션
+  const handleChatTitle = useCallback((event: MessageEvent) => handleEvent('chatTitle', event), [handleEvent]);
+  const handleChatMessage = useCallback((event: MessageEvent) => handleEvent('chatMessage', event), [handleEvent]);
+
   // SSE 연결 설정
-  const { eventSource } = useSSE({
-    handlers: {
-      chatTitle: (event) => handleEvent('chatTitle', event),
-    },
-    onError: (error) => {
+  React.useEffect(() => {
+    const eventSource = new EventSource(`${BASE_API_URL}/api/sse`, {
+      withCredentials: true,
+    });
+    eventSourceRef.current = eventSource;
+
+    // 이벤트 리스너 등록
+    eventSource.addEventListener('chatTitle', handleChatTitle);
+    eventSource.addEventListener('chatMessage', handleChatMessage);
+
+    eventSource.onerror = (error) => {
       console.error('SSE 연결 에러:', error);
-    },
-  });
+    };
+
+    return () => {
+      // 이벤트 리스너 해제
+      eventSource.removeEventListener('chatTitle', handleChatTitle);
+      eventSource.removeEventListener('chatMessage', handleChatMessage);
+      eventSource.close();
+      eventSourceRef.current = null;
+    };
+  }, [handleChatTitle, handleChatMessage]); // 메모이제이션된 핸들러를 의존성 배열에 추가
 
   // 이벤트 구독
   const subscribe = useCallback((eventType: string, callback: EventCallback) => {
@@ -61,7 +80,7 @@ export const SSEProvider = ({ children }: SSEProviderProps) => {
       value={{
         subscribe,
         unsubscribe,
-        isConnected: !!eventSource,
+        isConnected: !!eventSourceRef.current,
       }}
     >
       {children}

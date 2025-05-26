@@ -1,14 +1,44 @@
-import type { MessageListResponse } from '@lia/api/conversation/message/list.dto';
-import { Box, Avatar, Paper, Typography, useTheme } from '@mui/material';
+import { Box, Avatar, Paper, useTheme, Typography } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
+import { Message } from '../../../hooks/useMessage';
+import { useMemo } from 'react';
 import remarkGfm from 'remark-gfm';
 
 interface ChatContentProps {
-  messageData: MessageListResponse['data'] | undefined;
+  messageData: Message[] | undefined;
+  aiStreamContent?: string;
+  tempUserContent?: string;
 }
 
-export function ChatContent({ messageData }: ChatContentProps) {
+export function ChatContent({ messageData, aiStreamContent, tempUserContent }: ChatContentProps) {
   const theme = useTheme();
+  const totalMessages = useMemo(() => {
+    const messages = [];
+
+    if (aiStreamContent) {
+      messages.push({
+        id: `temp-${Date.now()}`,
+        content: aiStreamContent,
+        role: 'assistant',
+        createdAt: new Date(),
+      });
+    }
+
+    if (tempUserContent) {
+      messages.push({
+        id: `temp-${Date.now()}`,
+        content: tempUserContent,
+        role: 'user',
+        createdAt: new Date(),
+      });
+    }
+
+    if (messageData) {
+      messages.push(...messageData);
+    }
+
+    return messages;
+  }, [messageData, aiStreamContent, tempUserContent]);
 
   return (
     <Box
@@ -22,7 +52,7 @@ export function ChatContent({ messageData }: ChatContentProps) {
         overflowY: 'auto',
       }}
     >
-      {(messageData?.data ?? []).map((msg, idx) => {
+      {totalMessages.map((msg, idx) => {
         return (
           <Box
             key={`${msg.id}-${idx}`}
@@ -59,104 +89,8 @@ export function ChatContent({ messageData }: ChatContentProps) {
                 borderRadius: 2,
               }}
             >
-              <Box
-                sx={{
-                  '& > *:first-child': {
-                    mt: 0,
-                  },
-                  '& > *:last-child': {
-                    mb: 0,
-                  },
-                  '& p': {
-                    my: 1,
-                    lineHeight: 1.5,
-                  },
-                  '& ul, & ol': {
-                    my: 1,
-                    pl: 2,
-                  },
-                  '& li': {
-                    my: 0.5,
-                  },
-                  '& a': {
-                    color: msg.role === 'user' ? 'inherit' : 'primary.main',
-                    textDecoration: 'underline',
-                  },
-                  '& code': {
-                    p: 0.5,
-                    borderRadius: 1,
-                    bgcolor:
-                      msg.role === 'user'
-                        ? theme.palette.mode === 'dark'
-                          ? 'rgba(0, 0, 0, 0.2)'
-                          : 'rgba(255, 255, 255, 0.1)'
-                        : theme.palette.mode === 'dark'
-                          ? 'rgba(255, 255, 255, 0.05)'
-                          : 'rgba(0, 0, 0, 0.05)',
-                    fontSize: '0.875em',
-                    fontFamily: 'monospace',
-                  },
-                  '& pre': {
-                    my: 1,
-                    p: 1.5,
-                    borderRadius: 1,
-                    bgcolor:
-                      msg.role === 'user'
-                        ? theme.palette.mode === 'dark'
-                          ? 'rgba(0, 0, 0, 0.2)'
-                          : 'rgba(255, 255, 255, 0.1)'
-                        : theme.palette.mode === 'dark'
-                          ? 'rgba(255, 255, 255, 0.05)'
-                          : 'rgba(0, 0, 0, 0.05)',
-                    overflow: 'auto',
-                    '& code': {
-                      p: 0,
-                      bgcolor: 'transparent',
-                    },
-                  },
-                  '& table': {
-                    borderCollapse: 'collapse',
-                    width: '100%',
-                    my: 2,
-                  },
-                  '& th, & td': {
-                    border: '1px solid',
-                    borderColor:
-                      msg.role === 'user'
-                        ? theme.palette.mode === 'dark'
-                          ? 'rgba(0, 0, 0, 0.3)'
-                          : 'rgba(255, 255, 255, 0.2)'
-                        : theme.palette.mode === 'dark'
-                          ? 'rgba(255, 255, 255, 0.1)'
-                          : 'rgba(0, 0, 0, 0.1)',
-                    p: 1,
-                    textAlign: 'left',
-                  },
-                  '& th': {
-                    bgcolor:
-                      msg.role === 'user'
-                        ? theme.palette.mode === 'dark'
-                          ? 'rgba(0, 0, 0, 0.2)'
-                          : 'rgba(255, 255, 255, 0.1)'
-                        : theme.palette.mode === 'dark'
-                          ? 'rgba(255, 255, 255, 0.05)'
-                          : 'rgba(0, 0, 0, 0.05)',
-                    fontWeight: 'bold',
-                  },
-                }}
-              >
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    p: ({ children }) => (
-                      <Typography component="p" variant="body1">
-                        {children}
-                      </Typography>
-                    ),
-                  }}
-                >
-                  {msg.content}
-                </ReactMarkdown>
+              <Box>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
               </Box>
               <Typography
                 variant="caption"

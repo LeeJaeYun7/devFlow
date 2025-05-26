@@ -1,40 +1,22 @@
 import { Injectable, MessageEvent } from '@nestjs/common';
 import { Subject } from 'rxjs';
-import { Response } from 'express';
 import { CustomRequestContextService } from '../../module/custom_request_context/custom_request_context.service';
 
 @Injectable()
 export class SseService {
-  private readonly clients = new Map<string, SseClient>();
+  private readonly clients = new Map<string, Subject<MessageEvent>>();
   constructor(private readonly contextService: CustomRequestContextService) {}
 
-  public connect(res: Response): Subject<MessageEvent> {
+  public connect() {
     const user = this.contextService.get('user');
     const userId = user.id;
 
     if (this.clients.has(userId)) {
-      const old = this.clients.get(userId);
-      old?.res.end();
-      old?.subject.complete();
+      return this.clients.get(userId)!;
     }
 
     const subject = new Subject<MessageEvent>();
-
-    const subscription = subject.subscribe({
-      next: (event) => {
-        res.write(`event: ${event.type || 'message'}\n`);
-        res.write(`data: ${JSON.stringify(event.data)}\n\n`);
-      },
-    });
-
-    res.on('close', () => {
-      subscription.unsubscribe();
-      subject.complete();
-      this.clients.delete(userId);
-    });
-
-    this.clients.set(userId, { subject, res });
-
+    this.clients.set(userId, subject);
     return subject;
   }
 
@@ -44,12 +26,7 @@ export class SseService {
 
     const client = this.clients.get(userId);
     if (client) {
-      client.subject.next(event);
+      client.next(event);
     }
   }
-}
-
-interface SseClient {
-  subject: Subject<MessageEvent>;
-  res: Response;
 }

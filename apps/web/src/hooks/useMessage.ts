@@ -4,8 +4,21 @@ import type { MessageListDto } from '@lia/api/conversation/message/list.dto';
 import type { MessageCreateDto } from '@lia/api/conversation/message/create.dto';
 import { enqueueSnackbar } from 'notistack';
 
+export interface Message {
+  id: string;
+  content: string;
+  role: string;
+  createdAt: Date;
+}
+
 export function useMessageList(dto: MessageListDto) {
-  return useQuery({ queryKey: ['messageList', dto.chatId, dto.page, dto.limit], queryFn: () => getMessageList(dto) });
+  return useQuery({
+    queryKey: ['messageList', dto.chatId, dto.page, dto.limit],
+    queryFn: async () => {
+      const response = await getMessageList(dto);
+      return response.data;
+    },
+  });
 }
 
 export function useCreateMessage() {

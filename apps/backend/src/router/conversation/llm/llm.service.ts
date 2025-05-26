@@ -1,23 +1,28 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { tools } from './open_router/lia-tools.constant';
-
 import { YahooFinanceService } from '../../finance/yahoo/yahoo-finance.service';
 import { OpenRouterService } from './open_router/open_router.service';
-import { OpenRouterMessage, OpenRouterStreamChunk } from './open_router/open_router.type';
+import {
+  OpenRouterMessage,
+  OpenRouterStreamChunk,
+  OpenRouterStreamChunkToolCall,
+} from './open_router/open_router.type';
+import { InjectModel } from '@nestjs/mongoose';
+import { MessageModel } from '../../../module/mongo/model/conversation/models/message.model';
+import { Model } from 'mongoose';
+import { MessageRoleMap } from '@lia/api/conversation/message/message.constant';
+import { systemPrompt } from './example.constant';
 @Injectable()
 export class LlmService {
-  private readonly logger = new Logger(LlmService.name);
-
   constructor(
+    @InjectModel(MessageModel.name)
+    private readonly messageModel: Model<MessageModel>,
+
     private readonly yahooFinanceService: YahooFinanceService,
     private readonly openRouterService: OpenRouterService
   ) {}
 
-  public async getTitleStream(
-    message: string,
-    cb: (content: string) => void,
-    endCb: (finalTitle: string) => Promise<void>
-  ) {
+  public async getTitleStream({ message, cb, endCb }: LLMStreamParam) {
     const res = await this.openRouterService.chatStream({
       messages: [
         {
@@ -35,158 +40,271 @@ export class LlmService {
     let lastSentTitle = '';
 
     stream.on('data', (chunk: Buffer) => {
-      const chunkString = chunk.toString();
-      const data = chunkString.split('data: ')[1];
-
-      try {
-        const parsed = JSON.parse(data) as OpenRouterStreamChunk;
-        const content = parsed.choices[0]?.delta?.content;
-        if (content) {
-          title += content;
-          // 누적된 제목이 이전에 보낸 제목과 다를 때만 전송
-          if (title !== lastSentTitle) {
-            lastSentTitle = title;
-            cb(title);
-          }
+      const dataList = this.toDataList(chunk);
+      for (const data of dataList) {
+        if (!data) {
+          continue;
         }
-      } catch {
-        // ignore
+
+        try {
+          const parsed = JSON.parse(data) as OpenRouterStreamChunk;
+          const content = parsed.choices[0]?.delta?.content;
+          if (content) {
+            title += content;
+            // 누적된 제목이 이전에 보낸 제목과 다를 때만 전송
+            if (title !== lastSentTitle) {
+              lastSentTitle = title;
+              cb(title);
+            }
+          }
+        } catch {
+          // ignore
+        }
       }
     });
 
     stream.on('end', () => {
-      console.log('final title', title);
       if (title && title !== lastSentTitle) {
         cb(title);
       }
       if (title) {
-        endCb(title);
+        endCb?.(title);
       }
     });
   }
 
-  public async getAnalysis(content: string, messages: any[]): Promise<string> {
+  public async getAnalysisStream({ chatId, message, cb, endCb, titleParam }: LLMAnalysisStreamParam) {
     const toolFunctions = {
       get_technical_data: async (args: any) => {
-        return this.yahooFinanceService.getTechnicalData(args.symbol);
+        return await this.yahooFinanceService.getTechnicalData(args.symbol);
       },
       get_fundamental_data: async (args: any) => {
-        return this.yahooFinanceService.getFundamentalData(args.symbol);
+        return await this.yahooFinanceService.getFundamentalData(args.symbol);
       },
     };
 
-    const newMessages: OpenRouterMessage[] = [{ role: 'system', content: systemPrompt }];
-
-    /* technicalAnalysisExamples.forEach((example: AnalysisExample) => {
-      newMessages.push({ role: 'user', content: example.input });
-      newMessages.push({ role: 'assistant', content: example.output });
+    const messages = await this.messageModel.find({
+      chatId,
+      role: { $in: [MessageRoleMap.user, MessageRoleMap.assistant] },
+      content: { $ne: '[function_call]' },
     });
 
-    fundamentalAnalysisExamples.forEach((example: AnalysisExample) => {
-      newMessages.push({ role: 'user', content: example.input });
-      newMessages.push({ role: 'assistant', content: example.output });
-    });
-    */
-    messages.forEach((message) => {
-      if (
-        (message.role === 'user' || message.role === 'assistant') &&
-        message.content &&
-        message.content !== '[function_call]'
-      ) {
-        newMessages.push({ role: message.role, content: message.content });
-      }
-    });
-
-    newMessages.push({ role: 'user', content: content });
-
-    // 1차 API 호출 (tool call 예측)
-    const firstResponse = await this.openRouterService.chat({
-      messages: newMessages,
-      tools,
-    });
-
-    if (!firstResponse.data.choices || firstResponse.data.choices.length === 0) {
-      throw new Error('OpenRouter API 응답에 choices가 없습니다. API 응답: ' + JSON.stringify(firstResponse.data));
-    }
-
-    const assistantMessage = firstResponse.data.choices[0].message;
-    this.logger.log({ content, assistantMessage });
-
-    if (!assistantMessage.tool_calls || assistantMessage.tool_calls.length === 0) {
-      return this.removeThinkingAndResultTags(assistantMessage.content);
-    }
-
-    newMessages.push(assistantMessage);
-
-    // Tool calls 처리
-    for (const toolCall of assistantMessage.tool_calls) {
-      const functionName = toolCall.function.name.toLowerCase() as keyof typeof toolFunctions;
-      if (!toolFunctions[functionName]) continue;
-
-      const args = JSON.parse(toolCall.function.arguments);
-      this.logger.log({ content, toolCall: functionName, args });
-
-      let toolResult = await toolFunctions[functionName](args);
-
-      // Python dataclass처럼 필드 펼치기 (JS object 그대로라면 생략 가능)
-      if (typeof toolResult === 'object' && toolResult !== null) {
-        toolResult = { ...toolResult };
-      }
-
-      newMessages.push({
-        role: 'tool',
-        tool_call_id: toolCall.id,
-        name: toolCall.function.name,
-        content: JSON.stringify(toolResult),
+    if (messages.length === 0) {
+      await this.getTitleStream({
+        message,
+        cb: titleParam?.cb,
+        endCb: titleParam?.endCb,
       });
     }
 
-    // 2차 API 호출 (tool result 포함)
-    const finalResponse = await this.openRouterService.chat({
+    const newMessages: OpenRouterMessage[] = [
+      { role: 'system', content: systemPrompt },
+      ...messages.map((v) => ({ role: v.role, content: v.content })),
+      { role: 'user', content: message },
+    ];
+    const newMessageStartIndex = newMessages.length - 1;
+
+    const postProcess = async () => {
+      const createNewMessages = newMessages.slice(newMessageStartIndex);
+      await this.messageModel.insertMany(
+        createNewMessages
+          .map((v, i) => ({
+            chatId,
+            content: v.content,
+            role: v.role,
+            tool_calls: v.tool_calls?.map((v) => ({
+              id: v.id,
+              index: v.index,
+              type: v.type,
+              function: v.function,
+            })),
+            createdAt: new Date(Date.now() + i),
+          }))
+          .filter((v) => v.content)
+      );
+    };
+
+    const firstResponseStream = await this.openRouterService.chatStream({
       messages: newMessages,
       tools,
     });
 
-    const finalResult = finalResponse.data.choices[0].message.content;
-    this.logger.log({ content, finalResult });
+    const firstStream = firstResponseStream.data;
+    let isThinking = false;
+    let isToolCall = false;
+    let finalContent = '';
 
-    return this.removeThinkingAndResultTags(finalResult);
+    let firstTotalContent = '';
+
+    const firstResponseTools: OpenRouterStreamChunkToolCall[] = [];
+
+    firstStream.on('data', async (chunk: Buffer) => {
+      firstStream.pause();
+      const dataList = this.toDataList(chunk);
+      for (const data of dataList) {
+        if (!data || data === ': OPENROUTER PROCESSING' || data === '[DONE]') {
+          continue;
+        }
+
+        try {
+          const parsed = JSON.parse(data) as OpenRouterStreamChunk;
+          const delta = parsed.choices[0]?.delta;
+          let content = delta?.content;
+          firstTotalContent += content ?? '';
+
+          const toolCalls = delta?.tool_calls;
+          if (toolCalls) {
+            isToolCall = true;
+            for (const toolCall of toolCalls) {
+              const index = toolCall.index;
+              if (index >= firstResponseTools.length) {
+                firstResponseTools.push({
+                  id: toolCall.id,
+                  index,
+                  type: 'function',
+                  function: { name: toolCall.function.name, arguments: toolCall.function.arguments },
+                });
+              } else {
+                const targetToolCall = firstResponseTools[index];
+                if (!targetToolCall.function.name) {
+                  targetToolCall.function.name = toolCall.function.name;
+                }
+                targetToolCall.function.arguments += toolCall.function.arguments ?? '';
+              }
+            }
+            continue;
+          }
+
+          if (!content) {
+            continue;
+          }
+
+          // thinking 태그 처리
+          if (firstTotalContent.includes('<thinking>')) {
+            isThinking = true;
+            const splitContent = content.split('>');
+            content = splitContent[splitContent.length - 1];
+          }
+
+          if (firstTotalContent.includes('</thinking>')) {
+            isThinking = false;
+            const splitContent = content.split('>');
+            if (splitContent.length > 1) {
+              content = splitContent[splitContent.length - 1].trim();
+            }
+          }
+
+          // thinking 상태가 아닐 때만 컨텐츠를 저장하고 callback 호출
+          if (!isThinking) {
+            finalContent += content;
+            cb(content);
+          }
+        } catch {
+          // ignore
+        }
+      }
+
+      firstStream.resume();
+    });
+
+    firstStream.on('end', async () => {
+      if (!isToolCall) {
+        endCb?.(finalContent);
+        newMessages.push({
+          role: 'assistant',
+          content: finalContent,
+        });
+        await postProcess();
+        return;
+      }
+
+      finalContent = '';
+
+      newMessages.push({
+        role: 'assistant',
+        content: null,
+        tool_calls: firstResponseTools,
+      });
+      for (const toolCall of firstResponseTools) {
+        const functionName = toolCall.function.name.toLowerCase() as keyof typeof toolFunctions;
+        if (!toolFunctions[functionName]) continue;
+
+        const args = JSON.parse(toolCall.function.arguments);
+        const func = toolFunctions[functionName] as any;
+        const toolResult = await func(args);
+
+        newMessages.push({
+          role: 'tool',
+          tool_call_id: toolCall.id,
+          name: toolCall.function.name,
+          content: JSON.stringify(toolResult),
+        });
+      }
+
+      const secondResponseStream = await this.openRouterService.chatStream({
+        messages: newMessages,
+        tools,
+      });
+
+      const secondStream = secondResponseStream.data;
+
+      secondStream.on('data', (chunk: Buffer) => {
+        const dataList = this.toDataList(chunk);
+        for (const data of dataList) {
+          try {
+            const parsed = JSON.parse(data) as OpenRouterStreamChunk;
+            const delta = parsed.choices[0]?.delta;
+            const content = delta?.content;
+
+            if (content) {
+              finalContent += content;
+              cb(content);
+            }
+          } catch {
+            // ignore
+          }
+        }
+      });
+
+      secondStream.on('end', async () => {
+        endCb?.(finalContent);
+        newMessages.push({
+          role: 'assistant',
+          content: finalContent,
+        });
+        postProcess();
+      });
+    });
   }
 
-  // <thinking> 태그와 <result> 태그 제거
-  private removeThinkingAndResultTags(content: string) {
-    return content
-      .replace(/<thinking>[\s\S]*?<\/thinking>/g, '')
-      .replace(/<result>([\s\S]*?)<\/result>/g, '$1')
-      .trim();
+  private toDataList(chunk: Buffer): string[] {
+    try {
+      const chunkString = chunk.toString();
+      return chunkString
+        .split('data: ')
+        .map((data) => data.trim())
+        .filter((v) => v);
+    } catch {
+      return [];
+    }
   }
 }
 
-const systemPrompt = `당신은 금융 분석 전문가입니다. 사용자의 질문에 대해 기술적 분석과 기본적 분석을 제공합니다.
+const systemPromptForTitle = `This is a stock recommendation service.
+Generate a title based on the user’s question.
+• The title must be within 10 characters.
+• Detect the language of the user’s question accurately and conservatively.
+• Only use Japanese if the input is clearly in Japanese.
+• Respond in the same language.
+• Respond with the title only – no explanations or extra text.`;
 
-기술적 분석은 주가, 거래량, 이동평균선 등의 차트 데이터를 기반으로 합니다.
-기본적 분석은 재무제표, 실적, 뉴스 등의 데이터를 기반으로 합니다.
+interface LLMStreamParam {
+  message: string;
+  cb: (content: string) => void;
+  endCb?: (finalContent: string) => Promise<void>;
+}
 
-분석 시 다음 도구들을 사용할 수 있습니다:
-1. get_technical_data: 기술적 분석 데이터 조회
-2. get_fundamental_data: 기본적 분석 데이터 조회
-
-중요: 주가 상승/하락 원인을 분석할 때는 반드시 get_technical_data와 get_fundamental_data를 동시에 호출해야 합니다.
-두 함수를 순차적으로 호출하지 말고, 한 번의 tool_calls에 두 함수를 모두 포함시켜야 합니다.
-
-응답 형식:
-1. 기술적 분석
-2. 기본적 분석
-3. 종합 분석 및 투자 제안
-
-주의사항:
-- 답변은 한국어로 작성해주세요.
-- 사용자의 대화 히스토리는 참고용입니다.
-- Tool Call 및 응답 생성 시에는 반드시 가장 마지막 사용자의 질문을 기준으로 분석하고 응답하세요.
-`;
-
-const systemPromptForTitle = `
-이 서비스는 주식 추천 서비스야. 사용자 질문에 대해서 너는 제목을 만들어야 해.
-응답은 제목만 보내주면 되고, 10글자 내외로 만들어줘.
-언어는 사용자의 질문에 맞는 언어로 해줘
-`;
+interface LLMAnalysisStreamParam extends LLMStreamParam {
+  chatId: string;
+  titleParam: Omit<LLMStreamParam, 'message'>;
+}

@@ -63,13 +63,31 @@ export class MessageService {
   }
 
   public async createMessage(dto: MessageCreateDto): ServiceReturnType<MessageCreateResponse> {
-    // await this.checkUserMessageQuota();
+    await this.checkUserMessageQuota();
+    const { chatId } = dto;
 
     try {
-      const data = await this.analyze(dto.chatId, dto.content);
+      await this.llmService.getAnalysisStream({
+        chatId,
+        message: dto.content,
+        cb: (content) => {
+          this.sseService.sendEvent({ type: 'chatMessage', data: { chatId, content } });
+        },
+        endCb: async () => {
+          this.sseService.sendEvent({ type: 'chatMessage', data: { chatId, isEnd: true } });
+        },
+        titleParam: {
+          cb: (title) => {
+            this.sseService.sendEvent({ type: 'chatTitle', data: { chatId, title } });
+          },
+          endCb: async (title) => {
+            await this.chatModel.updateOne({ _id: new Types.ObjectId(chatId) }, { $set: { title } });
+          },
+        },
+      });
       return {
-        aiResponse: data.content,
-        createdAt: data.createdAt,
+        aiResponse: '',
+        createdAt: new Date(),
       };
     } finally {
       // const user = this.customRequestContext.get('user');
@@ -93,47 +111,5 @@ export class MessageService {
     }
 
     return true;
-  }
-
-  private async analyze(chatId: string, content: string): Promise<{ content: string; createdAt: Date }> {
-    const messages = await this.messageModel
-      .find({
-        chatId,
-        role: { $in: [MessageRoleMap.user, MessageRoleMap.assistant] },
-        content: { $ne: '[function_call]' },
-      })
-      .sort({ createdAt: 1 });
-
-    if (messages.length === 0) {
-      await this.llmService.getTitleStream(
-        content,
-        (title) => {
-          this.sseService.sendEvent({ type: 'chatTitle', data: { chatId, title } });
-        },
-        async (title) => {
-          const result = await this.chatModel.updateOne({ _id: new Types.ObjectId(chatId) }, { $set: { title } });
-          console.log('update result', result, title, chatId);
-        }
-      );
-    }
-
-    await this.messageModel.create({
-      chatId,
-      content,
-      role: MessageRoleMap.user,
-    });
-
-    const aiResponse = await this.llmService.getAnalysis(content, messages);
-
-    const assistantMessage = await this.messageModel.create({
-      chatId,
-      content: aiResponse,
-      role: MessageRoleMap.assistant,
-    });
-
-    return {
-      content: aiResponse ?? '',
-      createdAt: assistantMessage.createdAt,
-    };
   }
 }
