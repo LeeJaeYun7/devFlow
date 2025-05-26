@@ -1,19 +1,20 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Profile, Strategy } from 'passport-google-oauth20';
 import { Request } from 'express';
 import { SsoUser } from '../auth.type';
 import { AuthSsoMap } from '@lia/api/auth/auth.constant';
+import { BaseConfigService } from '@lia/config';
 
 @Injectable()
 export class SsoGoogleStrategy extends PassportStrategy(Strategy, 'google') {
-  constructor(private readonly configService: ConfigService) {
-    const isProduction = configService.get('NODE_ENV') === 'production';
+  constructor(private readonly configService: BaseConfigService) {
+    const config = configService.getConfig();
+    const isProduction = config.nodeEnv === 'production';
     const baseUrl = isProduction ? 'https://api.asklia.io' : 'http://localhost:4600';
     super({
-      clientID: configService.get('GOOGLE_OAUTH_CLIENT_ID') ?? 'default',
-      clientSecret: configService.get('GOOGLE_OAUTH_CLIENT_SECRET') ?? '',
+      clientID: config.googleOauth.clientId,
+      clientSecret: config.googleOauth.clientSecret,
       callbackURL: `${baseUrl}/api/auth/google/callback`,
       passReqToCallback: true,
       scope: ['email', 'profile'],

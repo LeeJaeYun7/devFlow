@@ -13,9 +13,11 @@ import { BaseExceptionFilter } from './common/filter/base.filter';
 import { SlackModule } from './module/slack/slack.module';
 import { CustomRequestContextModule } from './module/custom_request_context/custom_request_context.module';
 import { CustomRequestContextMiddleware } from './common/middleware/custom_request_context.middleware';
+import { BaseConfigModule } from '@lia/config';
 
 @Module({
   imports: [
+    BaseConfigModule,
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,

@@ -11,6 +11,12 @@
     },
     {
       "path": "./libs/api"
+    },
+    {
+      "path": "./apps/data-collector"
+    },
+    {
+      "path": "./libs/config"
     }
   ]
 }

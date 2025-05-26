@@ -50,7 +50,7 @@
       "options": {
         "targetName": "test"
       },
-      "exclude": ["apps/backend-e2e/**/*"]
+      "exclude": ["apps/backend-e2e/**/*", "apps/data-collector-e2e/**/*"]
     },
     {
       "plugin": "@nx/react/router-plugin",

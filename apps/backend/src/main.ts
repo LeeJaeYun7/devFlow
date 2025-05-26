@@ -10,14 +10,17 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import { JWT_SECRET } from './constants/jwt.constant';
+import { BaseConfigService } from '@lia/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const globalPrefix = 'api';
-  app.setGlobalPrefix(globalPrefix);
-  const isProd = process.env.NODE_ENV === 'production';
-  const port = process.env.PORT || 4600;
 
+  const baseConfigService = app.get(BaseConfigService);
+  const config = baseConfigService.getConfig();
+  const isProd = config.nodeEnv === 'production';
+  const port = config.apiPort;
+
+  app.setGlobalPrefix('api');
   app.use(cookieParser(JWT_SECRET));
   app.enableCors({
     origin: isProd ? 'https://asklia.io' : 'http://localhost:4500',
@@ -40,7 +43,7 @@ async function bootstrap() {
   await app.listen(port);
 
   const logger = new Logger('Bootstrap');
-  logger.log(`🚀 Application is running on: http://localhost:${port}/${globalPrefix}`);
+  logger.log(`🚀 API is running on: http://localhost:${port}/api`);
   logger.log(`🚀 Swagger is running on: http://localhost:${port}/api/docs`);
 }
 

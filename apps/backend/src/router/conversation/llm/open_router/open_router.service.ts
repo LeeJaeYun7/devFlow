@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import axios, { AxiosError } from 'axios';
 import { OpenRouterRequestBody, OpenRouterResponseBody } from './open_router.type';
 import { Readable } from 'node:stream';
+import { BaseConfigService } from '@lia/config';
 
 @Injectable()
 export class OpenRouterService {
@@ -12,12 +12,12 @@ export class OpenRouterService {
   private readonly temperature: number;
   private readonly logger = new Logger(OpenRouterService.name);
 
-  constructor(private readonly configService: ConfigService) {
-    this.openRouterUrl =
-      this.configService.get<string>('OPENROUTER_URL') ?? 'https://api.openrouter.ai/api/v1/chat/completions';
-    this.openRouterApiKey = this.configService.get<string>('OPENROUTER_API_KEY') ?? '';
-    this.model = this.configService.get<string>('OPENROUTER_MODEL') ?? '';
-    this.temperature = Number(this.configService.get<string>('OPENROUTER_TEMPERATURE')) || 0.7;
+  constructor(private readonly configService: BaseConfigService) {
+    const config = this.configService.getConfig();
+    this.openRouterUrl = config.openRouter.url;
+    this.openRouterApiKey = config.openRouter.apiKey;
+    this.model = config.openRouter.model;
+    this.temperature = config.openRouter.temperature;
 
     if (!this.openRouterApiKey) {
       throw new Error('OPENROUTER_API_KEY is not set');

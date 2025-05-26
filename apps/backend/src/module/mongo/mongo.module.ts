@@ -1,14 +1,14 @@
+import { BaseConfigService } from '@lia/config';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     MongooseModule.forRootAsync({
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGODB_URI') ?? 'mongodb://root:password@localhost:27017/lia?authSource=admin',
+      useFactory: async (configService: BaseConfigService) => ({
+        uri: configService.getConfig().mongodbUri,
       }),
-      inject: [ConfigService],
+      inject: [BaseConfigService],
     }),
   ],
   exports: [MongooseModule],
