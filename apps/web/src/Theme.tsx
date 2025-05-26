@@ -19,12 +19,13 @@ export const createCustomTheme = (mode: PaletteMode) =>
       },
       secondary: {
         main: '#00C2FF', // 밝은 하늘색으로 변경
-        light: '#33CFFF',
-        dark: '#0099CC',
+        light: '#f8f9fb',
+        dark: '#2f2f2f',
       },
+
       background: {
         default: mode === 'dark' ? '#121212' : '#FFFFFF',
-        paper: mode === 'dark' ? '#1E1E1E' : '#F8F9FA',
+        paper: mode === 'dark' ? '#2f2f2f' : '#f8f9fb',
       },
       text: {
         primary: mode === 'dark' ? '#FFFFFF' : '#1A1A1A',

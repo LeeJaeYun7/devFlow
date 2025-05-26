@@ -1,4 +1,4 @@
-import { Box, CircularProgress, IconButton, Paper, TextField } from '@mui/material';
+import { Box, CircularProgress, IconButton, Paper, TextField, Container } from '@mui/material';
 import { useEffect, useState, useCallback } from 'react';
 import SendIcon from '@mui/icons-material/Send';
 import { ChatContent } from '../../base/chat/Content';
@@ -7,6 +7,7 @@ import { useUser } from '../../../context/UserProvider';
 import { useUserMySelf } from '../../../hooks/useUser';
 import { enqueueSnackbar } from 'notistack';
 import { useSSEEvent } from '../../../context/SSEContext';
+import { FirstRecommend } from './FirstRecommend';
 
 export function ChatMain() {
   const { nowChatId } = useUser();
@@ -61,9 +62,7 @@ export function ChatMain() {
     try {
       setIsSending(true);
       setAiStreamContent('');
-      // 사용자 메시지를 임시 메시지에 추가
       setTempUserContent(message);
-      console.log('tempUserContent', message);
 
       await createMessage({ chatId: nowChatId, content: message });
       await refetchUserMySelf();
@@ -76,13 +75,14 @@ export function ChatMain() {
     }
   };
 
-  // 채팅방이 변경될 때 상태 초기화
   useEffect(() => {
     setTempUserContent('');
     setIsSending(false);
     setMessage('');
     setAiStreamContent('');
   }, [nowChatId]);
+
+  const isNothing = messageList?.data.length === 0 && tempUserContent === '';
 
   return (
     <Box
@@ -94,57 +94,140 @@ export function ChatMain() {
         overflow: 'hidden',
       }}
     >
-      {/* 채팅 목록 */}
-      <Box sx={{ flexGrow: 1, minHeight: 0, position: 'relative', height: '200px', overflowY: 'auto' }}>
-        <ChatContent
-          messageData={messageList?.data ?? []}
-          aiStreamContent={aiStreamContent}
-          tempUserContent={tempUserContent}
-        />
-      </Box>
-
-      {/* 입력 영역 */}
-      <Paper
-        elevation={3}
+      <Container
+        maxWidth="lg"
         sx={{
-          p: 2,
-          borderTop: 1,
-          borderColor: 'divider',
-          bgcolor: 'background.paper',
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          px: { xs: 0, md: 3 },
+          height: '100%',
+          position: 'relative',
         }}
       >
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <TextField
-            fullWidth
-            multiline
-            maxRows={4}
-            value={message}
-            disabled={isSending}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSendMessage();
-              }
+        {isNothing && <FirstRecommend />}
+
+        {!isNothing && (
+          <Box
+            sx={{
+              flex: 1,
+              overflow: 'hidden',
+              position: 'relative',
             }}
-            placeholder="주식과 투자 관련된 질문을 해보세요!"
-            variant="outlined"
-            size="small"
-          />
-          {isSending ? (
-            <CircularProgress color="secondary" />
-          ) : (
-            <IconButton
-              color="primary"
-              onClick={handleSendMessage}
-              disabled={!message.trim() || isSending}
-              sx={{ alignSelf: 'flex-end' }}
+          >
+            <Box
+              sx={{
+                height: '100%',
+                overflowY: 'auto',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                msOverflowStyle: 'none', // IE, Edge
+                scrollbarWidth: 'none', // Firefox
+                '&::-webkit-scrollbar': {
+                  // Chrome, Safari
+                  display: 'none',
+                },
+              }}
             >
-              <SendIcon />
-            </IconButton>
-          )}
+              <Box
+                sx={{
+                  py: { xs: 2, md: 3 },
+                  px: { xs: 2, md: 3 },
+                }}
+              >
+                <ChatContent
+                  messageData={messageList?.data ?? []}
+                  aiStreamContent={aiStreamContent}
+                  tempUserContent={tempUserContent}
+                />
+              </Box>
+            </Box>
+          </Box>
+        )}
+
+        {/* 입력 영역 */}
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            px: { xs: 2, md: 3 },
+            pb: { xs: 2, md: 3 },
+            pt: 2,
+            bgcolor: 'background.default',
+            borderTop: 1,
+            borderColor: 'divider',
+            boxShadow: '0px -4px 10px rgba(0, 0, 0, 0.05)',
+          }}
+        >
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 1.5, md: 2 },
+              bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'),
+              borderRadius: '16px',
+              mx: 'auto',
+              width: '100%',
+            }}
+          >
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              <TextField
+                fullWidth
+                value={message}
+                disabled={isSending}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }
+                }}
+                multiline
+                placeholder="Type message"
+                variant="standard"
+                sx={{
+                  '& .MuiInputBase-root': {
+                    padding: '4px 8px',
+                    fontSize: { xs: '0.875rem', md: '1rem' },
+                  },
+                  '& .MuiInput-underline:before': { borderBottom: 'none' },
+                  '& .MuiInput-underline:after': { borderBottom: 'none' },
+                  '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottom: 'none' },
+                }}
+              />
+              {isSending ? (
+                <CircularProgress
+                  size={24}
+                  sx={{
+                    color: 'text.secondary',
+                    mx: 1,
+                  }}
+                />
+              ) : (
+                <IconButton
+                  color="primary"
+                  onClick={handleSendMessage}
+                  disabled={!message.trim() || isSending}
+                  sx={{
+                    bgcolor: 'primary.main',
+                    color: 'white',
+                    '&:hover': { bgcolor: 'primary.dark' },
+                    '&.Mui-disabled': { bgcolor: 'action.disabledBackground' },
+                    width: 32,
+                    height: 32,
+                  }}
+                >
+                  <SendIcon sx={{ fontSize: 18 }} />
+                </IconButton>
+              )}
+            </Box>
+          </Paper>
         </Box>
-      </Paper>
+      </Container>
     </Box>
   );
 }

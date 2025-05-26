@@ -1,8 +1,9 @@
-import { Box, Avatar, Paper, useTheme, Typography } from '@mui/material';
+import { Box, Paper, useTheme, Typography, Container, useMediaQuery } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 import { Message } from '../../../hooks/useMessage';
 import { useMemo } from 'react';
 import remarkGfm from 'remark-gfm';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 
 interface ChatContentProps {
   messageData: Message[] | undefined;
@@ -12,6 +13,8 @@ interface ChatContentProps {
 
 export function ChatContent({ messageData, aiStreamContent, tempUserContent }: ChatContentProps) {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   const totalMessages = useMemo(() => {
     const messages = [];
 
@@ -41,84 +44,108 @@ export function ChatContent({ messageData, aiStreamContent, tempUserContent }: C
   }, [messageData, aiStreamContent, tempUserContent]);
 
   return (
-    <Box
-      sx={{
-        flexGrow: 1,
-        p: 2,
-        display: 'flex',
-        flexDirection: 'column-reverse',
-        gap: 2,
-        height: '100%',
-        overflowY: 'auto',
-      }}
-    >
-      {totalMessages.map((msg, idx) => {
-        return (
-          <Box
-            key={`${msg.id}-${idx}`}
-            sx={{
-              display: 'flex',
-              justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
-              alignItems: 'flex-start',
-            }}
-          >
-            {msg.role === 'assistant' && (
-              <Avatar
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', marginBottom: '100px' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          textAlign: 'center',
+          pt: isMobile ? 0 : 6,
+          pb: isMobile ? 2 : 4,
+          borderBottom: 1,
+          borderColor: 'divider',
+        }}
+      >
+        <Box sx={{ width: 80, height: 80, mb: 2, borderRadius: '24px', overflow: 'hidden' }}>
+          <img src="/icon/lia.png" alt="LIA" style={{ width: '100%', height: '100%' }} />
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
+          <Typography variant="h6" fontWeight={500}>
+            LIA
+          </Typography>
+          <ArrowForwardIosIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+        </Box>
+        <Typography variant="body2" color="text.secondary">
+          무슨 일인지 말씀을 해 주세요.
+        </Typography>
+      </Box>
+
+      <Container maxWidth="lg" sx={{ flex: 1, px: { xs: 2, sm: 4 } }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column-reverse',
+            gap: 3,
+            height: '100%',
+            overflowY: 'auto',
+            py: 3,
+          }}
+        >
+          {totalMessages.map((msg, idx) => {
+            const isUser = msg.role === 'user';
+            const date = new Date(msg.createdAt);
+            const time = date.toLocaleTimeString('ko-KR', {
+              hour: 'numeric',
+              minute: 'numeric',
+              hour12: false,
+            });
+
+            return (
+              <Box
+                key={`${msg.id}-${idx}`}
                 sx={{
-                  bgcolor: 'primary.main',
-                  mr: 1,
-                  width: 32,
-                  height: 32,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 1,
                 }}
               >
-                LIA
-              </Avatar>
-            )}
-            <Paper
-              elevation={1}
-              sx={{
-                p: 2,
-                maxWidth: '70%',
-                bgcolor:
-                  msg.role === 'user'
-                    ? theme.palette.mode === 'dark'
-                      ? 'primary.dark'
-                      : 'primary.main'
-                    : 'background.paper',
-                color: msg.role === 'user' ? 'primary.contrastText' : 'text.primary',
-                borderRadius: 2,
-              }}
-            >
-              <Box>
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                {!isUser && (
+                  <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, mb: 1 }}>
+                    <Box sx={{ width: 32, height: 32, borderRadius: '8px', overflow: 'hidden' }}>
+                      <img
+                        src="/icon/lia.png"
+                        alt="LIA"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    </Box>
+                    <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.5 }}>
+                      LIA
+                    </Typography>
+                  </Box>
+                )}
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: isUser ? 'flex-end' : 'flex-start',
+                    alignItems: 'flex-end',
+                    gap: 1,
+                    ml: !isUser ? '40px' : 0,
+                  }}
+                >
+                  {isUser && <Typography sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>{time}</Typography>}
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      maxWidth: '70%',
+                      bgcolor: isUser ? 'primary.main' : theme.palette.mode === 'dark' ? 'background.paper' : '#f8f9fb',
+                      color: isUser ? 'primary.contrastText' : 'text.primary',
+                      borderRadius: 2,
+                      '& p': {
+                        m: 0,
+                      },
+                    }}
+                  >
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                  </Paper>
+                  {!isUser && <Typography sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>{time}</Typography>}
+                </Box>
               </Box>
-              <Typography
-                variant="caption"
-                sx={{
-                  display: 'block',
-                  mt: 1.5,
-                  opacity: 0.7,
-                  color: msg.role === 'user' ? 'inherit' : 'text.secondary',
-                }}
-              >
-                {new Date(msg.createdAt).toLocaleTimeString()}
-              </Typography>
-            </Paper>
-            {msg.role === 'user' && (
-              <Avatar
-                sx={{
-                  bgcolor: 'secondary.main',
-                  ml: 1,
-                  width: 32,
-                  height: 32,
-                }}
-              >
-                U
-              </Avatar>
-            )}
-          </Box>
-        );
-      })}
+            );
+          })}
+        </Box>
+      </Container>
     </Box>
   );
 }

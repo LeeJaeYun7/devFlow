@@ -87,6 +87,23 @@ export function LoginMain() {
           </Button>
           <Button
             variant="contained"
+            startIcon={<NaverIcon />}
+            sx={{
+              bgcolor: '#03C75A',
+              color: '#fff',
+              '&:hover': { bgcolor: '#029e48' },
+              borderRadius: '8px',
+              py: 1.5,
+            }}
+            fullWidth
+            onClick={() => {
+              window.location.href = `${BASE_API_URL}/api/auth/naver`;
+            }}
+          >
+            네이버로 로그인하기
+          </Button>
+          <Button
+            variant="contained"
             startIcon={<GoogleIcon />}
             sx={{
               bgcolor: '#fff',
@@ -102,23 +119,6 @@ export function LoginMain() {
             }}
           >
             Google로 로그인하기
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<NaverIcon />}
-            sx={{
-              bgcolor: '#03C75A',
-              color: '#fff',
-              '&:hover': { bgcolor: '#029e48' },
-              borderRadius: '8px',
-              py: 1.5,
-            }}
-            fullWidth
-            onClick={() => {
-              window.location.href = `${BASE_API_URL}/api/auth/naver`;
-            }}
-          >
-            네이버로 로그인하기
           </Button>
         </Stack>
 

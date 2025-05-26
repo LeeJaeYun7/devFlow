@@ -267,15 +267,33 @@ export class LlmService {
 
       const secondStream = secondResponseStream.data;
 
+      let isSecondThinking = false;
+      let secondTotalContent = '';
+
       secondStream.on('data', (chunk: Buffer) => {
         const dataList = this.toDataList(chunk);
         for (const data of dataList) {
           try {
             const parsed = JSON.parse(data) as OpenRouterStreamChunk;
             const delta = parsed.choices[0]?.delta;
-            const content = delta?.content;
+            let content = delta?.content;
+            secondTotalContent += content ?? '';
 
-            if (content) {
+            if (secondTotalContent.includes('<thinking>')) {
+              isSecondThinking = true;
+              const splitContent = content.split('>');
+              content = splitContent[splitContent.length - 1];
+            }
+
+            if (secondTotalContent.includes('</thinking>')) {
+              isSecondThinking = false;
+              const splitContent = content.split('>');
+              if (splitContent.length > 1) {
+                content = splitContent[splitContent.length - 1].trim();
+              }
+            }
+
+            if (!isSecondThinking) {
               finalContent += content;
               cb(content);
             }

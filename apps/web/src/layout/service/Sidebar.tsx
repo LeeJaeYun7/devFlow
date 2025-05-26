@@ -120,12 +120,16 @@ export function ServiceRootSidebar() {
           onClick={() => setOpen(true)}
           sx={{
             position: 'fixed',
-            top: 8,
-            left: 8,
+            top: 12,
+            left: 12,
             zIndex: (theme) => theme.zIndex.drawer + 1,
-            borderRadius: '8px',
-            bgcolor: 'background.paper',
-            padding: '6px',
+            borderRadius: '12px',
+            bgcolor: 'background.default',
+            padding: '8px',
+            width: '40px',
+            height: '40px',
+            border: (theme) =>
+              `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)'}`,
             boxShadow: 2,
             '&:hover': {
               bgcolor: 'background.paper',
@@ -136,47 +140,59 @@ export function ServiceRootSidebar() {
           <MenuIcon fontSize="small" />
         </IconButton>
       )}
+      {open && isMobile && (
+        <IconButton
+          onClick={handleDrawerClose}
+          sx={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            zIndex: 3000,
+            borderRadius: '12px',
+            bgcolor: 'background.default',
+            boxShadow: 2,
+            '&:hover': {
+              bgcolor: 'background.paper',
+              boxShadow: 3,
+            },
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+      )}
       <Drawer
         variant={isMobile ? 'temporary' : 'persistent'}
         open={open}
         onClose={handleDrawerClose}
         sx={{
           '& .MuiDrawer-paper': {
-            bgcolor: 'background.paper',
+            bgcolor: 'background.default',
             borderRight: 'none',
             boxShadow: 'none',
             width: 256,
           },
         }}
       >
-        {open && isMobile && (
-          <IconButton
-            onClick={handleDrawerClose}
-            sx={{
-              position: 'absolute',
-              top: 12,
-              right: 12,
-              zIndex: 1,
-              borderRadius: '12px',
-              bgcolor: 'background.paper',
-              boxShadow: 2,
-              '&:hover': {
-                bgcolor: 'background.paper',
-                boxShadow: 3,
-              },
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        )}
         <Box
           sx={{
             height: '100%',
             display: 'flex',
             flexDirection: 'column',
             p: 1,
+            position: 'relative',
+            bgcolor: 'background.default',
           }}
         >
+          <Box
+            sx={{
+              position: 'absolute',
+              right: 0,
+              top: 0,
+              bottom: 0,
+              width: '1px',
+              bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)'),
+            }}
+          />
           <CreateChatButton />
           <ChatList />
           <Divider sx={{ mt: 1 }} />
