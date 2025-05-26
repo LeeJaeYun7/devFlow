@@ -1,4 +1,4 @@
-import { UserError } from "../../../util/base.error";
+import { UserError } from '../../../util/base.error';
 
 export class MessageQuotaNotEnoughError extends UserError {
   constructor() {

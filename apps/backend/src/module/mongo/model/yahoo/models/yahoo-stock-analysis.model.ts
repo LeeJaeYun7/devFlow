@@ -34,4 +34,4 @@ export class YahooStockAnalysis extends Document {
 export const YahooStockAnalysisSchema = SchemaFactory.createForClass(YahooStockAnalysis);
 
 // TTL 인덱스 추가
-YahooStockAnalysisSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 }); 
+YahooStockAnalysisSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });

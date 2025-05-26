@@ -20,4 +20,4 @@ export class YahooStockNews extends Document {
 export const YahooStockNewsSchema = SchemaFactory.createForClass(YahooStockNews);
 
 // TTL 인덱스 추가
-YahooStockNewsSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 }); 
+YahooStockNewsSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });

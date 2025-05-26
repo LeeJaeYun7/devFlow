@@ -51,7 +51,6 @@ export class YahooFinanceFetcherService {
       const data = await YahooFinance.quoteSummary(symbol, {
         modules: ['summaryDetail', 'defaultKeyStatistics', 'financialData'],
       });
-       // Save to MongoDB
       return await this.yahooStockService.saveStockInfo(symbol, data);
     } catch (error: unknown) {
       this.logger.error(`Error fetching info for ${symbol}: ${error instanceof Error ? error.message : String(error)}`);
@@ -67,7 +66,6 @@ export class YahooFinanceFetcherService {
     try {
       // Check MongoDB first
       const cached = await this.yahooStockService.getStockHistory(symbol, interval);
-  
       if (cached) {
         return cached;
       }
@@ -104,7 +102,7 @@ export class YahooFinanceFetcherService {
       const newsWithContent = await Promise.all(
         news.map(async (item) => {
           const content = await this.fetchArticleContent(item.link);
-  
+
           return {
             title: item.title,
             content,
@@ -130,14 +128,14 @@ export class YahooFinanceFetcherService {
     try {
       const { data: html } = await axios.get(url, { timeout: 5000 });
       const $ = cheerio.load(html);
-  
+
       // 아래는 사이트마다 다르니 각 도메인별로 분기해야 함
       if (url.includes('finance.yahoo.com')) {
         return $('article').text().trim(); // Yahoo는 대부분 <article> 태그 안에 본문
       } else if (url.includes('marketwatch.com')) {
         return $('.article__body').text().trim();
       }
-  
+
       // 기본 fallback
       return $('body').text().slice(0, 3000).trim(); // 너무 길면 자름
     } catch (e) {
@@ -145,7 +143,6 @@ export class YahooFinanceFetcherService {
       return '';
     }
   }
-  
 
   public formatNewsItem(item: YahooStockNewsItem): Record<string, string> {
     return {

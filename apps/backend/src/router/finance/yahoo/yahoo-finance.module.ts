@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { YahooStockInfo, YahooStockInfoSchema } from '../../../module/mongo/model/yahoo/models/yahoo-stock-info.model';
-import { YahooStockHistory,
+import {
+  YahooStockHistory,
   YahooStockHistorySchema,
 } from '../../../module/mongo/model/yahoo/models/yahoo-stock-history.model';
-import { YahooStockAnalysis,
+import {
+  YahooStockAnalysis,
   YahooStockAnalysisSchema,
 } from '../../../module/mongo/model/yahoo/models/yahoo-stock-analysis.model';
 import { YahooStockNews, YahooStockNewsSchema } from '../../../module/mongo/model/yahoo/models/yahoo-stock-news.model';

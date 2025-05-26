@@ -26,4 +26,4 @@ export const YahooStockHistorySchema = SchemaFactory.createForClass(YahooStockHi
 YahooStockHistorySchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 // 복합 인덱스 추가 (symbol과 interval로 빠른 조회)
-YahooStockHistorySchema.index({ symbol: 1, interval: 1 }); 
+YahooStockHistorySchema.index({ symbol: 1, interval: 1 });

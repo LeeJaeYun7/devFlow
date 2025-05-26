@@ -3,4 +3,4 @@ export interface YahooStockNewsItem {
   content: string;
   relatedTickers: string[];
   pubDate: string;
-} 
+}

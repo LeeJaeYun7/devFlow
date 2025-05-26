@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { BaseResponse } from "../types";
+import { ApiProperty } from '@nestjs/swagger';
+import { BaseResponse } from '../types';
 
 export class UserGetMySelfDto {}
 

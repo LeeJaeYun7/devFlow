@@ -12,6 +12,7 @@ import { MessageModel } from '../../../module/mongo/model/conversation/models/me
 import { Model } from 'mongoose';
 import { MessageRoleMap } from '@lia/api/conversation/message/message.constant';
 import { systemPrompt } from './example.constant';
+import { NaverStockFetcherService } from '../../finance/naver/fetchers/naver-finance-fetch.service';
 @Injectable()
 export class LlmService {
   constructor(
@@ -19,7 +20,8 @@ export class LlmService {
     private readonly messageModel: Model<MessageModel>,
 
     private readonly yahooFinanceService: YahooFinanceService,
-    private readonly openRouterService: OpenRouterService
+    private readonly openRouterService: OpenRouterService,
+    private readonly naverStockFetcherService: NaverStockFetcherService
   ) {}
 
   public async getTitleStream({ message, cb, endCb }: LLMStreamParam) {
@@ -73,13 +75,30 @@ export class LlmService {
     });
   }
 
+  private isKoreanStock(symbol: string): boolean {
+    // Check if symbol is 5-6 digit number or ends with .KS/.KQ
+    return /^\d{5,6}$/.test(symbol) || /\.(KS|KQ)$/.test(symbol);
+  }
+
   public async getAnalysisStream({ chatId, message, cb, endCb, titleParam }: LLMAnalysisStreamParam) {
     const toolFunctions = {
       get_technical_data: async (args: any) => {
-        return await this.yahooFinanceService.getTechnicalData(args.symbol);
+        const symbol = args.symbol;
+        if (this.isKoreanStock(symbol)) {
+          const cleanSymbol = symbol.replace(/\.(KS|KQ)$/, '');
+          return this.naverStockFetcherService.fetchTechnicalData(cleanSymbol);
+        } else {
+          return this.yahooFinanceService.getTechnicalData(symbol);
+        }
       },
       get_fundamental_data: async (args: any) => {
-        return await this.yahooFinanceService.getFundamentalData(args.symbol);
+        const symbol = args.symbol;
+        if (this.isKoreanStock(symbol)) {
+          const cleanSymbol = symbol.replace(/\.(KS|KQ)$/, '');
+          return this.naverStockFetcherService.fetchFundamentalData(cleanSymbol);
+        } else {
+          return this.yahooFinanceService.getFundamentalData(symbol);
+        }
       },
     };
 

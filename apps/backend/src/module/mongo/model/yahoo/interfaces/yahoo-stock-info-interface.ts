@@ -25,8 +25,7 @@ export interface YahooDefaultKeyStatistics {
   lastFiscalYearEnd: Date;
   nextFiscalYearEnd: Date;
   trailingEps: number;
-} 
-
+}
 export interface YahooSummaryDetail {
   maxAge: number;
   priceHint: number;
@@ -86,4 +85,4 @@ export interface YahooFinancialData {
   operatingCashflow: number;
   earningsGrowth: number;
   revenueGrowth: number;
-} 
+}

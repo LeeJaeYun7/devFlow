@@ -90,9 +90,9 @@ export class MessageService {
         createdAt: new Date(),
       };
     } finally {
-      // const user = this.customRequestContext.get('user');
-      // const userId = user.id;
-      // await this.userMessageQuotaModel.updateOne({ userId }, { $inc: { remainingMessages: -1 } });
+      const user = this.customRequestContext.get('user');
+      const userId = user.id;
+      await this.userMessageQuotaModel.updateOne({ userId }, { $inc: { remainingMessages: -1 } });
     }
   }
 

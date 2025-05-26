@@ -13,4 +13,5 @@ import { MongooseModule } from '@nestjs/mongoose';
   ],
   exports: [MongooseModule],
 })
-export class MongoModule {}
+export class MongoModule {} 
+

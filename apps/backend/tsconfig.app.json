@@ -20,5 +20,8 @@
     {
       "path": "../../libs/config/tsconfig.lib.json"
     }
-  ]
+  ],
+  "compilerOptions": {
+    "lib": ["es2021", "dom"]
+  }
 }

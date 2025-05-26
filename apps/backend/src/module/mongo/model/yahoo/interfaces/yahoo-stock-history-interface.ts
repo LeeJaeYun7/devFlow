@@ -5,4 +5,4 @@ export interface YahooStockHistoryItem {
   low: number;
   close: number;
   volume: number;
-} 
+}
