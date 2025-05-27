@@ -23,21 +23,32 @@ export default defineConfig(({ mode }) => ({
         short_name: 'AskLia',
         description: '금융 데이터 분석 챗봇',
         theme_color: '#ffffff',
+        background_color: '#000000',
+        display: 'standalone',
         icons: [
           {
             src: '/icon/lia_logo_128.png',
             sizes: '128x128',
             type: 'image/png',
+            purpose: 'any',
           },
           {
             src: '/icon/lia_logo_192.png',
             sizes: '192x192',
             type: 'image/png',
+            purpose: 'any',
           },
           {
             src: '/icon/lia_logo_512.png',
             sizes: '512x512',
             type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: '/icon/lia_logo_512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
           },
         ],
       },

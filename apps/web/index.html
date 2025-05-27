@@ -4,6 +4,9 @@
 <head>
   <meta charset="utf-8" />
   <base href="/" />
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 
   <!-- HTML Meta Tags -->
   <title>LIA | AI 주식 분석 · 종목 리서치 인사이트 도구</title>
@@ -35,6 +38,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" type="image/x-icon" href="/favicon.ico" />
   <link rel="stylesheet" href="/src/styles.css" />
+  <style>
+    body {
+      margin: 0;
+      background-color: #ffffff;
+      min-height: 100vh;
+      overscroll-behavior-y: none;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #000000;
+      }
+    }
+  </style>
 </head>
 
 <body>

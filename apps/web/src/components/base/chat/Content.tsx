@@ -97,7 +97,6 @@ export function ChatContent({ messageData, aiStreamContent, tempUserContent }: C
                 sx={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: 1,
                 }}
               >
                 {!isUser && (
@@ -120,7 +119,7 @@ export function ChatContent({ messageData, aiStreamContent, tempUserContent }: C
                     justifyContent: isUser ? 'flex-end' : 'flex-start',
                     alignItems: 'flex-end',
                     gap: 1,
-                    ml: !isUser ? '40px' : 0,
+                    ml: !isUser ? '20px' : 0,
                   }}
                 >
                   {isUser && <Typography sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>{time}</Typography>}
@@ -128,7 +127,7 @@ export function ChatContent({ messageData, aiStreamContent, tempUserContent }: C
                     elevation={0}
                     sx={{
                       p: 2,
-                      maxWidth: '70%',
+                      maxWidth: isMobile ? '100%' : '70%',
                       bgcolor: isUser ? 'primary.main' : theme.palette.mode === 'dark' ? 'background.paper' : '#f8f9fb',
                       color: isUser ? 'primary.contrastText' : 'text.primary',
                       borderRadius: 2,
