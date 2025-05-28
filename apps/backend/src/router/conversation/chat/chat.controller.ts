@@ -1,8 +1,9 @@
-import { Controller, Post, HttpStatus, Get, Body, Query } from '@nestjs/common';
+import { Controller, Post, HttpStatus, Get, Body, Query, Delete } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ChatResponse, CreateChatDto } from '@lia/api/conversation/chat/create.dto';
 import { ChatService } from './chat.service';
 import { ChatListDto, ChatListResponse } from '@lia/api/conversation/chat/list.dto';
+import { DeleteAllChatDto, DeleteAllChatResponse } from '@lia/api/conversation/chat/delete_all.dto';
 
 @ApiTags('Chat')
 @Controller('/conversation/chat')
@@ -27,5 +28,12 @@ export class ChatController {
       statusCode: HttpStatus.CREATED,
       data,
     } as ChatResponse;
+  }
+
+  @Delete('/all')
+  @ApiResponse({ type: DeleteAllChatResponse })
+  public async deleteAllChats(@Body() body: DeleteAllChatDto): Promise<DeleteAllChatResponse> {
+    await this.chatService.deleteAllChats(body);
+    return { statusCode: HttpStatus.OK };
   }
 }

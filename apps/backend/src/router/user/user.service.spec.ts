@@ -3,7 +3,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import { Connection, connect, Model, Types } from 'mongoose';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserService } from './user.service';
-import { UserModel, UserSchema } from '../../module/mongo/model/user.model';
+import { UserModel, UserSchema } from '../../module/mongo/model/user/models/user.model';
 import {
   UserMessageQuotaModel,
   UserMessageQuotaSchema,

@@ -101,14 +101,7 @@ export function ChatContent({ messageData, aiStreamContent, tempUserContent }: C
               >
                 {!isUser && (
                   <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, mb: 1 }}>
-                    <Box sx={{ width: 32, height: 32, borderRadius: '8px', overflow: 'hidden' }}>
-                      <img
-                        src="/icon/lia.png"
-                        alt="LIA"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                    </Box>
-                    <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.5 }}>
+                    <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.5, fontWeight: 600 }}>
                       LIA
                     </Typography>
                   </Box>
@@ -118,8 +111,7 @@ export function ChatContent({ messageData, aiStreamContent, tempUserContent }: C
                     display: 'flex',
                     justifyContent: isUser ? 'flex-end' : 'flex-start',
                     alignItems: 'flex-end',
-                    gap: 1,
-                    ml: !isUser ? '20px' : 0,
+                    gap: isMobile ? 0 : 1,
                   }}
                 >
                   {isUser && <Typography sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>{time}</Typography>}
@@ -127,7 +119,7 @@ export function ChatContent({ messageData, aiStreamContent, tempUserContent }: C
                     elevation={0}
                     sx={{
                       p: 2,
-                      maxWidth: isMobile ? '100%' : '70%',
+                      maxWidth: isMobile ? '100%' : '80%',
                       bgcolor: isUser ? 'primary.main' : theme.palette.mode === 'dark' ? 'background.paper' : '#f8f9fb',
                       color: isUser ? 'primary.contrastText' : 'text.primary',
                       borderRadius: 2,

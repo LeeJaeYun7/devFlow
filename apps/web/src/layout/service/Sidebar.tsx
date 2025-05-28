@@ -19,7 +19,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import ChatIcon from '@mui/icons-material/Chat';
 import AddIcon from '@mui/icons-material/Add';
 import { useUser } from '../../context/UserProvider';
-import { useChatList, useCreateChat } from '../../hooks/useChat';
+import { useChatList, useCreateChat, useDeleteAllChats } from '../../hooks/useChat';
 import { useUserMySelf } from '../../hooks/useUser';
 import { useSSEEvent } from '../../context/SSEContext';
 import { useQueryClient } from '@tanstack/react-query';
@@ -33,6 +33,8 @@ import { ServiceSidebarMenu, ServiceSidebarMenuProps } from './SidebarMenu';
 import { ColorModeContext } from '../../Theme';
 import { logout } from '../../api/auth';
 import { useNavigate } from 'react-router-dom';
+import HomeIcon from '@mui/icons-material/Home';
+import { enqueueSnackbar } from 'notistack';
 
 export function ServiceRootSidebar() {
   const navigate = useNavigate();
@@ -42,6 +44,7 @@ export function ServiceRootSidebar() {
   const colorMode = useContext(ColorModeContext);
   const [open, setOpen] = useState(isMobile ? false : true);
   const { mutateAsync: createChat } = useCreateChat();
+  const { mutateAsync: deleteAllChats } = useDeleteAllChats();
   const { data: chatList, isLoading: isChatListLoading } = useChatList({ page: 1, limit: 50 });
   const { nowChatId, setNowChatId } = useUser();
   const queryClient = useQueryClient();
@@ -66,8 +69,22 @@ export function ServiceRootSidebar() {
 
   const MenuList: ServiceSidebarMenuProps[] = [
     {
+      title: 'Home',
+      icon: <HomeIcon />,
+      onClick: () => navigate('/'),
+    },
+    {
       title: 'Clear conversations',
       icon: <DeleteOutlineIcon />,
+      onClick: async () => {
+        await deleteAllChats();
+        queryClient.invalidateQueries({ queryKey: ['chatList'], exact: false });
+        enqueueSnackbar('모든 채팅이 삭제되었습니다', {
+          variant: 'success',
+          autoHideDuration: 3000,
+        });
+        createChat();
+      },
     },
     {
       title: `${theme.palette.mode === 'dark' ? 'Light' : 'Dark'} mode`,
@@ -88,7 +105,7 @@ export function ServiceRootSidebar() {
       title: 'Log out',
       icon: <LogoutIcon />,
       onClick: async () => {
-        await logout();
+        void logout();
         navigate('/login');
       },
     },
@@ -192,6 +209,11 @@ export function ServiceRootSidebar() {
               width: '1px',
               bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)'),
             }}
+          />
+          <img
+            src={theme.palette.mode === 'dark' ? '/icon/lia_logo_white.svg' : '/icon/lia_logo_black.svg'}
+            alt="LIA"
+            style={{ width: '40%', objectFit: 'cover', padding: '16px' }}
           />
           <CreateChatButton />
           <ChatList />

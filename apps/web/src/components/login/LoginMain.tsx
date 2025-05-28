@@ -8,7 +8,7 @@ function Footer() {
   return (
     <Box sx={{ width: '100%' }}>
       <Box sx={{ maxWidth: 1200, mx: 'auto', py: 4 }}>
-        <Typography color="#fff" fontSize={14} fontWeight={600} mb={1}>
+        <Typography color="text.primary" fontSize={14} fontWeight={600} mb={1}>
           주식회사 더리버뱅크
         </Typography>
         <Typography color="text.secondary" fontSize={12} mb={0.5}>
@@ -56,7 +56,7 @@ export function LoginMain() {
   const theme = useTheme();
 
   return (
-    <Box>
+    <Box sx={{ bgcolor: theme.palette.background.default, height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Box
         minHeight="70vh"
         marginTop={10}

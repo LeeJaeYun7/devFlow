@@ -9,6 +9,9 @@ export class ChatModel extends Document<string> {
 
   @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: UserModel.name })
   userId!: string;
+
+  @Prop({ required: false, default: false })
+  deleted!: boolean;
 }
 
 export const ChatSchema = SchemaFactory.createForClass(ChatModel);

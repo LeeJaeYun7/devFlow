@@ -6,6 +6,7 @@ import { ServiceReturnType } from '@lia/api/types/base.type';
 import { ChatResponse, CreateChatDto } from '@lia/api/conversation/chat/create.dto';
 import { ChatListDto, ChatListResponse } from '@lia/api/conversation/chat/list.dto';
 import { CustomRequestContextService } from '../../../module/custom_request_context/custom_request_context.service';
+import { DeleteAllChatDto, DeleteAllChatResponse } from '@lia/api/conversation/chat/delete_all.dto';
 
 @Injectable()
 export class ChatService {
@@ -22,8 +23,8 @@ export class ChatService {
     const userId = user.id;
 
     // TODO: Aggregation을 통한 공통 페이지네이션 처리 추가
-    const chats = await this.chatModel.find({ userId }).skip(offset).limit(limit).lean();
-    const total = await this.chatModel.countDocuments({ userId });
+    const chats = await this.chatModel.find({ userId, deleted: false }).skip(offset).limit(limit).lean();
+    const total = await this.chatModel.countDocuments({ userId, deleted: false });
     const totalPages = Math.ceil(total / limit);
 
     const data = chats.map((v) => {
@@ -52,5 +53,12 @@ export class ChatService {
       chatId: createdChat.id,
       title: createdChat.title,
     };
+  }
+
+  public async deleteAllChats(_: DeleteAllChatDto): ServiceReturnType<DeleteAllChatResponse> {
+    const user = this.customRequestContext.get('user');
+    const userId = user.id;
+
+    await this.chatModel.updateMany({ userId }, { $set: { deleted: true } });
   }
 }

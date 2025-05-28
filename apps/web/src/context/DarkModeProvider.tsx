@@ -7,7 +7,11 @@ export function DarkModeProvider({ children }: { children: React.ReactNode }) {
   const colorMode = useMemo(
     () => ({
       toggleColorMode: () => {
-        setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
+        setMode((prevMode) => {
+          const newMode = prevMode === 'light' ? 'dark' : 'light';
+          localStorage.setItem('darkMode', newMode === 'dark' ? 'true' : 'false');
+          return newMode;
+        });
       },
       mode,
     }),

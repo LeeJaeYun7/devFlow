@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getChatList, createChat } from '../api/chat';
+import { getChatList, createChat, deleteAllChats } from '../api/chat';
 import type { ChatListDto } from '@lia/api/conversation/chat/list.dto';
 import { enqueueSnackbar } from 'notistack';
 
@@ -25,5 +25,11 @@ export function useCreateChat() {
         autoHideDuration: 3000,
       });
     },
+  });
+}
+
+export function useDeleteAllChats() {
+  return useMutation({
+    mutationFn: () => deleteAllChats(),
   });
 }
