@@ -11,7 +11,6 @@ import {
 } from '../../../module/mongo/model/yahoo/models/yahoo-stock-analysis.model';
 import { YahooStockNews, YahooStockNewsSchema } from '../../../module/mongo/model/yahoo/models/yahoo-stock-news.model';
 import { YahooFinanceService } from './yahoo-finance.service';
-import { YahooFinanceFetcherService } from './fetchers/yahoo-finance-fetcher.service';
 import { YahooStockService } from './yahoo-stock.service';
 
 @Module({
@@ -23,7 +22,7 @@ import { YahooStockService } from './yahoo-stock.service';
       { name: YahooStockNews.name, schema: YahooStockNewsSchema },
     ]),
   ],
-  providers: [YahooStockService, YahooFinanceFetcherService, YahooFinanceService],
-  exports: [YahooStockService, YahooFinanceFetcherService, YahooFinanceService],
+  providers: [YahooStockService, YahooFinanceService],
+  exports: [YahooStockService, YahooFinanceService],
 })
 export class YahooFinanceModule {}

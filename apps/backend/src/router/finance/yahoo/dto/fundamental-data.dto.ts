@@ -1,4 +1,4 @@
-export class FundamentalResponse {
+export class YahooFundamentalDto {
   currentPrice!: number;
   changePercent!: number;
   peTrailing!: number;

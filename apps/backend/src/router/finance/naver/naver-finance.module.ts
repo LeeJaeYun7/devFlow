@@ -1,20 +1,21 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { NaverStockFetcherService } from './fetchers/naver-finance-fetch.service';
+import { NaverStockInfo, NaverStockInfoSchema } from '../../../module/mongo/model/naver/models/naver-stock-info.model';
 import {
-  NaverStockFundamentals,
-  NaverStockFundamentalsSchema,
-} from '../../../module/mongo/model/naver/models/naver-stock-fundamentals.model';
-import { NaverStockNews, NaverStockNewsSchema } from '../../../module/mongo/model/naver/models/naver-stock-news.model';
+  NaverStockHistory,
+  NaverStockHistorySchema,
+} from '../../../module/mongo/model/naver/models/naver-stock-history.model';
+import { NaverFinanceService } from './naver-finance.service';
+import { NaverStockService } from './naver-stock.service';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: NaverStockFundamentals.name, schema: NaverStockFundamentalsSchema },
-      { name: NaverStockNews.name, schema: NaverStockNewsSchema },
+      { name: NaverStockHistory.name, schema: NaverStockHistorySchema },
+      { name: NaverStockInfo.name, schema: NaverStockInfoSchema },
     ]),
   ],
-  providers: [NaverStockFetcherService],
-  exports: [NaverStockFetcherService],
+  providers: [NaverFinanceService, NaverStockService],
+  exports: [NaverFinanceService, NaverStockService],
 })
 export class NaverFinanceModule {}

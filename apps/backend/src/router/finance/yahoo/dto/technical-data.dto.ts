@@ -1,4 +1,4 @@
-export class TechnicalResponse {
+export class YahooTechnicalDto {
   ohlcvAndIndicators!: any;
   currentPrice!: number;
   changePercent!: number;

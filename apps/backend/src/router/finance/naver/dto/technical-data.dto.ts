@@ -1,8 +1,5 @@
-export class TechnicalResponse {
-  ohlcvAndIndicators!: any;
-  currentPrice!: number;
-  changePercent!: number;
-  marketCap!: number;
-  high52Week!: number;
-  low52Week!: number;
+import { NaverStockHistoryItem } from '../../../../module/mongo/model/naver/interfaces/naver-stock-history-interface';
+
+export class NaverStockTechnicalDto {
+  ohlcvAndIndicators!: NaverStockHistoryItem[];
 }

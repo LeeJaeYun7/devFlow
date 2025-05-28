@@ -1,21 +1,17 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import type { YahooStockNewsItem } from '../interfaces/yahoo-stock-news-interface';
 
 @Schema({ timestamps: true })
-export class NaverStockNews extends Document {
+export class YahooStockNews extends Document {
   @Prop({ required: true, index: true })
   symbol!: string;
 
   @Prop({ type: [Object] })
-  articles!: any[];
+  news!: YahooStockNewsItem[];
 
   @Prop()
   lastUpdated!: Date;
-
-  @Prop()
-  expiresAt!: Date;
 }
 
-export const NaverStockNewsSchema = SchemaFactory.createForClass(NaverStockNews);
-
-NaverStockNewsSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+export const YahooStockNewsSchema = SchemaFactory.createForClass(YahooStockNews);
