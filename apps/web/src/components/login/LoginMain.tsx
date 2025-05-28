@@ -1,4 +1,4 @@
-import { Box, Button, Stack, Link, Typography } from '@mui/material';
+import { Box, Button, Stack, Link, Typography, useTheme } from '@mui/material';
 import NaverIcon from './NaverIcon';
 import KakaoIcon from './KakaoIcon';
 import GoogleIcon from './GoogleIcon';
@@ -53,6 +53,8 @@ function Footer() {
 }
 
 export function LoginMain() {
+  const theme = useTheme();
+
   return (
     <Box>
       <Box
@@ -64,7 +66,10 @@ export function LoginMain() {
         alignItems="center"
       >
         <Box sx={{ width: 135, mb: 5 }}>
-          <img src="/icon/lia_logo_white.svg" alt="LIA" />
+          <img
+            src={theme.palette.mode === 'dark' ? '/icon/lia_logo_white.svg' : '/icon/lia_logo_black.svg'}
+            alt="LIA"
+          />
         </Box>
 
         <Stack spacing={2} width={320}>

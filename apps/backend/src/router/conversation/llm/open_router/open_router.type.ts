@@ -32,6 +32,7 @@ export interface OpenRouterTool {
 }
 
 export interface OpenRouterRequestBody {
+  model?: string;
   messages: OpenRouterMessage[];
   tools?: OpenRouterTool[];
 }

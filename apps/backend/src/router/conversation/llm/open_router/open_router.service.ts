@@ -31,7 +31,7 @@ export class OpenRouterService {
     return await axios.post<OpenRouterResponseBody>(
       this.openRouterUrl,
       {
-        model: this.model,
+        model: body.model ?? this.model,
         messages: body.messages,
         tools: body.tools,
         tool_choice: 'auto',
@@ -51,7 +51,7 @@ export class OpenRouterService {
       return await axios.post<Readable>(
         this.openRouterUrl,
         {
-          model: this.model,
+          model: body.model ?? this.model,
           messages: body.messages,
           tools: body.tools,
           tool_choice: 'auto',
@@ -68,7 +68,7 @@ export class OpenRouterService {
       );
     } catch (e) {
       if (e instanceof AxiosError) {
-        this.logger.error(`LLM Error: ${e.response?.status} ${e.response?.statusText} ${e.response?.data}`);
+        this.logger.error(`LLM Error: ${e.response?.status} ${e.response?.statusText}`);
       } else {
         this.logger.error(e);
       }

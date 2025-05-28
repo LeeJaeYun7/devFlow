@@ -13,6 +13,7 @@ import { Model } from 'mongoose';
 import { MessageRoleMap } from '@lia/api/conversation/message/message.constant';
 import { systemPrompt } from './example.constant';
 import { NaverStockFetcherService } from '../../finance/naver/fetchers/naver-finance-fetch.service';
+import { ParserService } from './parser.service';
 @Injectable()
 export class LlmService {
   constructor(
@@ -21,7 +22,8 @@ export class LlmService {
 
     private readonly yahooFinanceService: YahooFinanceService,
     private readonly openRouterService: OpenRouterService,
-    private readonly naverStockFetcherService: NaverStockFetcherService
+    private readonly naverStockFetcherService: NaverStockFetcherService,
+    private readonly parserService: ParserService
   ) {}
 
   public async getTitleStream({ message, cb, endCb }: LLMStreamParam) {
@@ -36,6 +38,7 @@ export class LlmService {
           content: message,
         },
       ],
+      model: 'openai/gpt-3.5-turbo',
     });
     const stream = res.data;
     let title = '';
@@ -44,10 +47,6 @@ export class LlmService {
     stream.on('data', (chunk: Buffer) => {
       const dataList = this.toDataList(chunk);
       for (const data of dataList) {
-        if (!data) {
-          continue;
-        }
-
         try {
           const parsed = JSON.parse(data) as OpenRouterStreamChunk;
           const content = parsed.choices[0]?.delta?.content;
@@ -148,28 +147,27 @@ export class LlmService {
       tools,
     });
 
-    const firstStream = firstResponseStream.data;
-    let isThinking = false;
-    let isToolCall = false;
     let finalContent = '';
+    let isToolCall = false;
 
-    let firstTotalContent = '';
+    const firstStreamParser = this.parserService.createParser((content) => {
+      if (isToolCall) {
+        return;
+      }
+      finalContent += content;
+      cb(content);
+    });
 
+    const firstStream = firstResponseStream.data;
     const firstResponseTools: OpenRouterStreamChunkToolCall[] = [];
 
-    firstStream.on('data', async (chunk: Buffer) => {
-      firstStream.pause();
+    firstStream.on('data', (chunk: Buffer) => {
       const dataList = this.toDataList(chunk);
       for (const data of dataList) {
-        if (!data || data === ': OPENROUTER PROCESSING' || data === '[DONE]') {
-          continue;
-        }
-
         try {
           const parsed = JSON.parse(data) as OpenRouterStreamChunk;
           const delta = parsed.choices[0]?.delta;
-          let content = delta?.content;
-          firstTotalContent += content ?? '';
+          const content = delta?.content;
 
           const toolCalls = delta?.tool_calls;
           if (toolCalls) {
@@ -198,32 +196,11 @@ export class LlmService {
             continue;
           }
 
-          // thinking 태그 처리
-          if (firstTotalContent.includes('<thinking>')) {
-            isThinking = true;
-            const splitContent = content.split('>');
-            content = splitContent[splitContent.length - 1];
-          }
-
-          if (firstTotalContent.includes('</thinking>')) {
-            isThinking = false;
-            const splitContent = content.split('>');
-            if (splitContent.length > 1) {
-              content = splitContent[splitContent.length - 1].trim();
-            }
-          }
-
-          // thinking 상태가 아닐 때만 컨텐츠를 저장하고 callback 호출
-          if (!isThinking) {
-            finalContent += content;
-            cb(content);
-          }
+          firstStreamParser.write(content);
         } catch {
           // ignore
         }
       }
-
-      firstStream.resume();
     });
 
     firstStream.on('end', async () => {
@@ -249,7 +226,7 @@ export class LlmService {
         if (!toolFunctions[functionName]) continue;
 
         const args = JSON.parse(toolCall.function.arguments);
-        const func = toolFunctions[functionName] as any;
+        const func = toolFunctions[functionName];
         const toolResult = await func(args);
 
         newMessages.push({
@@ -264,39 +241,23 @@ export class LlmService {
         messages: newMessages,
         tools,
       });
+      const secondStreamParser = this.parserService.createParser((content) => {
+        finalContent += content;
+        cb(content);
+      });
 
       const secondStream = secondResponseStream.data;
-
-      let isSecondThinking = false;
-      let secondTotalContent = '';
-
       secondStream.on('data', (chunk: Buffer) => {
         const dataList = this.toDataList(chunk);
         for (const data of dataList) {
           try {
             const parsed = JSON.parse(data) as OpenRouterStreamChunk;
             const delta = parsed.choices[0]?.delta;
-            let content = delta?.content;
-            secondTotalContent += content ?? '';
-
-            if (secondTotalContent.includes('<thinking>')) {
-              isSecondThinking = true;
-              const splitContent = content.split('>');
-              content = splitContent[splitContent.length - 1];
+            const content = delta?.content;
+            if (!content) {
+              continue;
             }
-
-            if (secondTotalContent.includes('</thinking>')) {
-              isSecondThinking = false;
-              const splitContent = content.split('>');
-              if (splitContent.length > 1) {
-                content = splitContent[splitContent.length - 1].trim();
-              }
-            }
-
-            if (!isSecondThinking) {
-              finalContent += content;
-              cb(content);
-            }
+            secondStreamParser.write(content);
           } catch {
             // ignore
           }
@@ -320,7 +281,7 @@ export class LlmService {
       return chunkString
         .split('data: ')
         .map((data) => data.trim())
-        .filter((v) => v);
+        .filter((v) => v && v !== ': OPENROUTER PROCESSING' && v !== '[DONE]');
     } catch {
       return [];
     }
