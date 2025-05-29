@@ -28,6 +28,4 @@ RUN chown -R data-collector:data-collector .
 
 EXPOSE 4700
 
-COPY apps/data-collector/entrypoint.sh /app/entrypoint.sh
-
-ENTRYPOINT [ "sh", "entrypoint.sh" ]
+ENTRYPOINT [ "node", "data-collector" ]

@@ -28,6 +28,4 @@ RUN chown -R backend:backend .
 
 EXPOSE 4600
 
-COPY apps/backend/entrypoint.sh /app/entrypoint.sh
-
-ENTRYPOINT [ "sh", "entrypoint.sh" ]
+ENTRYPOINT [ "node", "backend" ]
