@@ -12,7 +12,6 @@ import { MessageModel } from '../../../module/mongo/model/conversation/models/me
 import { Model } from 'mongoose';
 import { MessageRoleMap } from '@lia/api/conversation/message/message.constant';
 import { systemPrompt } from './example.constant';
-import { NaverStockFetcherService } from '../../finance/naver/fetchers/naver-finance-fetch.service';
 import { ParserService } from './parser.service';
 @Injectable()
 export class LlmService {
@@ -22,7 +21,6 @@ export class LlmService {
 
     private readonly yahooFinanceService: YahooFinanceService,
     private readonly openRouterService: OpenRouterService,
-    private readonly naverStockFetcherService: NaverStockFetcherService,
     private readonly parserService: ParserService
   ) {}
 
