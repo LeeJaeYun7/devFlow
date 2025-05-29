@@ -13,6 +13,15 @@ export class NaverStockHistory extends Document {
   @Prop({ type: Object, required: true })
   data!: NaverStockHistoryItem[];
 
+  @Prop({ required: false })
+  marketCap?: number;
+
+  @Prop({ required: false })
+  high52Week?: number;
+
+  @Prop({ required: false })
+  low52Week?: number;
+
   @Prop({ required: true })
   lastUpdated!: Date;
 }

@@ -1,5 +1,19 @@
 import { NaverStockHistoryItem } from '../../../../module/mongo/model/naver/interfaces/naver-stock-history-interface';
 
 export class NaverStockTechnicalDto {
-  ohlcvAndIndicators!: NaverStockHistoryItem[];
+  ohlcvAndIndicators!: Record<
+    string,
+    {
+      open: number;
+      high: number;
+      low: number;
+      close: number;
+      volume: number;
+    }
+  >;
+  currentPrice!: number;
+  changePercent!: number;
+  marketCap!: number;
+  high52Week!: number;
+  low52Week!: number;
 }

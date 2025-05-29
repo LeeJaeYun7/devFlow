@@ -7,6 +7,7 @@ import {
 } from '../../../module/mongo/model/naver/models/naver-stock-history.model';
 import { NaverFinanceService } from './naver-finance.service';
 import { NaverStockService } from './naver-stock.service';
+import { NaverStockFetcherService } from './fetchers/naver-finance-fetch.service';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { NaverStockService } from './naver-stock.service';
       { name: NaverStockInfo.name, schema: NaverStockInfoSchema },
     ]),
   ],
-  providers: [NaverFinanceService, NaverStockService],
-  exports: [NaverFinanceService, NaverStockService],
+  providers: [NaverFinanceService, NaverStockService, NaverStockFetcherService],
+  exports: [NaverFinanceService, NaverStockService, NaverStockFetcherService],
 })
 export class NaverFinanceModule {}

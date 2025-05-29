@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { tools } from './open_router/lia-tools.constant';
 import { YahooFinanceService } from '../../finance/yahoo/yahoo-finance.service';
+import { NaverFinanceService } from '../../finance/naver/naver-finance.service';
 import { OpenRouterService } from './open_router/open_router.service';
 import {
   OpenRouterMessage,
@@ -18,8 +19,8 @@ export class LlmService {
   constructor(
     @InjectModel(MessageModel.name)
     private readonly messageModel: Model<MessageModel>,
-
     private readonly yahooFinanceService: YahooFinanceService,
+    private readonly naverFinanceService: NaverFinanceService,
     private readonly openRouterService: OpenRouterService,
     private readonly parserService: ParserService
   ) {}
@@ -83,7 +84,7 @@ export class LlmService {
         const symbol = args.symbol;
         if (this.isKoreanStock(symbol)) {
           const cleanSymbol = symbol.replace(/\.(KS|KQ)$/, '');
-          return this.naverStockFetcherService.fetchTechnicalData(cleanSymbol);
+          return this.naverFinanceService.getTechnicalData(cleanSymbol);
         } else {
           return this.yahooFinanceService.getTechnicalData(symbol);
         }
@@ -92,7 +93,7 @@ export class LlmService {
         const symbol = args.symbol;
         if (this.isKoreanStock(symbol)) {
           const cleanSymbol = symbol.replace(/\.(KS|KQ)$/, '');
-          return this.naverStockFetcherService.fetchFundamentalData(cleanSymbol);
+          return this.naverFinanceService.getFundamentalData(cleanSymbol);
         } else {
           return this.yahooFinanceService.getFundamentalData(symbol);
         }

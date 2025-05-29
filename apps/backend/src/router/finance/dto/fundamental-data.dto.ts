@@ -1,4 +1,4 @@
-export class NaverStockFundamentalDto {
+export class FundamentalDataDto {
   currentPrice!: number;
   PER!: number;
   EPS!: number;
@@ -6,4 +6,4 @@ export class NaverStockFundamentalDto {
   marketCap!: number;
   sharesOutstanding!: number;
   capital!: number;
-}
+} 
