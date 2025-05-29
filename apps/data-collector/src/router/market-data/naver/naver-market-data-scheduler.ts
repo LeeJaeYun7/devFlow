@@ -27,7 +27,7 @@ export class NaverMarketScheduler {
 
   @Cron('30 17 * * 1-5')
   private async fetchNaverStockHistory(): Promise<void> {
-    this.logger.log('Starting Naver technical data update...');
+    this.logger.log('Starting Naver Stock History update...');
 
     // MongoDB에서 심볼 목록 가져오기
     const symbols = await this.stockSymbolModel.find().select('symbol').lean();

@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import dayjs from 'dayjs';
+import YahooFinance from 'yahoo-finance2';
 import { YahooStockInfo } from '../../../module/mongo/model/yahoo/models/yahoo-stock-info.model';
 import { YahooStockHistory } from '../../../module/mongo/model/yahoo/models/yahoo-stock-history.model';
 import { YahooStockAnalysis } from '../../../module/mongo/model/yahoo/models/yahoo-stock-analysis.model';
@@ -21,7 +22,29 @@ export class YahooStockService {
 
   async getStockInfo(symbol: string): Promise<YahooStockInfo | null> {
     try {
-      return await this.stockInfoModel.findOne({ symbol }).exec();
+      // 먼저 MongoDB에서 데이터 조회
+      const existingInfo = await this.stockInfoModel.findOne({ symbol }).exec();
+      if (existingInfo) {
+        return existingInfo;
+      }
+
+      // MongoDB에 데이터가 없는 경우 Yahoo Finance API 호출
+      const data = await YahooFinance.quoteSummary(symbol, {
+        modules: ['summaryDetail', 'defaultKeyStatistics', 'financialData'],
+      });
+
+      // 새로운 주식 정보 데이터 생성
+      const newStockInfo = new this.stockInfoModel({
+        symbol,
+        summaryDetail: data.summaryDetail,
+        defaultKeyStatistics: data.defaultKeyStatistics,
+        financialData: data.financialData,
+        updatedAt: new Date(),
+      });
+
+      // MongoDB에 저장
+      await newStockInfo.save();
+      return newStockInfo;
     } catch (error: unknown) {
       this.logger.error(`Error getting stock info for ${symbol}: ${(error as Error).message}`);
       throw error;
@@ -30,7 +53,7 @@ export class YahooStockService {
 
   async getStockQuote(symbol: string): Promise<YahooStockQuote> {
     try {
-      const stockInfo = await this.stockInfoModel.findOne({ symbol }).exec();
+      const stockInfo = await this.getStockInfo(symbol);
 
       return {
         currentPrice: stockInfo?.summaryDetail?.regularMarketOpen ?? null,
@@ -45,9 +68,38 @@ export class YahooStockService {
     }
   }
 
-  async getStockHistory(symbol: string, interval: string): Promise<YahooStockHistory | null> {
+  async getStockHistory(symbol: string, interval: '1d' | '1wk' | '1mo'): Promise<YahooStockHistory | null> {
     try {
-      return await this.stockHistoryModel.findOne({ symbol, interval }).exec();
+      // 먼저 MongoDB에서 데이터 조회
+      const existingHistory = await this.stockHistoryModel.findOne({ symbol, interval }).exec();
+      if (existingHistory) {
+        return existingHistory;
+      }
+
+      // MongoDB에 데이터가 없는 경우 Yahoo Finance API 호출
+      const data = await YahooFinance.historical(symbol, {
+        period1: dayjs().subtract(3, 'month').toDate(),
+        interval,
+      });
+
+      // 새로운 주식 히스토리 데이터 생성
+      const newHistory = new this.stockHistoryModel({
+        symbol,
+        interval,
+        data: data.map((item) => ({
+          date: item.date,
+          open: item.open,
+          high: item.high,
+          low: item.low,
+          close: item.close,
+          volume: item.volume,
+        })),
+        updatedAt: new Date(),
+      });
+
+      // MongoDB에 저장
+      await newHistory.save();
+      return newHistory;
     } catch (error: unknown) {
       this.logger.error(`Error getting stock history for ${symbol}: ${(error as Error).message}`);
       throw error;
@@ -94,7 +146,30 @@ export class YahooStockService {
 
   async getStockAnalysis(symbol: string): Promise<YahooStockAnalysis | null> {
     try {
-      return await this.stockAnalysisModel.findOne({ symbol }).exec();
+      // 먼저 MongoDB에서 데이터 조회
+      const existingAnalysis = await this.stockAnalysisModel.findOne({ symbol }).exec();
+      if (existingAnalysis) {
+        return existingAnalysis;
+      }
+
+      // MongoDB에 데이터가 없는 경우 Yahoo Finance API 호출
+      const data = await YahooFinance.quoteSummary(symbol, {
+        modules: ['earningsTrend', 'recommendationTrend', 'earningsHistory', 'earnings'],
+      });
+
+      // 새로운 분석 데이터 생성
+      const newAnalysis = new this.stockAnalysisModel({
+        symbol,
+        earningsTrend: data.earningsTrend,
+        recommendationTrend: data.recommendationTrend,
+        earningsHistory: data.earningsHistory,
+        earnings: data.earnings,
+        updatedAt: new Date(),
+      });
+
+      // MongoDB에 저장
+      await newAnalysis.save();
+      return newAnalysis;
     } catch (error: unknown) {
       this.logger.error(`Error getting stock analysis for ${symbol}: ${(error as Error).message}`);
       throw error;
@@ -103,9 +178,60 @@ export class YahooStockService {
 
   async getStockNews(symbol: string): Promise<YahooStockNews | null> {
     try {
-      return await this.stockNewsModel.findOne({ symbol }).exec();
+      // 먼저 MongoDB에서 데이터 조회
+      const existingNews = await this.stockNewsModel.findOne({ symbol }).exec();
+      if (existingNews) {
+        return existingNews;
+      }
+
+      // MongoDB에 데이터가 없는 경우 Yahoo Finance API 호출
+      const result = await YahooFinance.search(symbol);
+      const news = result?.news ?? [];
+
+      // 뉴스 데이터 가공
+      const newsWithContent = await Promise.all(
+        news.map(async (item) => {
+          return {
+            title: item.title,
+            content: item.content || '',
+            relatedTickers: (Array.isArray(item.relatedTickers) ? item.relatedTickers : [item.relatedTickers]).filter(
+              (ticker): ticker is string => typeof ticker === 'string'
+            ),
+            pubDate:
+              item.providerPublishTime instanceof Date
+                ? item.providerPublishTime.toISOString()
+                : new Date(item.providerPublishTime).toISOString(),
+          };
+        })
+      );
+
+      // 새로운 뉴스 데이터 생성
+      const newNews = new this.stockNewsModel({
+        symbol,
+        news: newsWithContent,
+        updatedAt: new Date(),
+      });
+
+      // MongoDB에 저장
+      await newNews.save();
+      return newNews;
     } catch (error: unknown) {
       this.logger.error(`Error getting stock news for ${symbol}: ${(error as Error).message}`);
+      throw error;
+    }
+  }
+
+  async saveStockNews(symbol: string, news: any[]): Promise<YahooStockNews> {
+    try {
+      const stockNews = new this.stockNewsModel({
+        symbol,
+        news,
+        updatedAt: new Date(),
+      });
+
+      return await stockNews.save();
+    } catch (error: unknown) {
+      this.logger.error(`Error saving stock news for ${symbol}: ${(error as Error).message}`);
       throw error;
     }
   }
