@@ -8,14 +8,17 @@ import { YahooStockService } from './yahoo/yahoo-market-data-service';
 import { NasdaqSymbolScheduler } from './nasdaq/nasdaq-symbol-scheduler';
 import { NasdaqSymbolService } from './nasdaq/nasdaq-symbol.service';
 import { YahooStockInfo, YahooStockInfoSchema } from '../../module/mongo/model/yahoo/models/yahoo-stock-info.model';
-import { YahooStockHistory,
+import {
+  YahooStockHistory,
   YahooStockHistorySchema,
 } from '../../module/mongo/model/yahoo/models/yahoo-stock-history.model';
-import { YahooStockAnalysis,
+import {
+  YahooStockAnalysis,
   YahooStockAnalysisSchema,
 } from '../../module/mongo/model/yahoo/models/yahoo-stock-analysis.model';
 import { YahooStockNews, YahooStockNewsSchema } from '../../module/mongo/model/yahoo/models/yahoo-stock-news.model';
-import { NaverStockHistory,
+import {
+  NaverStockHistory,
   NaverStockHistorySchema,
 } from '../../module/mongo/model/naver/models/naver-stock-history.model';
 import { NaverStockInfo, NaverStockInfoSchema } from '../../module/mongo/model/naver/models/naver-stock-info.model';

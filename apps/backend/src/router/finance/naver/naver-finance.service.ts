@@ -8,10 +8,11 @@ export class NaverFinanceService {
   constructor(private readonly naverStockService: NaverStockService) {}
 
   public getTechnicalData = async (symbol: string): Promise<NaverStockTechnicalDto> => {
+    console.log('naver get technical data', symbol);
     const stockHistory = await this.naverStockService.getStockHistory(symbol);
 
     const technicalData: NaverStockTechnicalDto = {
-      ohlcvAndIndicators: 
+      ohlcvAndIndicators:
         stockHistory?.data?.reduce(
           (acc, cur) => {
             acc[cur.date] = {
@@ -26,7 +27,7 @@ export class NaverFinanceService {
           {} as Record<string, { open: number; high: number; low: number; close: number; volume: number }>
         ) ?? {},
       currentPrice: stockHistory?.data?.[0]?.close ?? 0,
-      changePercent: 
+      changePercent:
         stockHistory?.data?.[0] && stockHistory?.data?.[1]
           ? ((stockHistory.data[0].close - stockHistory.data[1].close) / stockHistory.data[1].close) * 100
           : 0,
@@ -39,7 +40,10 @@ export class NaverFinanceService {
   };
 
   public getFundamentalData = async (symbol: string): Promise<NaverStockFundamentalDto> => {
+    console.log('naver get fundamental data', symbol);
     const stockInfo = await this.naverStockService.getStockInfo(symbol);
+
+    console.log('naver get stockInfo', stockInfo);
 
     const fundamentalData: NaverStockFundamentalDto = {
       currentPrice: stockInfo?.summaryDetail?.regularMarketOpen ?? 0,

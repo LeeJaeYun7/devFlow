@@ -15,7 +15,7 @@ export class NaverStockService {
     @InjectModel(NaverStockInfo.name)
     private readonly stockInfoModel: Model<NaverStockInfo>,
     @InjectModel(KoreaStockSymbol.name)
-    private readonly stockSymbolModel: Model<KoreaStockSymbol>,
+    private readonly stockSymbolModel: Model<KoreaStockSymbol>
   ) {}
 
   public async saveStockHistory(symbol: string, ohlcvAndIndicators: any, fundamentalData: any) {

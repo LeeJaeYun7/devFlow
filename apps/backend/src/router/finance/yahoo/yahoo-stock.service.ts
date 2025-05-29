@@ -33,6 +33,12 @@ export class YahooStockService {
         modules: ['summaryDetail', 'defaultKeyStatistics', 'financialData'],
       });
 
+      // 데이터가 없는 경우
+      if (!data || !data.summaryDetail) {
+        this.logger.warn(`No stock info found for symbol ${symbol} in Yahoo Finance`);
+        return null;
+      }
+
       // 새로운 주식 정보 데이터 생성
       const newStockInfo = new this.stockInfoModel({
         symbol,
@@ -46,6 +52,12 @@ export class YahooStockService {
       await newStockInfo.save();
       return newStockInfo;
     } catch (error: unknown) {
+      // Yahoo Finance API에서 심볼을 찾을 수 없는 경우
+      if (error instanceof Error && error.message.includes('Quote not found')) {
+        this.logger.warn(`Symbol ${symbol} not found in Yahoo Finance`);
+        return null;
+      }
+
       this.logger.error(`Error getting stock info for ${symbol}: ${(error as Error).message}`);
       throw error;
     }
@@ -82,6 +94,12 @@ export class YahooStockService {
         interval,
       });
 
+      // 데이터가 없는 경우
+      if (!data || data.length === 0) {
+        this.logger.warn(`No historical data found for symbol ${symbol} in Yahoo Finance`);
+        return null;
+      }
+
       // 새로운 주식 히스토리 데이터 생성
       const newHistory = new this.stockHistoryModel({
         symbol,
@@ -101,6 +119,12 @@ export class YahooStockService {
       await newHistory.save();
       return newHistory;
     } catch (error: unknown) {
+      // Yahoo Finance API에서 심볼을 찾을 수 없는 경우
+      if (error instanceof Error && error.message.includes('Quote not found')) {
+        this.logger.warn(`Symbol ${symbol} not found in Yahoo Finance`);
+        return null;
+      }
+
       this.logger.error(`Error getting stock history for ${symbol}: ${(error as Error).message}`);
       throw error;
     }
@@ -171,6 +195,12 @@ export class YahooStockService {
       await newAnalysis.save();
       return newAnalysis;
     } catch (error: unknown) {
+      // Yahoo Finance API에서 심볼을 찾을 수 없는 경우
+      if (error instanceof Error && error.message.includes('Quote not found')) {
+        this.logger.warn(`Symbol ${symbol} not found in Yahoo Finance`);
+        return null;
+      }
+
       this.logger.error(`Error getting stock analysis for ${symbol}: ${(error as Error).message}`);
       throw error;
     }
@@ -186,7 +216,14 @@ export class YahooStockService {
 
       // MongoDB에 데이터가 없는 경우 Yahoo Finance API 호출
       const result = await YahooFinance.search(symbol);
-      const news = result?.news ?? [];
+
+      // 검색 결과가 없거나 뉴스가 없는 경우
+      if (!result || !result.news || result.news.length === 0) {
+        this.logger.warn(`No news found for symbol ${symbol} in Yahoo Finance`);
+        return null;
+      }
+
+      const news = result.news;
 
       // 뉴스 데이터 가공
       const newsWithContent = await Promise.all(
@@ -216,6 +253,12 @@ export class YahooStockService {
       await newNews.save();
       return newNews;
     } catch (error: unknown) {
+      // Yahoo Finance API에서 심볼을 찾을 수 없는 경우
+      if (error instanceof Error && error.message.includes('Quote not found')) {
+        this.logger.warn(`Symbol ${symbol} not found in Yahoo Finance`);
+        return null;
+      }
+
       this.logger.error(`Error getting stock news for ${symbol}: ${(error as Error).message}`);
       throw error;
     }
@@ -253,7 +296,7 @@ export class YahooStockService {
     };
   }
 
-  public async getEpsTrend(symbol: string): Promise<any>{
+  public async getEpsTrend(symbol: string): Promise<any> {
     try {
       const yahooStockAnalysis = await this.getStockAnalysis(symbol);
       if (!yahooStockAnalysis) return {};

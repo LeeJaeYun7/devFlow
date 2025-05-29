@@ -14,6 +14,11 @@ export class NaverMarketScheduler {
 
     // MongoDB에서 심볼 목록 가져오기
     const symbols = await this.naverStockService.getStockSymbols();
+    if (!symbols || symbols.length === 0) {
+      this.logger.warn('No symbols found in database');
+      return;
+    }
+    this.logger.log(`Found ${symbols.length} symbols in database`);
 
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
@@ -25,6 +30,14 @@ export class NaverMarketScheduler {
       for (const { symbol } of symbols) {
         try {
           const baseUrl = `https://finance.naver.com/item/sise_day.naver?code=${symbol}`;
+          const response = await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
+
+          // 페이지가 존재하지 않는 경우
+          if (!response || response.status() === 404) {
+            this.logger.warn(`Symbol ${symbol} not found in Naver Finance`);
+            continue;
+          }
+
           const dailyData: {
             date: string;
             close: number;
@@ -37,11 +50,18 @@ export class NaverMarketScheduler {
           // ✅ 1. 여러 페이지 순회 (예: 최근 3개월치 약 9페이지)
           for (let i = 1; i <= 9; i++) {
             const url = `${baseUrl}&page=${i}`;
-            await page.goto(url, { waitUntil: 'domcontentloaded' });
+            const pageResponse = await page.goto(url, { waitUntil: 'domcontentloaded' });
+
+            // 페이지가 존재하지 않는 경우
+            if (!pageResponse || pageResponse.status() === 404) {
+              this.logger.warn(`Page ${i} not found for symbol ${symbol} in Naver Finance`);
+              break;
+            }
 
             const pageData = await page.evaluate(() => {
               const rows = Array.from(document.querySelectorAll('table.type2 tr'));
-              const data: { date: string; close: number; open: number; high: number; low: number; volume: number }[] = [];
+              const data: { date: string; close: number; open: number; high: number; low: number; volume: number }[] =
+                [];
 
               rows.forEach((row) => {
                 const tds = row.querySelectorAll('td');
@@ -62,6 +82,11 @@ export class NaverMarketScheduler {
               return data;
             });
 
+            if (pageData.length === 0) {
+              this.logger.warn(`No data found on page ${i} for symbol ${symbol}`);
+              break;
+            }
+
             dailyData.push(...pageData);
             await new Promise((res) => setTimeout(res, 300)); // 서버 과부하 방지
           }
@@ -70,12 +95,19 @@ export class NaverMarketScheduler {
           const uniqueData = Array.from(new Map(dailyData.map((d) => [d.date, d])).values());
 
           if (uniqueData.length < 2) {
-            throw new Error('Not enough data');
+            this.logger.warn(`Not enough data found for symbol ${symbol}`);
+            continue;
           }
 
           // ✅ 2. fundamental 정보 크롤링
           const fundUrl = `https://finance.naver.com/item/sise.naver?code=${symbol}`;
-          await page.goto(fundUrl, { waitUntil: 'domcontentloaded' });
+          const fundResponse = await page.goto(fundUrl, { waitUntil: 'domcontentloaded' });
+
+          // 페이지가 존재하지 않는 경우
+          if (!fundResponse || fundResponse.status() === 404) {
+            this.logger.warn(`Fundamental data not found for symbol ${symbol} in Naver Finance`);
+            continue;
+          }
 
           const fundamentalData = await page.evaluate(() => {
             const cleanText = (text: string | null) => text?.trim().replace(/,/g, '') ?? null;
@@ -98,6 +130,11 @@ export class NaverMarketScheduler {
             };
           });
 
+          if (!fundamentalData) {
+            this.logger.warn(`No fundamental data found for symbol ${symbol}`);
+            continue;
+          }
+
           const ohlcvAndIndicators = uniqueData.reduce(
             (acc, cur) => {
               acc[cur.date] = {
@@ -116,7 +153,6 @@ export class NaverMarketScheduler {
 
           // 서버 과부하 방지를 위한 딜레이
           await new Promise((res) => setTimeout(res, 300));
-
         } catch (error: any) {
           this.logger.error(`Error fetching technical data for ${symbol}: ${error.message}`);
         }
@@ -132,6 +168,11 @@ export class NaverMarketScheduler {
 
     // MongoDB에서 심볼 목록 가져오기
     const symbols = await this.naverStockService.getStockSymbols();
+    if (!symbols || symbols.length === 0) {
+      this.logger.warn('No symbols found in database');
+      return;
+    }
+    this.logger.log(`Found ${symbols.length} symbols in database`);
 
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
@@ -145,7 +186,13 @@ export class NaverMarketScheduler {
         try {
           // 📌 1. 기본정보 페이지로 이동
           const fundamentalUrl = `https://finance.naver.com/item/sise.naver?code=${symbol}`;
-          await page.goto(fundamentalUrl, { waitUntil: 'domcontentloaded' });
+          const response = await page.goto(fundamentalUrl, { waitUntil: 'domcontentloaded' });
+
+          // 페이지가 존재하지 않는 경우
+          if (!response || response.status() === 404) {
+            this.logger.warn(`Symbol ${symbol} not found in Naver Finance`);
+            continue;
+          }
 
           const fundamentalResult = await page.evaluate(() => {
             const cleanText = (text: string | null) => text?.trim().replace(/,/g, '') ?? null;
@@ -180,6 +227,12 @@ export class NaverMarketScheduler {
             };
           });
 
+          // 데이터가 없는 경우
+          if (!fundamentalResult) {
+            this.logger.warn(`No fundamental data found for symbol ${symbol}`);
+            continue;
+          }
+
           // naverStockService를 통해 저장
           await this.naverStockService.saveStockInfo(symbol, {
             summaryDetail: {
@@ -202,7 +255,6 @@ export class NaverMarketScheduler {
 
           // 서버 과부하 방지를 위한 딜레이
           await new Promise((res) => setTimeout(res, 300));
-
         } catch (error: any) {
           this.logger.error(`Error fetching fundamental data for ${symbol}: ${error.message}`);
         }

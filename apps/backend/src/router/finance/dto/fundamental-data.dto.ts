@@ -6,4 +6,4 @@ export class FundamentalDataDto {
   marketCap!: number;
   sharesOutstanding!: number;
   capital!: number;
-} 
+}

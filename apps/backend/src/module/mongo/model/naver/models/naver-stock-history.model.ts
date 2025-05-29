@@ -26,4 +26,4 @@ export class NaverStockHistory extends Document {
   lastUpdated!: Date;
 }
 
-export const NaverStockHistorySchema = SchemaFactory.createForClass(NaverStockHistory); 
+export const NaverStockHistorySchema = SchemaFactory.createForClass(NaverStockHistory);

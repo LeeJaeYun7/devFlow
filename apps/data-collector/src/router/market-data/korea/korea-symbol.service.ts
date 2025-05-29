@@ -10,7 +10,7 @@ export class KoreaSymbolService {
 
   constructor(
     @InjectModel(KoreaStockSymbol.name)
-    private readonly stockSymbolModel: Model<KoreaStockSymbol>,
+    private readonly stockSymbolModel: Model<KoreaStockSymbol>
   ) {}
 
   public async fetchAndStoreTopSymbols(): Promise<void> {
@@ -32,11 +32,13 @@ export class KoreaSymbolService {
 
           const pageSymbols = await page.evaluate(() => {
             const anchors = Array.from(document.querySelectorAll('table.type_2 a[href*="item/main.naver?code="]'));
-            return anchors.map((a) => {
-              const href = a.getAttribute('href');
-              const match = href?.match(/code=(\d+)/);
-              return match ? match[1] : null;
-            }).filter((code): code is string => !!code);
+            return anchors
+              .map((a) => {
+                const href = a.getAttribute('href');
+                const match = href?.match(/code=(\d+)/);
+                return match ? match[1] : null;
+              })
+              .filter((code): code is string => !!code);
           });
 
           pageSymbols.forEach((symbol) => symbols.add(symbol));

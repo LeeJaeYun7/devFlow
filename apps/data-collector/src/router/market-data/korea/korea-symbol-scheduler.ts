@@ -21,4 +21,4 @@ export class KoreaSymbolScheduler {
       throw error;
     }
   }
-} 
+}

@@ -1,8 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { NaverStockHistory } from '../../../module/mongo/model/naver/models/naver-stock-history.model';
 import { NaverStockInfo } from '../../../module/mongo/model/naver/models/naver-stock-info.model';
+import { NaverStockFetcherService } from './fetchers/naver-finance-fetch.service';
 
 @Injectable()
 export class NaverStockService {
@@ -12,12 +13,38 @@ export class NaverStockService {
     @InjectModel(NaverStockHistory.name)
     private readonly stockHistoryModel: Model<NaverStockHistory>,
     @InjectModel(NaverStockInfo.name)
-    private readonly stockInfoModel: Model<NaverStockInfo>
+    private readonly stockInfoModel: Model<NaverStockInfo>,
+    private readonly naverStockFetcherService: NaverStockFetcherService
   ) {}
 
   async getStockHistory(symbol: string, interval = '1d'): Promise<NaverStockHistory | null> {
     try {
+      // MongoDB에서 데이터 조회
       const history = await this.stockHistoryModel.findOne({ symbol, interval }).sort({ createdAt: -1 });
+
+      // 데이터가 없는 경우 fetchTechnicalData에서 가져오기
+      if (!history) {
+        this.logger.log(`No history found for ${symbol}, fetching from Naver Finance...`);
+        const technicalData = await this.naverStockFetcherService.fetchTechnicalData(symbol);
+
+        if (!technicalData) {
+          this.logger.warn(`Failed to fetch technical data for ${symbol}`);
+          return null;
+        }
+
+        // 새로운 히스토리 데이터 생성
+        const newHistory = new this.stockHistoryModel({
+          symbol,
+          interval,
+          data: technicalData,
+          updatedAt: new Date(),
+        });
+
+        // MongoDB에 저장
+        await newHistory.save();
+        return newHistory;
+      }
+
       return history;
     } catch (error) {
       this.logger.error(
@@ -29,7 +56,44 @@ export class NaverStockService {
 
   async getStockInfo(symbol: string): Promise<NaverStockInfo | null> {
     try {
+      // MongoDB에서 데이터 조회
       const info = await this.stockInfoModel.findOne({ symbol }).sort({ lastUpdated: -1 });
+
+      // 데이터가 없는 경우 getFundamentalData에서 가져오기
+      if (!info) {
+        this.logger.log(`No stock info found for ${symbol}, fetching from Naver Finance...`);
+        const fundamentalData = await this.naverStockFetcherService.fetchFundamentalData(symbol);
+
+        if (!fundamentalData) {
+          this.logger.warn(`Failed to fetch fundamental data for ${symbol}`);
+          return null;
+        }
+
+        // 새로운 주식 정보 데이터 생성
+        const newInfo = new this.stockInfoModel({
+          _id: new Types.ObjectId(),
+          symbol,
+          summaryDetail: {
+            regularMarketPrice: fundamentalData.currentPrice,
+            marketCap: fundamentalData.marketCap,
+            volume: fundamentalData.VOLUME,
+          },
+          defaultKeyStatistics: {
+            trailingPE: fundamentalData.PER,
+            trailingEps: fundamentalData.EPS,
+            sharesOutstanding: fundamentalData.sharesOutstanding,
+          },
+          financialData: {
+            totalCash: fundamentalData.capital,
+          },
+          lastUpdated: new Date(),
+        });
+
+        // MongoDB에 저장
+        await newInfo.save();
+        return newInfo;
+      }
+
       return info;
     } catch (error) {
       this.logger.error(

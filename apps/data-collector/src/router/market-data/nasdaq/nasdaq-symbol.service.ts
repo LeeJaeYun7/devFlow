@@ -46,7 +46,9 @@ export class NasdaqSymbolService {
           this.logger.log(`Fetched ${symbols.length} symbols from ${screener}`);
           await new Promise((res) => setTimeout(res, 1000)); // API 제한을 피하기 위한 딜레이
         } catch (error) {
-          this.logger.warn(`Failed to fetch from ${screener}: ${error instanceof Error ? error.message : String(error)}`);
+          this.logger.warn(
+            `Failed to fetch from ${screener}: ${error instanceof Error ? error.message : String(error)}`
+          );
           continue; // 한 스크리너가 실패해도 계속 진행
         }
       }
