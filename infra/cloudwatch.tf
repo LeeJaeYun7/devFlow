@@ -1,9 +1,9 @@
 resource "aws_cloudwatch_log_group" "api" {
   name              = "/ecs/api"
-  retention_in_days = 30
+  retention_in_days = 14
 }
 
-resource "aws_cloudwatch_log_group" "mongo" {
-  name              = "/ecs/mongo"
-  retention_in_days = 30
+resource "aws_cloudwatch_log_group" "data_collector" {
+  name              = "/ecs/data_collector"
+  retention_in_days = 14
 } 
