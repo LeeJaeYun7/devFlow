@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { NaverStockHistory } from '../../../module/mongo/model/naver/models/naver-stock-history.model';
 import { NaverStockInfo } from '../../../module/mongo/model/naver/models/naver-stock-info.model';
 import { KoreaStockSymbol } from '../../../module/mongo/model/korea/models/korea-stock-symbol.model';
@@ -20,6 +20,7 @@ export class NaverStockService {
 
   public async saveStockHistory(symbol: string, ohlcvAndIndicators: any, fundamentalData: any) {
     const stockHistory = new this.stockHistoryModel({
+      _id: new Types.ObjectId(),
       symbol,
       interval: '1d',
       data: Object.entries(ohlcvAndIndicators).map(([date, data]: [string, any]) => ({
@@ -43,6 +44,7 @@ export class NaverStockService {
   public async saveStockInfo(symbol: string, stockInfo: any) {
     try {
       const infoData = {
+        _id: new Types.ObjectId(),
         symbol,
         summaryDetail: stockInfo.summaryDetail,
         defaultKeyStatistics: stockInfo.defaultKeyStatistics,
@@ -50,7 +52,11 @@ export class NaverStockService {
         lastUpdated: new Date(),
       };
 
-      await this.stockInfoModel.findOneAndUpdate({ symbol }, { $set: infoData }, { upsert: true, new: true });
+      await this.stockInfoModel.findOneAndUpdate(
+        { symbol },
+        { $setOnInsert: { _id: new Types.ObjectId() }, $set: infoData },
+        { upsert: true, new: true }
+      );
 
       this.logger.log(`Successfully saved stock info for ${symbol}`);
     } catch (error) {

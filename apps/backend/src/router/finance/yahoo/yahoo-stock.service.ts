@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import dayjs from 'dayjs';
 import YahooFinance from 'yahoo-finance2';
 import { YahooStockInfo } from '../../../module/mongo/model/yahoo/models/yahoo-stock-info.model';
@@ -41,6 +41,7 @@ export class YahooStockService {
 
       // 새로운 주식 정보 데이터 생성
       const newStockInfo = new this.stockInfoModel({
+        _id: new Types.ObjectId(),
         symbol,
         summaryDetail: data.summaryDetail,
         defaultKeyStatistics: data.defaultKeyStatistics,
@@ -102,6 +103,7 @@ export class YahooStockService {
 
       // 새로운 주식 히스토리 데이터 생성
       const newHistory = new this.stockHistoryModel({
+        _id: new Types.ObjectId(),
         symbol,
         interval,
         data: data.map((item) => ({
@@ -183,6 +185,7 @@ export class YahooStockService {
 
       // 새로운 분석 데이터 생성
       const newAnalysis = new this.stockAnalysisModel({
+        _id: new Types.ObjectId(),
         symbol,
         earningsTrend: data.earningsTrend,
         recommendationTrend: data.recommendationTrend,
@@ -244,6 +247,7 @@ export class YahooStockService {
 
       // 새로운 뉴스 데이터 생성
       const newNews = new this.stockNewsModel({
+        _id: new Types.ObjectId(),
         symbol,
         news: newsWithContent,
         updatedAt: new Date(),
@@ -267,6 +271,7 @@ export class YahooStockService {
   async saveStockNews(symbol: string, news: any[]): Promise<YahooStockNews> {
     try {
       const stockNews = new this.stockNewsModel({
+        _id: new Types.ObjectId(),
         symbol,
         news,
         updatedAt: new Date(),

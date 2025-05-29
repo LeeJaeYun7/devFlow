@@ -7,7 +7,8 @@ import { NaverStockFundamentalDto } from '../dto/fundamental-data.dto';
 export class NaverStockFetcherService {
   private readonly logger = new Logger(NaverStockFetcherService.name);
 
-  public async fetchFundamentalData(symbol: string): Promise<NaverStockFundamentalDto> {
+  public async fetchFundamentalData(symbol: string): Promise<NaverStockFundamentalDto | null> {
+
     if (!symbol) {
       this.logger.warn('Symbol is required');
       return null;
@@ -89,7 +90,8 @@ export class NaverStockFetcherService {
     }
   }
 
-  public async fetchTechnicalData(symbol: string): Promise<NaverStockTechnicalDto> {
+
+  public async fetchTechnicalData(symbol: string): Promise<NaverStockTechnicalDto | null> {
     if (!symbol) {
       this.logger.warn('Symbol is required');
       return null;

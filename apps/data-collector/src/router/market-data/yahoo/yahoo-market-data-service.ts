@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { YahooStockInfo } from '../../../module/mongo/model/yahoo/models/yahoo-stock-info.model';
 import { YahooStockHistory } from '../../../module/mongo/model/yahoo/models/yahoo-stock-history.model';
 import { YahooStockAnalysis } from '../../../module/mongo/model/yahoo/models/yahoo-stock-analysis.model';
@@ -28,12 +28,15 @@ export class YahooStockService {
       const stockInfo = await this.stockInfoModel.findOneAndUpdate(
         { symbol },
         {
-          symbol,
-          summaryDetail: data.summaryDetail,
-          defaultKeyStatistics: data.defaultKeyStatistics,
-          financialData: data.financialData,
-          lastUpdated: new Date(),
-          expiresAt: new Date(Date.now() + 2 * 3600 * 1000), // 2시간간 후 만료
+          $setOnInsert: { _id: new Types.ObjectId() },
+          $set: {
+            symbol,
+            summaryDetail: data.summaryDetail,
+            defaultKeyStatistics: data.defaultKeyStatistics,
+            financialData: data.financialData,
+            lastUpdated: new Date(),
+            expiresAt: new Date(Date.now() + 2 * 3600 * 1000), // 2시간간 후 만료
+          }
         },
         { upsert: true, new: true }
       );
@@ -77,11 +80,14 @@ export class YahooStockService {
       const stockHistory = await this.stockHistoryModel.findOneAndUpdate(
         { symbol, interval },
         {
-          symbol,
-          interval,
-          data: formattedData,
-          lastUpdated: new Date(),
-          expiresAt: new Date(Date.now() + 2 * 3600 * 1000), // 2시간 후 만료
+          $setOnInsert: { _id: new Types.ObjectId() },
+          $set: {
+            symbol,
+            interval,
+            data: formattedData,
+            lastUpdated: new Date(),
+            expiresAt: new Date(Date.now() + 2 * 3600 * 1000), // 2시간 후 만료
+          }
         },
         { upsert: true, new: true }
       );
@@ -124,13 +130,16 @@ export class YahooStockService {
       const stockAnalysis = await this.stockAnalysisModel.findOneAndUpdate(
         { symbol },
         {
-          symbol,
-          recommendationTrend: data.recommendationTrend,
-          earnings: data.earnings,
-          earningsTrend: data.earningsTrend,
-          earningsHistory: data.earningsHistory,
-          lastUpdated: new Date(),
-          expiresAt: new Date(Date.now() + 2 * 3600 * 1000), // 2시간 후 만료
+          $setOnInsert: { _id: new Types.ObjectId() },
+          $set: {
+            symbol,
+            recommendationTrend: data.recommendationTrend,
+            earnings: data.earnings,
+            earningsTrend: data.earningsTrend,
+            earningsHistory: data.earningsHistory,
+            lastUpdated: new Date(),
+            expiresAt: new Date(Date.now() + 2 * 3600 * 1000), // 2시간 후 만료
+          }
         },
         { upsert: true, new: true }
       );
@@ -168,10 +177,13 @@ export class YahooStockService {
       const stockNews = await this.stockNewsModel.findOneAndUpdate(
         { symbol },
         {
-          symbol,
-          news,
-          lastUpdated: new Date(),
-          expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10분 후 만료
+          $setOnInsert: { _id: new Types.ObjectId() },
+          $set: {
+            symbol,
+            news,
+            lastUpdated: new Date(),
+            expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10분 후 만료
+          }
         },
         { upsert: true, new: true }
       );
