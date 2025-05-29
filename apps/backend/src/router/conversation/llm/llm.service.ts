@@ -82,6 +82,7 @@ export class LlmService {
     const toolFunctions = {
       get_technical_data: async (args: any) => {
         const symbol = args.symbol;
+
         if (this.isKoreanStock(symbol)) {
           const cleanSymbol = symbol.replace(/\.(KS|KQ)$/, '');
           return this.naverFinanceService.getTechnicalData(cleanSymbol);
@@ -91,6 +92,7 @@ export class LlmService {
       },
       get_fundamental_data: async (args: any) => {
         const symbol = args.symbol;
+
         if (this.isKoreanStock(symbol)) {
           const cleanSymbol = symbol.replace(/\.(KS|KQ)$/, '');
           return this.naverFinanceService.getFundamentalData(cleanSymbol);
@@ -224,7 +226,13 @@ export class LlmService {
         const functionName = toolCall.function.name.toLowerCase() as keyof typeof toolFunctions;
         if (!toolFunctions[functionName]) continue;
 
-        const args = JSON.parse(toolCall.function.arguments);
+        let args: any;
+        try {
+          args = JSON.parse(toolCall.function.arguments);
+        } catch (err) {
+          console.error(`❌ Failed to parse tool arguments for ${functionName}:`, err);
+          continue; // 이 경우 해당 함수 호출은 건너뜀
+        }
         const func = toolFunctions[functionName];
         const toolResult = await func(args);
 

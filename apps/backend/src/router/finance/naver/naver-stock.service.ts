@@ -33,15 +33,23 @@ export class NaverStockService {
         }
 
         // 새로운 히스토리 데이터 생성
-        const newHistory = new this.stockHistoryModel({
-          symbol,
-          interval,
-          data: technicalData,
-          updatedAt: new Date(),
-        });
+        const newHistory = await this.stockHistoryModel.findOneAndUpdate(
+          { symbol, interval },
+          {
+            $setOnInsert: { _id: new Types.ObjectId() },
+            $set: {
+              symbol,
+              interval,
+              data: technicalData.ohlcvAndIndicators, // key-value 구조 유지,
+              marketCap: technicalData.marketCap,
+              high52Week: technicalData.high52Week,
+              low52Week: technicalData.low52Week,
+              lastUpdated: new Date(),
+            },
+          },
+          { upsert: true, new: true }
+        );
 
-        // MongoDB에 저장
-        await newHistory.save();
         return newHistory;
       }
 
@@ -100,6 +108,35 @@ export class NaverStockService {
         `Failed to get stock info for ${symbol}: ${error instanceof Error ? error.message : String(error)}`
       );
       return null;
+    }
+  }
+
+  async saveStockHistory(symbol: string, data: any[], interval: string): Promise<NaverStockHistory> {
+    try {
+      const stockHistory = await this.stockHistoryModel.findOneAndUpdate(
+        { symbol, interval },
+        {
+          $setOnInsert: { _id: new Types.ObjectId() },
+          $set: {
+            symbol,
+            interval,
+            data: data.map((item) => ({
+              date: item.date,
+              open: item.open,
+              high: item.high,
+              low: item.low,
+              close: item.close,
+              volume: item.volume,
+            })),
+            lastUpdated: new Date(),
+          },
+        },
+        { upsert: true, new: true }
+      );
+      return stockHistory;
+    } catch (error: unknown) {
+      this.logger.error(`Error saving stock history for ${symbol}: ${(error as Error).message}`);
+      throw error;
     }
   }
 }

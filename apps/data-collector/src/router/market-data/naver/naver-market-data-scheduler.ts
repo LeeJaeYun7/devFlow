@@ -2,6 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { NaverStockService } from './naver-market-data-service';
 import puppeteer from 'puppeteer';
+import { NaverStockFundamental } from '../../../module/mongo/model/naver/interfaces/naver-stock-fundamental.interface';
+import { NaverStockHistoryItem } from '../../../module/mongo/model/naver/interfaces/naver-stock-history-interface';
 @Injectable()
 export class NaverMarketScheduler {
   private readonly logger = new Logger(NaverMarketScheduler.name);
@@ -109,7 +111,7 @@ export class NaverMarketScheduler {
             continue;
           }
 
-          const fundamentalData = await page.evaluate(() => {
+          const fundamentalData: NaverStockFundamental = await page.evaluate(() => {
             const cleanText = (text: string | null) => text?.trim().replace(/,/g, '') ?? null;
 
             const getTextByThLabel = (label: string) => {
@@ -135,19 +137,14 @@ export class NaverMarketScheduler {
             continue;
           }
 
-          const ohlcvAndIndicators = uniqueData.reduce(
-            (acc, cur) => {
-              acc[cur.date] = {
-                open: cur.open,
-                high: cur.high,
-                low: cur.low,
-                close: cur.close,
-                volume: cur.volume,
-              };
-              return acc;
-            },
-            {} as Record<string, any>
-          );
+          const ohlcvAndIndicators: NaverStockHistoryItem[] = uniqueData.map((d) => ({
+            date: d.date,
+            open: d.open,
+            high: d.high,
+            low: d.low,
+            close: d.close,
+            volume: d.volume,
+          }));
 
           await this.naverStockService.saveStockHistory(symbol, ohlcvAndIndicators, fundamentalData);
 

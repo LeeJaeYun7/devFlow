@@ -11,29 +11,30 @@ export class NaverFinanceService {
     console.log('naver get technical data', symbol);
     const stockHistory = await this.naverStockService.getStockHistory(symbol);
 
+    if (!stockHistory?.data) {
+      return {
+        ohlcvAndIndicators: [],
+        currentPrice: 0,
+        changePercent: 0,
+        marketCap: 0,
+        high52Week: 0,
+        low52Week: 0,
+      };
+    }
+
+    const ohlcvMap = stockHistory.data;
+
+    const sorted = stockHistory.data.sort((a, b) => (a.date < b.date ? 1 : -1)); // 내림차순 정렬
+    const latest = sorted[0];
+    const previous = sorted[1];
+
     const technicalData: NaverStockTechnicalDto = {
-      ohlcvAndIndicators:
-        stockHistory?.data?.reduce(
-          (acc, cur) => {
-            acc[cur.date] = {
-              open: cur.open,
-              high: cur.high,
-              low: cur.low,
-              close: cur.close,
-              volume: cur.volume,
-            };
-            return acc;
-          },
-          {} as Record<string, { open: number; high: number; low: number; close: number; volume: number }>
-        ) ?? {},
-      currentPrice: stockHistory?.data?.[0]?.close ?? 0,
-      changePercent:
-        stockHistory?.data?.[0] && stockHistory?.data?.[1]
-          ? ((stockHistory.data[0].close - stockHistory.data[1].close) / stockHistory.data[1].close) * 100
-          : 0,
-      marketCap: stockHistory?.marketCap ?? 0,
-      high52Week: stockHistory?.high52Week ?? 0,
-      low52Week: stockHistory?.low52Week ?? 0,
+      ohlcvAndIndicators: ohlcvMap,
+      currentPrice: latest?.close ?? 0,
+      changePercent: latest && previous ? ((latest.close - previous.close) / previous.close) * 100 : 0,
+      marketCap: stockHistory.marketCap ?? 0,
+      high52Week: stockHistory.high52Week ?? 0,
+      low52Week: stockHistory.low52Week ?? 0,
     };
 
     return technicalData;

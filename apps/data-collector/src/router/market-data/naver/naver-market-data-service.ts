@@ -4,7 +4,8 @@ import { Model, Types } from 'mongoose';
 import { NaverStockHistory } from '../../../module/mongo/model/naver/models/naver-stock-history.model';
 import { NaverStockInfo } from '../../../module/mongo/model/naver/models/naver-stock-info.model';
 import { KoreaStockSymbol } from '../../../module/mongo/model/korea/models/korea-stock-symbol.model';
-
+import { NaverStockHistoryItem } from '../../../module/mongo/model/naver/interfaces/naver-stock-history-interface';
+import { NaverStockFundamental } from '../../../module/mongo/model/naver/interfaces/naver-stock-fundamental.interface';
 @Injectable()
 export class NaverStockService {
   private readonly logger = new Logger(NaverStockService.name);
@@ -18,27 +19,35 @@ export class NaverStockService {
     private readonly stockSymbolModel: Model<KoreaStockSymbol>
   ) {}
 
-  public async saveStockHistory(symbol: string, ohlcvAndIndicators: any, fundamentalData: any) {
-    const stockHistory = new this.stockHistoryModel({
-      _id: new Types.ObjectId(),
-      symbol,
-      interval: '1d',
-      data: Object.entries(ohlcvAndIndicators).map(([date, data]: [string, any]) => ({
-        date,
-        open: data.open,
-        high: data.high,
-        low: data.low,
-        close: data.close,
-        volume: data.volume,
-      })),
-      marketCap: Number(fundamentalData.marketCap) || 0,
-      high52Week: Number(fundamentalData.high52Week) || 0,
-      low52Week: Number(fundamentalData.low52Week) || 0,
-      lastUpdated: new Date(),
-    });
-
-    await stockHistory.save();
-    return stockHistory;
+  public async saveStockHistory(
+    symbol: string,
+    ohlcvAndIndicators: NaverStockHistoryItem[],
+    fundamentalData: NaverStockFundamental,
+  ) {
+    try {
+      const stockHistory = await this.stockHistoryModel.findOneAndUpdate(
+        { symbol, interval: '1d' },
+        {
+          $setOnInsert: { _id: new Types.ObjectId() },
+          $set: {
+            symbol,
+            interval: '1d',
+            data: ohlcvAndIndicators,
+            marketCap: Number(fundamentalData.marketCap) || 0,
+            high52Week: Number(fundamentalData.high52Week) || 0,
+            low52Week: Number(fundamentalData.low52Week) || 0,
+            lastUpdated: new Date(),
+          },
+        },
+        { upsert: true, new: true }
+      );
+      return stockHistory;
+    } catch (error) {
+      this.logger.error(
+        `Failed to save stock history for ${symbol}: ${error instanceof Error ? error.message : String(error)}`
+      );
+      throw error;
+    }
   }
 
   public async saveStockInfo(symbol: string, stockInfo: any) {

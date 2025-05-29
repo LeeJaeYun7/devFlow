@@ -2,13 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import puppeteer from 'puppeteer';
 import { NaverStockTechnicalDto } from '../dto/technical-data.dto';
 import { NaverStockFundamentalDto } from '../dto/fundamental-data.dto';
+import { NaverStockHistoryItem } from '../../../../module/mongo/model/naver/interfaces/naver-stock-history-interface';
 
 @Injectable()
 export class NaverStockFetcherService {
   private readonly logger = new Logger(NaverStockFetcherService.name);
 
   public async fetchFundamentalData(symbol: string): Promise<NaverStockFundamentalDto | null> {
-
     if (!symbol) {
       this.logger.warn('Symbol is required');
       return null;
@@ -89,7 +89,6 @@ export class NaverStockFetcherService {
       await browser.close();
     }
   }
-
 
   public async fetchTechnicalData(symbol: string): Promise<NaverStockTechnicalDto | null> {
     if (!symbol) {
@@ -210,29 +209,28 @@ export class NaverStockFetcherService {
       }
 
       const prices = uniqueData.map((d) => d.close);
-      const ohlcvAndIndicators = uniqueData.reduce(
-        (acc, cur) => {
-          acc[cur.date] = {
-            open: cur.open,
-            high: cur.high,
-            low: cur.low,
-            close: cur.close,
-            volume: cur.volume,
-          };
-          return acc;
-        },
-        {} as Record<string, any>
-      );
+      const ohlcvAndIndicators: NaverStockHistoryItem[] = uniqueData.map((d) => ({
+        date: d.date,
+        open: d.open,
+        high: d.high,
+        low: d.low,
+        close: d.close,
+        volume: d.volume,
+      }));
 
       const currentPrice = prices[0];
       const previousPrice = prices[1];
       const changePercent = Number((((currentPrice - previousPrice) / previousPrice) * 100).toFixed(2));
 
+      console.log('marketCap', fundamentalData.marketCap);
+      console.log('high52Week', fundamentalData.high52Week);
+      console.log('low52Week', fundamentalData.low52Week);
+
       return {
         ohlcvAndIndicators,
         currentPrice,
         changePercent,
-        marketCap: Number(fundamentalData.marketCap) || 0,
+        marketCap: this.parseMarketCap(fundamentalData.marketCap) || 0,
         high52Week: Number(fundamentalData.high52Week) || 0,
         low52Week: Number(fundamentalData.low52Week) || 0,
       };
@@ -244,5 +242,17 @@ export class NaverStockFetcherService {
     } finally {
       await browser.close();
     }
+  }
+
+  private parseMarketCap(value: string | number | undefined | null): number {
+
+    if (!value) return 0;
+  
+    const stringValue = String(value);
+    const matched = stringValue.match(/[\d,.]+/); // 숫자만 추출
+    if (!matched) return 0;
+  
+    const eokValue = Number(matched[0].replace(/,/g, ''));
+    return eokValue * 100_000_000; // "억원"을 "원"으로 변환
   }
 }

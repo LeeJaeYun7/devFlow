@@ -1,14 +1,5 @@
 export class NaverStockTechnicalDto {
-  ohlcvAndIndicators!: Record<
-    string,
-    {
-      open: number;
-      high: number;
-      low: number;
-      close: number;
-      volume: number;
-    }
-  >;
+  ohlcvAndIndicators!: NaverStockHistoryItem[];
   currentPrice!: number;
   changePercent!: number;
   marketCap!: number;
