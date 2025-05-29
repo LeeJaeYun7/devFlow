@@ -10,7 +10,7 @@ export class YahooStockNews extends Document {
   @Prop({ type: [Object] })
   news!: YahooStockNewsItem[];
 
-  @Prop()
+  @Prop({ required: true })
   lastUpdated!: Date;
 }
 

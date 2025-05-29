@@ -90,7 +90,7 @@ export class YahooStockService {
       }
 
       // MongoDB에 데이터가 없는 경우 Yahoo Finance API 호출
-      const data = await YahooFinance.historical(symbol, {
+      const data = await YahooFinance.chart(symbol, {
         period1: dayjs().subtract(3, 'month').toDate(),
         interval,
       });
@@ -114,7 +114,7 @@ export class YahooStockService {
           close: item.close,
           volume: item.volume,
         })),
-        updatedAt: new Date(),
+        lastUpdated: new Date(),
       });
 
       // MongoDB에 저장

@@ -45,11 +45,12 @@ export class YahooMarketScheduler {
           await this.yahooStockService.saveStockInfo(symbol, infoData);
 
           // 주가 히스토리 업데이트
-          const historyData = await YahooFinance.historical(symbol, {
+          const historyData = await YahooFinance.chart(symbol, {
             period1: dayjs().subtract(3, 'month').toDate(),
             interval: '1d',
           });
-          if (!historyData || historyData.length === 0) {
+
+          if (!historyData) {
             this.logger.warn(`No historical data found for symbol ${symbol} in Yahoo Finance`);
             continue;
           }
@@ -59,6 +60,7 @@ export class YahooMarketScheduler {
           const analysisData = await YahooFinance.quoteSummary(symbol, {
             modules: ['earningsTrend', 'recommendationTrend', 'earningsHistory', 'earnings'],
           });
+          
           if (!analysisData) {
             this.logger.warn(`No analysis data found for symbol ${symbol} in Yahoo Finance`);
             continue;

@@ -35,8 +35,7 @@ export class YahooStockService {
             defaultKeyStatistics: data.defaultKeyStatistics,
             financialData: data.financialData,
             lastUpdated: new Date(),
-            expiresAt: new Date(Date.now() + 2 * 3600 * 1000), // 2시간간 후 만료
-          }
+          },
         },
         { upsert: true, new: true }
       );
@@ -86,9 +85,8 @@ export class YahooStockService {
             interval,
             data: formattedData,
             lastUpdated: new Date(),
-            expiresAt: new Date(Date.now() + 2 * 3600 * 1000), // 2시간 후 만료
-          }
-        },
+          },
+       },
         { upsert: true, new: true }
       );
       return stockHistory;
@@ -138,8 +136,7 @@ export class YahooStockService {
             earningsTrend: data.earningsTrend,
             earningsHistory: data.earningsHistory,
             lastUpdated: new Date(),
-            expiresAt: new Date(Date.now() + 2 * 3600 * 1000), // 2시간 후 만료
-          }
+          },
         },
         { upsert: true, new: true }
       );
@@ -182,8 +179,7 @@ export class YahooStockService {
             symbol,
             news,
             lastUpdated: new Date(),
-            expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10분 후 만료
-          }
+          },
         },
         { upsert: true, new: true }
       );
