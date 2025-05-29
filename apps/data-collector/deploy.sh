@@ -1,6 +1,6 @@
 #!/bin/bash
 
-REPO=731219764596.dkr.ecr.ap-northeast-2.amazonaws.com/data-collector
+REPO=731219764596.dkr.ecr.ap-northeast-2.amazonaws.com/data_collector
 SHA_TAG=$(git rev-parse --short HEAD)
 
 docker buildx build \
