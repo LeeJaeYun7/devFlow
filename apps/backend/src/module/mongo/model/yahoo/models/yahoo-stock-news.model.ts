@@ -10,14 +10,8 @@ export class YahooStockNews extends Document {
   @Prop({ type: [Object] })
   news!: YahooStockNewsItem[];
 
-  @Prop()
+  @Prop({ required: true })
   lastUpdated!: Date;
-
-  @Prop()
-  expiresAt!: Date;
 }
 
 export const YahooStockNewsSchema = SchemaFactory.createForClass(YahooStockNews);
-
-// TTL 인덱스 추가
-YahooStockNewsSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });

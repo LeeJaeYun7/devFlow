@@ -228,10 +228,16 @@ export class LlmService {
 
         let args: any;
         try {
-          args = JSON.parse(toolCall.function.arguments);
+          // JSON 문자열이 완성되지 않았을 경우를 대비해 처리
+          const jsonStr = toolCall.function.arguments.trim();
+          if (!jsonStr || !jsonStr.startsWith('{') || !jsonStr.endsWith('}')) {
+            console.error(`❌ Invalid JSON format for ${functionName}:`, jsonStr);
+            continue;
+          }
+          args = JSON.parse(jsonStr);
         } catch (err) {
           console.error(`❌ Failed to parse tool arguments for ${functionName}:`, err);
-          continue; // 이 경우 해당 함수 호출은 건너뜀
+          continue;
         }
         const func = toolFunctions[functionName];
         const toolResult = await func(args);

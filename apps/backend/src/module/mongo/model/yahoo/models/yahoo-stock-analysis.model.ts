@@ -24,14 +24,7 @@ export class YahooStockAnalysis extends Document {
   @Prop({ type: Object })
   earningsHistory!: EarningsHistory;
 
-  @Prop()
+  @Prop({ required: true })
   lastUpdated!: Date;
-
-  @Prop()
-  expiresAt!: Date;
 }
-
 export const YahooStockAnalysisSchema = SchemaFactory.createForClass(YahooStockAnalysis);
-
-// TTL 인덱스 추가
-YahooStockAnalysisSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });

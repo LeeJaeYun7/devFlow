@@ -25,11 +25,6 @@ export class YahooStockInfo extends Document {
 
   @Prop({ type: Date, default: Date.now })
   lastUpdated!: Date;
-
-  @Prop({ type: Date })
-  expiresAt!: Date;
 }
 
 export const YahooStockInfoSchema = SchemaFactory.createForClass(YahooStockInfo);
-
-YahooStockInfoSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
