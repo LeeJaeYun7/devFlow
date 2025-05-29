@@ -40,6 +40,21 @@
         "options": {
           "passWithNoTests": true
         }
+      },
+      "docker-build": {
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "docker build -f apps/backend/Dockerfile . -t backend"
+        }
+      },
+      "deploy": {
+        "dependsOn": [
+          "build"
+        ],
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "bash apps/backend/deploy.sh"
+        }
       }
     }
   }
