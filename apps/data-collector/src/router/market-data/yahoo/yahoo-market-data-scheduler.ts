@@ -19,7 +19,7 @@ export class YahooMarketScheduler {
     this.logger.log('YahooMarketScheduler initialized');
   }
 
-  @Cron('45 15 * * 1-5') // 매주 월~금 오전 6시 30분
+  @Cron('30 6 * * 1-5') // 매주 월~금 오전 6시 30분
   public async updateYahooMarketData() {
     try {
       this.logger.log('Starting Yahoo market data update...');
