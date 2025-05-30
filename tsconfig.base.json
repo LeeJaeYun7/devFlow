@@ -7,9 +7,7 @@
     "emitDecoratorMetadata": true,
     "importHelpers": true,
     "isolatedModules": true,
-    "lib": [
-      "es2022"
-    ],
+    "lib": ["es2022"],
     "module": "ESNext",
     "moduleResolution": "node",
     "noEmitOnError": true,
@@ -24,12 +22,9 @@
     "sourceMap": true,
     "baseUrl": ".",
     "paths": {
-      "@lia/api/*": [
-        "libs/api/src/*"
-      ],
-      "@lia/config": [
-        "libs/config/src/index.ts"
-      ]
+      "@lia/api/*": ["libs/api/src/*"],
+      "@lia/config": ["libs/config/src/index.ts"],
+      "@lia/react/*": ["libs/react/src/*"]
     }
   }
 }

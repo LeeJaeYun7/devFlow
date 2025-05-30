@@ -1,10 +1,10 @@
 import { Box, CircularProgress, IconButton, Paper, TextField, Container } from '@mui/material';
 import { useEffect, useState, useCallback } from 'react';
 import SendIcon from '@mui/icons-material/Send';
-import { ChatContent } from '../../base/chat/Content';
+import { ChatContent } from './Content';
 import { useCreateMessage, useMessageList } from '../../../hooks/useMessage';
 import { useUser } from '../../../context/UserProvider';
-import { useUserMySelf } from '../../../hooks/useUser';
+import { useUserMySelf } from '@lia/react/hooks/useUser';
 import { enqueueSnackbar } from 'notistack';
 import { useSSEEvent } from '../../../context/SSEContext';
 import { FirstRecommend } from './FirstRecommend';

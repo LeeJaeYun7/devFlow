@@ -3,13 +3,10 @@
   "include": [],
   "references": [
     {
-      "path": "../../libs/api"
+      "path": "../api"
     },
     {
-      "path": "../../libs/react"
-    },
-    {
-      "path": "./tsconfig.app.json"
+      "path": "./tsconfig.lib.json"
     }
   ],
   "extends": "../../tsconfig.base.json"

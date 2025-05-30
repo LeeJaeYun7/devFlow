@@ -1,4 +1,4 @@
-import { api } from './api.constant';
+import { api } from '@lia/react/constants/api.constant';
 import type { MessageListDto, MessageListResponse } from '@lia/api/conversation/message/list.dto';
 import type { MessageCreateDto, MessageCreateResponse } from '@lia/api/conversation/message/create.dto';
 

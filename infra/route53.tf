@@ -42,3 +42,18 @@ resource "aws_route53_record" "api_alb" {
     evaluate_target_health = true
   }
 } 
+
+##### Admin Service #####
+resource "aws_route53_record" "admin_site" {
+  zone_id = data.aws_route53_zone.selected.zone_id
+  name    = "admin.${var.domain_name}"
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.admin_site.domain_name
+    zone_id                = aws_cloudfront_distribution.admin_site.hosted_zone_id
+    evaluate_target_health = true
+  }
+}
+
+##### Admin Service #####

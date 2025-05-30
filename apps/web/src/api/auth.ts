@@ -1,4 +1,4 @@
-import { api } from './api.constant';
+import { api } from '@lia/react/constants/api.constant';
 
 const BASE_URL = `/api/auth`;
 

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useCallback, useRef, ReactNode } from 'react';
-import { BASE_API_URL } from '../api/api.constant';
+import { BASE_API_URL } from '@lia/react/constants/api.constant';
 
 type EventCallback = (event: MessageEvent) => void;
 

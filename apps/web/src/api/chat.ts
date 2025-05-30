@@ -1,4 +1,4 @@
-import { api } from './api.constant';
+import { api } from '@lia/react/constants/api.constant';
 import type { ChatListDto, ChatListResponse } from '@lia/api/conversation/chat/list.dto';
 import type { ChatResponse } from '@lia/api/conversation/chat/create.dto';
 import type { DeleteAllChatResponse } from '@lia/api/conversation/chat/delete_all.dto';

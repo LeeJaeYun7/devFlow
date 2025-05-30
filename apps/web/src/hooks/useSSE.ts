@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { BASE_API_URL } from '../api/api.constant';
+import { BASE_API_URL } from '@lia/react/constants/api.constant';
 
 type EventCallback = (event: MessageEvent) => void;
 

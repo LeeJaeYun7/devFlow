@@ -17,6 +17,12 @@
     },
     {
       "path": "./libs/config"
+    },
+    {
+      "path": "./libs/react"
+    },
+    {
+      "path": "./apps/admin"
     }
   ]
 }

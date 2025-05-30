@@ -13,7 +13,7 @@
       "@nx/react/typings/image.d.ts",
       "vite/client"
     ],
-    "module": "esnext",
+    "rootDir": "src",
     "moduleResolution": "bundler"
   },
   "exclude": [
@@ -35,7 +35,7 @@
     "src/**/*.js",
     "src/**/*.jsx",
     "src/**/*.ts",
-    "src/**/*.tsx",
+    "src/**/*.tsx"
   ],
   "references": [
     {

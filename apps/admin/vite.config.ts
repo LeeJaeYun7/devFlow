@@ -1,65 +1,29 @@
 /// <reference types='vitest' />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
 
 export default defineConfig(({ mode }) => ({
   root: __dirname,
-  cacheDir: '../../node_modules/.vite/apps/web',
+  cacheDir: '../../node_modules/.vite/apps/admin',
   resolve: {
     alias: {
       '@lia/react': path.resolve(__dirname, '../../libs/react/src'),
     },
   },
   server: {
-    port: 4500,
+    port: 4100,
     host: 'localhost',
   },
   preview: {
     port: 4300,
     host: 'localhost',
   },
-  plugins: [
-    react(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      manifest: {
-        name: 'AskLia',
-        short_name: 'AskLia',
-        description: '금융 데이터 분석 챗봇',
-        theme_color: '#ffffff',
-        background_color: '#000000',
-        display: 'standalone',
-        icons: [
-          {
-            src: '/icon/lia_logo_128.png',
-            sizes: '128x128',
-            type: 'image/png',
-            purpose: 'any',
-          },
-          {
-            src: '/icon/lia_logo_192.png',
-            sizes: '192x192',
-            type: 'image/png',
-            purpose: 'any',
-          },
-          {
-            src: '/icon/lia_logo_512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any',
-          },
-          {
-            src: '/icon/lia_logo_512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'maskable',
-          },
-        ],
-      },
-    }),
-  ],
+  plugins: [react()],
+  // Uncomment this if you are using workers.
+  // worker: {
+  //  plugins: [ nxViteTsPaths() ],
+  // },
   build: {
     outDir: './dist',
     emptyOutDir: true,

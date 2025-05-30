@@ -1,5 +1,5 @@
 import { Box, Card, CardContent, Typography, Stack, Avatar, Link } from '@mui/material';
-import { useUserMySelf } from '../../../hooks/useUser';
+import { useUserMySelf } from '@lia/react/hooks/useUser';
 
 export function ProfileMain() {
   const { data: userMySelf } = useUserMySelf();
