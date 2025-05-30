@@ -11,7 +11,7 @@ export class NasdaqSymbolScheduler {
   }
 
   @Cron('0 6 * * 1-5') // 월~금 오전 6시
-  async updateSymbols(): Promise<void> {
+  public async updateSymbols(): Promise<void> {
     try {
       this.logger.log('Starting Nasdaq symbols update...');
       await this.nasdaqSymbolService.fetchAndStoreTopSymbols();

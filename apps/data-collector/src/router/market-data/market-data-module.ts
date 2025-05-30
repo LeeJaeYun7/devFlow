@@ -34,6 +34,7 @@ import { MongoModule } from '../../module/mongo/mongo.module';
 import { KoreaSymbolService } from './korea/korea-symbol.service';
 import { KoreaSymbolScheduler } from './korea/korea-symbol-scheduler';
 
+console.log('YahooMarketScheduler:', YahooMarketScheduler);
 @Module({
   imports: [
     ScheduleModule.forRoot(),
@@ -59,5 +60,6 @@ import { KoreaSymbolScheduler } from './korea/korea-symbol-scheduler';
     KoreaSymbolService,
     KoreaSymbolScheduler,
   ],
+  exports: [YahooMarketScheduler, NaverMarketScheduler, NasdaqSymbolScheduler, KoreaSymbolScheduler],
 })
 export class MarketDataModule {}

@@ -8,10 +8,12 @@ import { NaverStockHistoryItem } from '../../../module/mongo/model/naver/interfa
 export class NaverMarketScheduler {
   private readonly logger = new Logger(NaverMarketScheduler.name);
 
-  constructor(private readonly naverStockService: NaverStockService) {}
+  constructor(private readonly naverStockService: NaverStockService) {
+    this.logger.log('NaverMarketScheduler initialized');
+  }
 
   @Cron('30 17 * * 1-5')
-  private async fetchNaverTechnicalData(): Promise<void> {
+  public async fetchNaverTechnicalData(): Promise<void> {
     this.logger.log('Starting Naver technical data update...');
 
     // MongoDB에서 심볼 목록 가져오기
@@ -160,7 +162,7 @@ export class NaverMarketScheduler {
   }
 
   @Cron('30 17 * * 1-5')
-  private async fetchNaverFundamentalData(): Promise<void> {
+  public async fetchNaverFundamentalData(): Promise<void> {
     this.logger.log('Starting Naver Stock Fundamental Data update...');
 
     // MongoDB에서 심볼 목록 가져오기

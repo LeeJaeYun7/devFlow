@@ -15,10 +15,12 @@ export class YahooMarketScheduler {
     private readonly yahooStockService: YahooStockService,
     @InjectModel(NasdaqStockSymbol.name)
     private readonly stockSymbolModel: Model<NasdaqStockSymbol>
-  ) {}
+  ) {
+    this.logger.log('YahooMarketScheduler initialized');
+  }
 
-  @Cron('30 6 * * 1-5') // 매주 월~금 오전 6시 30분
-  async updateYahooMarketData() {
+  @Cron('45 15 * * 1-5') // 매주 월~금 오전 6시 30분
+  public async updateYahooMarketData() {
     try {
       this.logger.log('Starting Yahoo market data update...');
 
@@ -49,18 +51,16 @@ export class YahooMarketScheduler {
             period1: dayjs().subtract(3, 'month').toDate(),
             interval: '1d',
           });
-
           if (!historyData) {
             this.logger.warn(`No historical data found for symbol ${symbol} in Yahoo Finance`);
             continue;
           }
-          await this.yahooStockService.saveStockHistory(symbol, historyData, '1d');
+          await this.yahooStockService.saveStockHistory(symbol, historyData.quotes, '1d');
 
           // 분석 데이터 업데이트
           const analysisData = await YahooFinance.quoteSummary(symbol, {
             modules: ['earningsTrend', 'recommendationTrend', 'earningsHistory', 'earnings'],
           });
-          
           if (!analysisData) {
             this.logger.warn(`No analysis data found for symbol ${symbol} in Yahoo Finance`);
             continue;
@@ -95,7 +95,7 @@ export class YahooMarketScheduler {
   }
 
   @Cron('0 0,6,12,18 * * *') // 매일 6시간 단위로 실행: 00시, 06시, 12시, 18시
-  async updateYahooNews() {
+  public async updateYahooNews() {
     try {
       this.logger.log('Starting Yahoo news update...');
 
