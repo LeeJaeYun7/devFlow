@@ -98,7 +98,7 @@ resource "aws_cloudfront_distribution" "admin_site" {
   }
 
   viewer_certificate {
-    acm_certificate_arn      = aws_acm_certificate.cert.arn
+    acm_certificate_arn      = aws_acm_certificate.cert_wildcard.arn
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
   }
@@ -115,5 +115,5 @@ resource "aws_cloudfront_distribution" "admin_site" {
     response_page_path    = "/index.html"
   }
 
-  depends_on = [aws_acm_certificate_validation.cert]
+  depends_on = [aws_acm_certificate_validation.cert_wildcard]
 }
