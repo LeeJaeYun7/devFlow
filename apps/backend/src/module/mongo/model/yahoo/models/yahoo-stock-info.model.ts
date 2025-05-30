@@ -22,9 +22,6 @@ export class YahooStockInfo extends Document {
 
   @Prop({ type: MongooseSchema.Types.Mixed })
   financialData?: YahooFinancialData;
-
-  @Prop({ type: Date, default: Date.now })
-  lastUpdated!: Date;
 }
 
 export const YahooStockInfoSchema = SchemaFactory.createForClass(YahooStockInfo);

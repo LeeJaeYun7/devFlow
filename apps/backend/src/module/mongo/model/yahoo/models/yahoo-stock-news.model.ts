@@ -9,9 +9,6 @@ export class YahooStockNews extends Document {
 
   @Prop({ type: [Object] })
   news!: YahooStockNewsItem[];
-
-  @Prop({ required: true })
-  lastUpdated!: Date;
 }
 
 export const YahooStockNewsSchema = SchemaFactory.createForClass(YahooStockNews);

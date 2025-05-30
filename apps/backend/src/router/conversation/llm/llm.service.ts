@@ -87,6 +87,7 @@ export class LlmService {
           const cleanSymbol = symbol.replace(/\.(KS|KQ)$/, '');
           return this.naverFinanceService.getTechnicalData(cleanSymbol);
         } else {
+          console.log('get_technical_data', symbol);
           return this.yahooFinanceService.getTechnicalData(symbol);
         }
       },
@@ -97,6 +98,7 @@ export class LlmService {
           const cleanSymbol = symbol.replace(/\.(KS|KQ)$/, '');
           return this.naverFinanceService.getFundamentalData(cleanSymbol);
         } else {
+          console.log('get_fundamental_data', symbol);
           return this.yahooFinanceService.getFundamentalData(symbol);
         }
       },
@@ -230,24 +232,57 @@ export class LlmService {
         try {
           // JSON 문자열이 완성되지 않았을 경우를 대비해 처리
           const jsonStr = toolCall.function.arguments.trim();
+          
+          // 기본적인 JSON 형식 검증
           if (!jsonStr || !jsonStr.startsWith('{') || !jsonStr.endsWith('}')) {
             console.error(`❌ Invalid JSON format for ${functionName}:`, jsonStr);
             continue;
           }
-          args = JSON.parse(jsonStr);
+
+          // 필수 키 검증
+          if (!jsonStr.includes('"symbol"') && !jsonStr.includes('symbol:')) {
+            console.error(`❌ Missing required 'symbol' key in JSON for ${functionName}:`, jsonStr);
+            continue;
+          }
+
+          try {
+            args = JSON.parse(jsonStr);
+            
+            // 심볼 값 검증
+            if (!args.symbol || typeof args.symbol !== 'string' || args.symbol.length === 0) {
+              console.error(`❌ Invalid symbol format: ${args.symbol}`);
+              continue;
+            }
+            
+            console.log(`Symbol: ${args.symbol}`);
+          } catch (parseError) {
+            console.error(`❌ Failed to parse JSON for ${functionName}:`, parseError);
+            console.error('Original JSON:', jsonStr);
+            continue;
+          }
         } catch (err) {
-          console.error(`❌ Failed to parse tool arguments for ${functionName}:`, err);
+          console.error(`❌ Failed to process tool arguments for ${functionName}:`, err);
           continue;
         }
-        const func = toolFunctions[functionName];
-        const toolResult = await func(args);
 
-        newMessages.push({
-          role: 'tool',
-          tool_call_id: toolCall.id,
-          name: toolCall.function.name,
-          content: JSON.stringify(toolResult),
-        });
+        const func = toolFunctions[functionName];
+        try {
+          const toolResult = await func(args);
+          newMessages.push({
+            role: 'tool',
+            tool_call_id: toolCall.id,
+            name: toolCall.function.name,
+            content: JSON.stringify(toolResult),
+          });
+        } catch (error: any) {
+          console.error(`❌ Error executing ${functionName}:`, error);
+          newMessages.push({
+            role: 'tool',
+            tool_call_id: toolCall.id,
+            name: toolCall.function.name,
+            content: JSON.stringify({ error: error.message }),
+          });
+        }
       }
 
       const secondResponseStream = await this.openRouterService.chatStream({
@@ -302,9 +337,9 @@ export class LlmService {
 }
 
 const systemPromptForTitle = `This is a stock recommendation service.
-Generate a title based on the user’s question.
+Generate a title based on the user's question.
 • The title must be within 10 characters.
-• Detect the language of the user’s question accurately and conservatively.
+• Detect the language of the user's question accurately and conservatively.
 • Only use Japanese if the input is clearly in Japanese.
 • Respond in the same language.
 • Respond with the title only – no explanations or extra text.`;

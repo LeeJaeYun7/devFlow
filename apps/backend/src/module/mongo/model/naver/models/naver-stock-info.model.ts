@@ -22,9 +22,6 @@ export class NaverStockInfo extends Document {
 
   @Prop({ type: MongooseSchema.Types.Mixed })
   financialData?: NaverFinancialData;
-
-  @Prop({ type: Date, default: Date.now })
-  lastUpdated!: Date;
 }
 
 export const NaverStockInfoSchema = SchemaFactory.createForClass(NaverStockInfo);

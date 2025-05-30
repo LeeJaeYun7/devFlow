@@ -106,7 +106,7 @@ export class YahooStockService {
         _id: new Types.ObjectId(),
         symbol,
         interval,
-        data: data.map((item) => ({
+        data: data.quotes.map((item) => ({
           date: item.date,
           open: item.open,
           high: item.high,
@@ -114,7 +114,7 @@ export class YahooStockService {
           close: item.close,
           volume: item.volume,
         })),
-        lastUpdated: new Date(),
+        updatedAt: new Date(),
       });
 
       // MongoDB에 저장

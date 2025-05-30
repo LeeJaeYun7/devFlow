@@ -44,8 +44,8 @@ export class NaverStockService {
               marketCap: technicalData.marketCap,
               high52Week: technicalData.high52Week,
               low52Week: technicalData.low52Week,
-              lastUpdated: new Date(),
             },
+            updatedAt: new Date(),
           },
           { upsert: true, new: true }
         );
@@ -65,7 +65,7 @@ export class NaverStockService {
   async getStockInfo(symbol: string): Promise<NaverStockInfo | null> {
     try {
       // MongoDB에서 데이터 조회
-      const info = await this.stockInfoModel.findOne({ symbol }).sort({ lastUpdated: -1 });
+      const info = await this.stockInfoModel.findOne({ symbol }).sort({ updatedAt: -1 });
 
       // 데이터가 없는 경우 getFundamentalData에서 가져오기
       if (!info) {
@@ -94,7 +94,7 @@ export class NaverStockService {
           financialData: {
             totalCash: fundamentalData.capital,
           },
-          lastUpdated: new Date(),
+          updatedAt: new Date(),
         });
 
         // MongoDB에 저장
@@ -128,8 +128,8 @@ export class NaverStockService {
               close: item.close,
               volume: item.volume,
             })),
-            lastUpdated: new Date(),
           },
+          updatedAt: new Date(),
         },
         { upsert: true, new: true }
       );

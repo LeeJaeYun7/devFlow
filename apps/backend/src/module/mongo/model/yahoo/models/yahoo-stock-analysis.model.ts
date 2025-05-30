@@ -23,8 +23,5 @@ export class YahooStockAnalysis extends Document {
 
   @Prop({ type: Object })
   earningsHistory!: EarningsHistory;
-
-  @Prop({ required: true })
-  lastUpdated!: Date;
 }
 export const YahooStockAnalysisSchema = SchemaFactory.createForClass(YahooStockAnalysis);
