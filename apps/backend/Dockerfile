@@ -3,6 +3,9 @@ FROM node:22.13-alpine AS base
 
 WORKDIR /app
 
+# Chromium 설치
+RUN apk add --no-cache chromium
+
 # pnpm 설치
 RUN npm install -g pnpm@9.15
 
