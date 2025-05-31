@@ -17,7 +17,8 @@ export class NaverStockFetcherService {
     const browser = await puppeteer.launch({
       headless: true,
       executablePath: '/usr/lib/chromium/chromium',
-    });
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+ });
 
     const page = await browser.newPage();
     await page.setUserAgent(
@@ -103,6 +104,7 @@ export class NaverStockFetcherService {
     const browser = await puppeteer.launch({
       headless: true,
       executablePath: '/usr/lib/chromium/chromium',
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
 
     const page = await browser.newPage();
