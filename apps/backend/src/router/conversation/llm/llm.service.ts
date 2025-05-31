@@ -12,13 +12,22 @@ import { InjectModel } from '@nestjs/mongoose';
 import { MessageModel } from '../../../module/mongo/model/conversation/models/message.model';
 import { Model } from 'mongoose';
 import { MessageRoleMap } from '@lia/api/conversation/message/message.constant';
-import { systemPrompt } from './example.constant';
 import { ParserService } from './parser.service';
+import { SystemModelModel } from '../../../module/mongo/model/system_model.model';
+import { SystemModelTargetMap } from '@lia/api/admin/system_model/system_model.constant';
+import { SystemCharacterModel } from '../../../module/mongo/model/system_character.model';
 @Injectable()
 export class LlmService {
   constructor(
     @InjectModel(MessageModel.name)
     private readonly messageModel: Model<MessageModel>,
+
+    @InjectModel(SystemModelModel.name)
+    private readonly systemModelModel: Model<SystemModelModel>,
+
+    @InjectModel(SystemCharacterModel.name)
+    private readonly systemCharacterModel: Model<SystemCharacterModel>,
+
     private readonly yahooFinanceService: YahooFinanceService,
     private readonly naverFinanceService: NaverFinanceService,
     private readonly openRouterService: OpenRouterService,
@@ -26,6 +35,8 @@ export class LlmService {
   ) {}
 
   public async getTitleStream({ message, cb, endCb }: LLMStreamParam) {
+    const systemModel = await this.systemModelModel.findOne({ target: SystemModelTargetMap.title });
+
     const res = await this.openRouterService.chatStream({
       messages: [
         {
@@ -37,7 +48,7 @@ export class LlmService {
           content: message,
         },
       ],
-      model: 'openai/gpt-3.5-turbo',
+      model: systemModel?.modelId,
     });
     const stream = res.data;
     let title = '';
@@ -104,6 +115,9 @@ export class LlmService {
       },
     };
 
+    const systemPrompt = await this.systemCharacterModel.findOne({ name: 'Lia' }).lean();
+    const model = await this.systemModelModel.findOne({ target: SystemModelTargetMap.message }).lean();
+
     const messages = await this.messageModel.find({
       chatId,
       role: { $in: [MessageRoleMap.user, MessageRoleMap.assistant] },
@@ -119,7 +133,7 @@ export class LlmService {
     }
 
     const newMessages: OpenRouterMessage[] = [
-      { role: 'system', content: systemPrompt },
+      { role: 'system', content: systemPrompt?.systemPrompt || '' },
       ...messages.map((v) => ({ role: v.role, content: v.content })),
       { role: 'user', content: message },
     ];
@@ -148,6 +162,7 @@ export class LlmService {
     const firstResponseStream = await this.openRouterService.chatStream({
       messages: newMessages,
       tools,
+      model: model?.modelId,
     });
 
     let finalContent = '';
@@ -232,7 +247,7 @@ export class LlmService {
         try {
           // JSON 문자열이 완성되지 않았을 경우를 대비해 처리
           const jsonStr = toolCall.function.arguments.trim();
-          
+
           // 기본적인 JSON 형식 검증
           if (!jsonStr || !jsonStr.startsWith('{') || !jsonStr.endsWith('}')) {
             console.error(`❌ Invalid JSON format for ${functionName}:`, jsonStr);
@@ -247,13 +262,13 @@ export class LlmService {
 
           try {
             args = JSON.parse(jsonStr);
-            
+
             // 심볼 값 검증
             if (!args.symbol || typeof args.symbol !== 'string' || args.symbol.length === 0) {
               console.error(`❌ Invalid symbol format: ${args.symbol}`);
               continue;
             }
-            
+
             console.log(`Symbol: ${args.symbol}`);
           } catch (parseError) {
             console.error(`❌ Failed to parse JSON for ${functionName}:`, parseError);
@@ -288,6 +303,7 @@ export class LlmService {
       const secondResponseStream = await this.openRouterService.chatStream({
         messages: newMessages,
         tools,
+        model: model?.modelId,
       });
       const secondStreamParser = this.parserService.createParser((content) => {
         finalContent += content;
