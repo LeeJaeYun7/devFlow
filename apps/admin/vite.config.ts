@@ -9,6 +9,7 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       '@lia/react': path.resolve(__dirname, '../../libs/react/src'),
+      '@lia/api': path.resolve(__dirname, '../../libs/api/src'),
     },
   },
   server: {

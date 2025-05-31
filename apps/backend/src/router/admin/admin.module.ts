@@ -4,11 +4,13 @@ import { AdminUserModule } from './user/user.module';
 import { IsAdminMiddleware } from '../../common/middleware/is_admin.middleware';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AdminUserModel, AdminUserSchema } from '../../module/mongo/model/user/models/admin_user.model';
+import { SystemModelModule } from './system_model/system_model.module';
 
 @Module({
   imports: [
     SystemPromptModule,
     AdminUserModule,
+    SystemModelModule,
     MongooseModule.forFeature([{ name: AdminUserModel.name, schema: AdminUserSchema }]),
   ],
 })
