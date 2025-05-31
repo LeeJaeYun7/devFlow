@@ -1,5 +1,18 @@
 {
   "name": "@lia/admin",
   "version": "0.0.1",
-  "private": true
+  "private": true,
+  "nx": {
+    "targets": {
+      "deploy": {
+        "dependsOn": [
+          "build"
+        ],
+        "executor": "nx:run-commands",
+        "options": {
+          "command": "bash apps/admin/deploy.sh"
+        }
+      }
+    }
+  }
 }
