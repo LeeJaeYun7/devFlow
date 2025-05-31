@@ -6,8 +6,8 @@ import { BASE_API_URL } from '../../constants/api.constant';
 
 function Footer() {
   return (
-    <Box sx={{ width: '100%' }}>
-      <Box sx={{ maxWidth: 1200, mx: 'auto', py: 4 }}>
+    <Box sx={{ width: '100%', px: 2 }}>
+      <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
         <Typography color="text.primary" fontSize={14} fontWeight={600} mb={1}>
           주식회사 더리버뱅크
         </Typography>
@@ -23,7 +23,7 @@ function Footer() {
         <Typography color="text.secondary" fontSize={12} mb={2}>
           사업의 종류: 응용 소프트웨어 개발 및 공급업
         </Typography>
-        <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap">
           <Typography color="text.secondary" fontSize={12}>
             ©2025 주식회사 리버뱅크
           </Typography>
@@ -56,7 +56,15 @@ export function LoginMain() {
   const theme = useTheme();
 
   return (
-    <Box sx={{ bgcolor: theme.palette.background.default, height: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <Box
+      sx={{
+        bgcolor: theme.palette.background.default,
+        minHeight: '100vh',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
       <Box
         minHeight="70vh"
         marginTop={10}

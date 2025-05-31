@@ -1,5 +1,15 @@
-import { Box, CircularProgress, IconButton, Paper, TextField, Container, TextFieldProps } from '@mui/material';
-import { useEffect, useState, useCallback } from 'react';
+import {
+  Box,
+  CircularProgress,
+  IconButton,
+  Paper,
+  TextField,
+  Container,
+  TextFieldProps,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import SendIcon from '@mui/icons-material/Send';
 import { ChatContent } from './Content';
 import { useCreateMessage, useMessageList } from '../../../hooks/useMessage';
@@ -11,6 +21,8 @@ import { FirstRecommend } from './FirstRecommend';
 
 export function ChatMain() {
   const { nowChatId } = useUser();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { refetch: refetchUserMySelf, data: userMySelf } = useUserMySelf();
   const [message, setMessage] = useState('');
   const { data: messageList, refetch: refetchMessageList } = useMessageList({
@@ -22,6 +34,13 @@ export function ChatMain() {
   const [isSending, setIsSending] = useState(false);
   const [tempUserContent, setTempUserContent] = useState('');
   const [aiStreamContent, setAiStreamContent] = useState('');
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight + 200;
+    }
+  };
 
   // SSE 이벤트 처리
   const handleChatMessage = useCallback(
@@ -35,12 +54,14 @@ export function ChatMain() {
         setIsSending(false);
         setTempUserContent('');
         setAiStreamContent('');
+        scrollToBottom();
         return;
       }
 
       // 스트리밍 컨텐츠 누적 및 임시 메시지 업데이트
       if (data.content) {
         setAiStreamContent((prev) => prev + data.content);
+        scrollToBottom();
       }
     },
     [nowChatId, refetchMessageList]
@@ -63,6 +84,7 @@ export function ChatMain() {
       setIsSending(true);
       setAiStreamContent('');
       setTempUserContent(message);
+      scrollToBottom();
 
       await createMessage({ chatId: nowChatId, content: message });
       await refetchUserMySelf();
@@ -80,9 +102,15 @@ export function ChatMain() {
     setIsSending(false);
     setMessage('');
     setAiStreamContent('');
+    scrollToBottom();
   }, [nowChatId]);
 
   const isNothing = (messageList?.data ?? []).length === 0 && tempUserContent === '';
+
+  // 메시지 리스트가 변경될 때마다 스크롤
+  useEffect(() => {
+    scrollToBottom();
+  }, [messageList?.data]);
 
   return (
     <Box
@@ -116,6 +144,7 @@ export function ChatMain() {
             }}
           >
             <Box
+              ref={chatContainerRef}
               sx={{
                 height: '100%',
                 overflowY: 'auto',
@@ -151,11 +180,12 @@ export function ChatMain() {
         {/* 입력 영역 */}
         <Box
           sx={{
-            position: 'absolute',
+            position: isMobile && isNothing ? 'fixed' : 'absolute',
             bottom: 0,
             left: 0,
             right: 0,
             px: { xs: 2, md: 11 },
+            pb: { xs: 2, md: 0 },
             pt: 2,
             bgcolor: 'background.default',
             borderTop: 1,

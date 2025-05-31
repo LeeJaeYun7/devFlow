@@ -82,7 +82,7 @@ export function FirstRecommend() {
                 fontSize: { xs: '0.875rem', md: '1rem' },
               }}
             >
-              "What impact will this week's CPI have on the stock market?"
+              What impact will this week's CPI have on the stock market?
             </Box>
             <Box
               sx={{
@@ -171,7 +171,7 @@ export function FirstRecommend() {
           <Typography variant="h6" fontWeight="bold" sx={{ mb: 1, fontSize: { xs: '1rem', md: '1.25rem' } }}>
             Limitations
           </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%', mb: { xs: 8, md: 0 } }}>
             <Box
               sx={{
                 bgcolor: 'background.paper',
