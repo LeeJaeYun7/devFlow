@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => ({
   },
   server: {
     port: 4500,
-    host: 'localhost',
+    host: '0.0.0.0',
   },
   preview: {
     port: 4300,

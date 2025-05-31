@@ -5,6 +5,7 @@ import { RootLayout } from '@lia/react/layouts/RootLayout';
 import { ServiceRootSidebar } from './layout/Sidebar';
 import { SnackbarProvider } from 'notistack';
 import { SSEProvider } from './context/SSEContext';
+import { UserProvider } from './context/UserProvider';
 
 // @lia/react components
 import LiaApp from '@lia/react/LiaApp';
@@ -20,22 +21,24 @@ export default function App() {
   return (
     <LiaApp>
       <SSEProvider>
-        <SnackbarProvider>
-          <CssBaseline />
-          <Suspense fallback={<div>로딩중...</div>}>
-            <Routes>
-              <Route path="/" element={<RootLayout sidebar={<ServiceRootSidebar />} />}>
-                <Route path="/" element={<ChatMain />} />
-                <Route path="/profile" element={<ProfileMain />} />
-                <Route path="/faq" element={<FaqMain />} />
-              </Route>
-              <Route>
-                <Route path="/login" element={<LoginMain />} />
-              </Route>
-              <Route path="/login/callback" element={<CallbackMain />} />
-            </Routes>
-          </Suspense>
-        </SnackbarProvider>
+        <UserProvider>
+          <SnackbarProvider>
+            <CssBaseline />
+            <Suspense fallback={<div>로딩중...</div>}>
+              <Routes>
+                <Route path="/" element={<RootLayout sidebar={<ServiceRootSidebar />} />}>
+                  <Route path="/" element={<ChatMain />} />
+                  <Route path="/profile" element={<ProfileMain />} />
+                  <Route path="/faq" element={<FaqMain />} />
+                </Route>
+                <Route>
+                  <Route path="/login" element={<LoginMain />} />
+                </Route>
+                <Route path="/login/callback" element={<CallbackMain />} />
+              </Routes>
+            </Suspense>
+          </SnackbarProvider>
+        </UserProvider>
       </SSEProvider>
     </LiaApp>
   );

@@ -1,4 +1,4 @@
-import { Box, CircularProgress, IconButton, Paper, TextField, Container } from '@mui/material';
+import { Box, CircularProgress, IconButton, Paper, TextField, Container, TextFieldProps } from '@mui/material';
 import { useEffect, useState, useCallback } from 'react';
 import SendIcon from '@mui/icons-material/Send';
 import { ChatContent } from './Content';
@@ -82,7 +82,7 @@ export function ChatMain() {
     setAiStreamContent('');
   }, [nowChatId]);
 
-  const isNothing = messageList?.data.length === 0 && tempUserContent === '';
+  const isNothing = (messageList?.data ?? []).length === 0 && tempUserContent === '';
 
   return (
     <Box
@@ -174,28 +174,15 @@ export function ChatMain() {
             }}
           >
             <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-              <TextField
-                fullWidth
+              <InputTextField
+                isSending={isSending}
                 value={message}
-                disabled={isSending}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     handleSendMessage();
                   }
-                }}
-                multiline
-                placeholder="Type message"
-                variant="standard"
-                sx={{
-                  '& .MuiInputBase-root': {
-                    padding: '4px 8px',
-                    fontSize: { xs: '0.875rem', md: '1rem' },
-                  },
-                  '& .MuiInput-underline:before': { borderBottom: 'none' },
-                  '& .MuiInput-underline:after': { borderBottom: 'none' },
-                  '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottom: 'none' },
                 }}
               />
               {isSending ? (
@@ -228,5 +215,42 @@ export function ChatMain() {
         </Box>
       </Container>
     </Box>
+  );
+}
+
+function InputTextField(props: TextFieldProps & { isSending: boolean }) {
+  const { isSending, ...rest } = props;
+  const [dots, setDots] = useState('');
+
+  useEffect(() => {
+    if (isSending) {
+      const interval = setInterval(() => {
+        setDots((prev) => (prev.length < 5 ? prev + '.' : ''));
+      }, 500);
+      return () => clearInterval(interval);
+    }
+
+    return () => {
+      setDots('');
+    };
+  }, [isSending]);
+
+  return (
+    <TextField
+      {...rest}
+      fullWidth
+      disabled={isSending}
+      multiline
+      placeholder={isSending ? `Generating${dots}` : 'Type message'}
+      variant="standard"
+      sx={{
+        '& .MuiInputBase-root': {
+          padding: '4px 8px',
+          fontSize: { xs: '0.875rem', md: '1rem' },
+        },
+        '& .MuiInput-underline:before': { borderBottom: 'none' },
+        '& .MuiInput-underline:after': { borderBottom: 'none' },
+      }}
+    />
   );
 }

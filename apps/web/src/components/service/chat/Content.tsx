@@ -1,9 +1,10 @@
 import { Box, Paper, useTheme, Typography, Container, useMediaQuery } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Message } from '../../../hooks/useMessage';
 import { useMemo } from 'react';
-import remarkGfm from 'remark-gfm';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import remarkEmoji from 'remark-emoji';
 
 interface ChatContentProps {
   messageData: Message[] | undefined;
@@ -128,7 +129,7 @@ export function ChatContent({ messageData, aiStreamContent, tempUserContent }: C
                       },
                     }}
                   >
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkEmoji, remarkGfm]}>{msg.content}</ReactMarkdown>
                   </Paper>
                   {!isUser && <Typography sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>{time}</Typography>}
                 </Box>
