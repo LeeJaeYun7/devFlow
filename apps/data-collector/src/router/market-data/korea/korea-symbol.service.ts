@@ -16,7 +16,7 @@ export class KoreaSymbolService {
   public async fetchAndStoreTopSymbols(): Promise<void> {
     const browser = await puppeteer.launch({
       headless: true,
-      executablePath: '/usr/bin/chromium-browser',
+      executablePath: '/usr/bin/chromium-browser', // 예: 리눅스 서버
     });
 
     const page = await browser.newPage();
