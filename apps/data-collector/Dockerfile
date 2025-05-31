@@ -22,6 +22,9 @@ ENV PORT=4700
 
 WORKDIR /app
 
+# Chromium 설치
+RUN apk add --no-cache chromium
+
 RUN addgroup --system data-collector && \
   adduser --system -G data-collector data-collector
 

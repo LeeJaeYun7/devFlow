@@ -26,7 +26,8 @@ export class NaverMarketScheduler {
 
     const browser = await puppeteer.launch({
       headless: true,
-      executablePath: '/usr/bin/chromium-browser',
+      executablePath: '/usr/lib/chromium/chromium',
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
 
     const page = await browser.newPage();
@@ -179,7 +180,8 @@ export class NaverMarketScheduler {
   
     const browser = await puppeteer.launch({
       headless: true,
-      executablePath: '/usr/bin/chromium-browser',
+      executablePath: '/usr/lib/chromium/chromium',
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
 
     const page = await browser.newPage();

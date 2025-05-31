@@ -14,29 +14,36 @@ export class NaverStockFetcherService {
       return null;
     }
 
-    const browser = await puppeteer.launch({
-      headless: true,
-      executablePath: '/usr/lib/chromium/chromium',
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    });
-
-    const page = await browser.newPage();
-    await page.setUserAgent(
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
-        '(KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'
-    );
-
     try {
-      // 📌 1. 기본정보 페이지로 이동
-      const fundamentalUrl = `https://finance.naver.com/item/sise.naver?code=${symbol}`;
-      const response = await page.goto(fundamentalUrl, { waitUntil: 'domcontentloaded' });
+      this.logger.debug(`[${symbol}] Launching Puppeteer...`);
+      const browser = await puppeteer.launch({
+        headless: true,
+        executablePath: '/usr/lib/chromium/chromium',
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      });
+      this.logger.debug(`[${symbol}] Puppeteer launched.`);
 
-      // 페이지가 존재하지 않는 경우
+      const page = await browser.newPage();
+      this.logger.debug(`[${symbol}] New page created.`);
+
+      await page.setUserAgent(
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
+          '(KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'
+      );
+      this.logger.debug(`[${symbol}] User agent set.`);
+
+      const fundamentalUrl = `https://finance.naver.com/item/sise.naver?code=${symbol}`;
+      this.logger.debug(`[${symbol}] Navigating to URL: ${fundamentalUrl}`);
+      const response = await page.goto(fundamentalUrl, { waitUntil: 'domcontentloaded' });
+      this.logger.debug(`[${symbol}] Navigation completed.`);
+
       if (!response || response.status() === 404) {
         this.logger.warn(`Symbol ${symbol} not found in Naver Finance`);
+        await browser.close();
         return null;
       }
 
+      this.logger.debug(`[${symbol}] Evaluating page content...`);
       const fundamentalResult = await page.evaluate(() => {
         const cleanText = (text: string | null) => text?.trim().replace(/,/g, '') ?? null;
 
@@ -69,12 +76,16 @@ export class NaverStockFetcherService {
           capital,
         };
       });
+      this.logger.debug(`[${symbol}] Page content evaluated.`);
 
-      // 데이터가 없는 경우
       if (!fundamentalResult) {
         this.logger.warn(`No data found for symbol ${symbol} in Naver Finance`);
+        await browser.close();
         return null;
       }
+
+      await browser.close();
+      this.logger.debug(`[${symbol}] Browser closed successfully.`);
 
       return {
         currentPrice: Number(fundamentalResult.currentPrice) || 0,
@@ -87,11 +98,9 @@ export class NaverStockFetcherService {
       };
     } catch (error) {
       this.logger.error(
-        `Error fetching fundamental data for ${symbol}: ${error instanceof Error ? error.message : String(error)}`
+        `Error fetching fundamental data for ${symbol}: ${error instanceof Error ? error.stack : String(error)}`
       );
       return null;
-    } finally {
-      await browser.close();
     }
   }
 
@@ -101,24 +110,31 @@ export class NaverStockFetcherService {
       return null;
     }
 
-    const browser = await puppeteer.launch({
-      headless: true,
-      executablePath: '/usr/lib/chromium/chromium',
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    });
-
-    const page = await browser.newPage();
-    await page.setUserAgent(
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
-    );
-
     try {
-      const baseUrl = `https://finance.naver.com/item/sise_day.naver?code=${symbol}`;
-      const response = await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
+      this.logger.debug(`[${symbol}] Launching Puppeteer...`);
+      const browser = await puppeteer.launch({
+        headless: true,
+        executablePath: '/usr/lib/chromium/chromium',
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      });
+      this.logger.debug(`[${symbol}] Puppeteer launched.`);
 
-      // 페이지가 존재하지 않는 경우
+      const page = await browser.newPage();
+      this.logger.debug(`[${symbol}] New page created.`);
+
+      await page.setUserAgent(
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
+      );
+      this.logger.debug(`[${symbol}] User agent set.`);
+
+      const baseUrl = `https://finance.naver.com/item/sise_day.naver?code=${symbol}`;
+      this.logger.debug(`[${symbol}] Navigating to URL: ${baseUrl}`);
+      const response = await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
+      this.logger.debug(`[${symbol}] Navigation completed.`);
+
       if (!response || response.status() === 404) {
         this.logger.warn(`Symbol ${symbol} not found in Naver Finance`);
+        await browser.close();
         return null;
       }
 
@@ -131,12 +147,12 @@ export class NaverStockFetcherService {
         volume: number;
       }[] = [];
 
-      // ✅ 1. 여러 페이지 순회 (예: 최근 3개월치 약 9페이지)
       for (let i = 1; i <= 9; i++) {
         const url = `${baseUrl}&page=${i}`;
+        this.logger.debug(`[${symbol}] Navigating to page ${i}: ${url}`);
         const pageResponse = await page.goto(url, { waitUntil: 'domcontentloaded' });
+        this.logger.debug(`[${symbol}] Page ${i} navigation completed.`);
 
-        // 페이지가 존재하지 않는 경우
         if (!pageResponse || pageResponse.status() === 404) {
           this.logger.warn(`Page ${i} not found for symbol ${symbol} in Naver Finance`);
           break;
@@ -164,6 +180,7 @@ export class NaverStockFetcherService {
 
           return data;
         });
+        this.logger.debug(`[${symbol}] Page ${i} data evaluated.`);
 
         if (pageData.length === 0) {
           this.logger.warn(`No data found on page ${i} for symbol ${symbol}`);
@@ -171,27 +188,29 @@ export class NaverStockFetcherService {
         }
 
         dailyData.push(...pageData);
-        await new Promise((res) => setTimeout(res, 300)); // 서버 과부하 방지
+        await new Promise((res) => setTimeout(res, 300));
       }
 
-      // ✅ 중복 제거 (날짜 기준)
       const uniqueData = Array.from(new Map(dailyData.map((d) => [d.date, d])).values());
 
       if (uniqueData.length < 2) {
         this.logger.warn(`Not enough data found for symbol ${symbol}`);
+        await browser.close();
         return null;
       }
 
-      // ✅ 2. fundamental 정보 크롤링
       const fundUrl = `https://finance.naver.com/item/sise.naver?code=${symbol}`;
+      this.logger.debug(`[${symbol}] Navigating to fundamental URL: ${fundUrl}`);
       const fundResponse = await page.goto(fundUrl, { waitUntil: 'domcontentloaded' });
+      this.logger.debug(`[${symbol}] Fundamental navigation completed.`);
 
-      // 페이지가 존재하지 않는 경우
       if (!fundResponse || fundResponse.status() === 404) {
         this.logger.warn(`Fundamental data not found for symbol ${symbol} in Naver Finance`);
+        await browser.close();
         return null;
       }
 
+      this.logger.debug(`[${symbol}] Evaluating fundamental data...`);
       const fundamentalData = await page.evaluate(() => {
         const cleanText = (text: string | null) => text?.trim().replace(/,/g, '') ?? null;
 
@@ -212,9 +231,11 @@ export class NaverStockFetcherService {
           low52Week: getTextByThLabel('52주 최저'),
         };
       });
+      this.logger.debug(`[${symbol}] Fundamental data evaluated.`);
 
       if (!fundamentalData) {
         this.logger.warn(`No fundamental data found for symbol ${symbol}`);
+        await browser.close();
         return null;
       }
 
@@ -232,6 +253,9 @@ export class NaverStockFetcherService {
       const previousPrice = prices[1];
       const changePercent = Number((((currentPrice - previousPrice) / previousPrice) * 100).toFixed(2));
 
+      await browser.close();
+      this.logger.debug(`[${symbol}] Browser closed successfully.`);
+
       return {
         ohlcvAndIndicators,
         currentPrice,
@@ -242,23 +266,18 @@ export class NaverStockFetcherService {
       };
     } catch (error) {
       this.logger.error(
-        `Error fetching technical data for ${symbol}: ${error instanceof Error ? error.message : String(error)}`
+        `Error fetching technical data for ${symbol}: ${error instanceof Error ? error.stack : String(error)}`
       );
       return null;
-    } finally {
-      await browser.close();
     }
   }
 
   private parseMarketCap(value: string | number | undefined | null): number {
-
     if (!value) return 0;
-  
     const stringValue = String(value);
-    const matched = stringValue.match(/[\d,.]+/); // 숫자만 추출
+    const matched = stringValue.match(/[\d,.]+/);
     if (!matched) return 0;
-  
     const eokValue = Number(matched[0].replace(/,/g, ''));
-    return eokValue * 100_000_000; // "억원"을 "원"으로 변환
+    return eokValue * 100_000_000;
   }
 }
