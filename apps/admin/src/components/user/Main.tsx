@@ -1,65 +1,46 @@
 import { Box, Typography, Paper, Grid, Chip } from '@mui/material';
+
 import { DataGrid } from '@mui/x-data-grid';
 import { StatisticsCard } from '@lia/react/components/card/Statistics';
-
-// 상단 요약 카드용 mock 데이터
-type Metric = {
-  label: string;
-  value: number;
-  diff: number; // 전날 대비 증감 수치
-  diffPercent: number; // 전날 대비 증감률
-};
-
-const metrics: Metric[] = [
-  { label: 'DAU', value: 1200, diff: 50, diffPercent: 4.35 },
-  { label: 'Total User', value: 15000, diff: 100, diffPercent: 0.67 },
-  { label: 'NRU', value: 80, diff: -10, diffPercent: -11.1 },
-  { label: 'Total DAU', value: 320000, diff: 2000, diffPercent: 0.63 },
-  { label: 'D1 Retention', value: 42.5, diff: 1.2, diffPercent: 2.91 },
-  { label: 'D7 Retention', value: 18.3, diff: -0.5, diffPercent: -2.66 },
-];
-
-// 유저 테이블용 mock 데이터
-type User = {
-  email: string;
-  createdAt: string;
-  lastLoginAt: string;
-  chatCount: number;
-  sso: 'kakao' | 'google' | 'naver';
-};
-
-const users: User[] = [
-  {
-    email: 'user1@email.com',
-    createdAt: '2024-06-01 10:12',
-    lastLoginAt: '2024-06-10 09:30',
-    chatCount: 12,
-    sso: 'kakao',
-  },
-  {
-    email: 'user2@email.com',
-    createdAt: '2024-05-28 14:22',
-    lastLoginAt: '2024-06-09 20:10',
-    chatCount: 5,
-    sso: 'google',
-  },
-  {
-    email: 'user3@email.com',
-    createdAt: '2024-06-05 08:45',
-    lastLoginAt: '2024-06-10 08:00',
-    chatCount: 20,
-    sso: 'naver',
-  },
-  {
-    email: 'user4@email.com',
-    createdAt: '2024-06-03 16:00',
-    lastLoginAt: '2024-06-08 21:15',
-    chatCount: 2,
-    sso: 'kakao',
-  },
-];
+import { useUserList, useUserMetric } from '../../hooks/useUser';
 
 export function UserMain() {
+  const { data: userList } = useUserList({ page: 1, limit: 10 });
+  const { data: userMetric } = useUserMetric({});
+
+  const metrics = [
+    {
+      label: 'DAU',
+      value: userMetric?.data.dau.value ?? 0,
+      diff: userMetric?.data.dau.diff ?? 0,
+      diffPercent: userMetric?.data.dau.diffRate ?? 0,
+    },
+    {
+      label: 'Total User',
+      value: userMetric?.data.totalUser.value ?? 0,
+      diff: userMetric?.data.totalUser.diff ?? 0,
+      diffPercent: userMetric?.data.totalUser.diffRate ?? 0,
+    },
+    {
+      label: 'Run',
+      value: userMetric?.data.run.value ?? 0,
+      diff: userMetric?.data.run.diff ?? 0,
+      diffPercent: userMetric?.data.run.diffRate ?? 0,
+    },
+    {
+      label: 'D1 Retention',
+      value: userMetric?.data.d1Retention.value ?? 0,
+      diff: userMetric?.data.d1Retention.diff ?? 0,
+      diffPercent: userMetric?.data.d1Retention.diffRate ?? 0,
+    },
+    {
+      label: 'D7 Retention',
+      value: userMetric?.data.d7Retention.value ?? 0,
+      diff: userMetric?.data.d7Retention.diff ?? 0,
+      diffPercent: userMetric?.data.d7Retention.diffRate ?? 0,
+    },
+  ];
+
   return (
     <Box>
       {/* 상단 요약 카드 */}
@@ -77,12 +58,14 @@ export function UserMain() {
         <DataGrid
           sx={{ border: 0 }}
           rowSelection={false}
-          rows={Array.from({ length: 100 }, () => users[Math.floor(Math.random() * users.length)]).map((user, i) => ({
-            ...user,
-            createdAt: new Date(user.createdAt).toLocaleString(),
-            lastLoginAt: new Date(user.lastLoginAt).toLocaleString(),
-            id: user.email + i,
-          }))}
+          rows={
+            userList?.data.data.map((user, i) => ({
+              ...user,
+              createdAt: new Date(user.createdAt).toLocaleString(),
+              lastLoginAt: user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : '',
+              id: user.email + i,
+            })) ?? []
+          }
           initialState={{ pagination: { paginationModel: { pageSize: 20 } } }}
           pageSizeOptions={[10, 20, 50, 100]}
           columns={[
@@ -95,7 +78,13 @@ export function UserMain() {
               field: 'sso',
               headerName: 'SNS',
               renderCell: (params) => {
-                return <Chip label={params.row.sso.toUpperCase()} size="small" color={SsoColorMap[params.row.sso]} />;
+                return (
+                  <Chip
+                    label={params.row.provider.toUpperCase()}
+                    size="small"
+                    color={SsoColorMap[params.row.provider]}
+                  />
+                );
               },
             },
             {
@@ -109,8 +98,8 @@ export function UserMain() {
               flex: 1,
             },
             {
-              field: 'chatCount',
-              headerName: '채팅 개수',
+              field: 'remainingMessages',
+              headerName: '남은 메시지',
               flex: 1,
             },
           ]}

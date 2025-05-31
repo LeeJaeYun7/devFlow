@@ -7,6 +7,7 @@ import { UserMessageQuotaModel } from '../../module/mongo/model/user/models/user
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UserError } from '../../util/base.error';
+import { DEFAULT_MESSAGE_QUOTA } from '../../constants/message.constant';
 
 @Injectable()
 export class UserService {
@@ -28,7 +29,17 @@ export class UserService {
       throw new UserError('User not found');
     }
 
+    const userId = user.id;
     const userMessageQuota = await this.userMessageQuotaModel.findOne({ userId: user.id });
+    if (userMessageQuota?.lastReset && userMessageQuota.lastReset.getDate() !== new Date().getDate()) {
+      await this.userMessageQuotaModel.updateOne(
+        { userId },
+        { $set: { remainingMessages: DEFAULT_MESSAGE_QUOTA, lastReset: new Date() } }
+      );
+    }
+
+    userData.lastLoginAt = new Date();
+    await userData.save();
 
     return {
       name: userData.name,

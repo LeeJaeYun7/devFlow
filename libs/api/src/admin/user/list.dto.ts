@@ -14,6 +14,12 @@ class UserData {
 
   @ApiProperty({ description: 'createdAt' })
   createdAt!: Date;
+
+  @ApiProperty({ description: 'lastLoginAt' })
+  lastLoginAt?: Date;
+
+  @ApiProperty({ description: 'remainingMessages' })
+  remainingMessages!: number;
 }
 
 class UserListData extends CreatePaginationResponseData(UserData) {}

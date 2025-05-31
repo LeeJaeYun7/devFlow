@@ -33,6 +33,7 @@ export class AuthService {
         provider: user.provider,
         providerId: user.id,
         name: user.name,
+        lastLoginAt: new Date(),
       });
 
       await this.userMetricService.createNewUser(userData._id);
@@ -41,6 +42,10 @@ export class AuthService {
         remainingMessages: DEFAULT_MESSAGE_FIRST_QUOTA,
         lastReset: new Date(),
       });
+    } else {
+      userData.lastLoginAt = new Date();
+      await userData.save();
+      await this.userMetricService.accessToday(userData._id);
     }
 
     const payload = {

@@ -17,6 +17,9 @@ export class UserModel extends Document<string> {
   @Prop({ required: false })
   name?: string;
 
+  @Prop({ required: false })
+  lastLoginAt?: Date;
+
   createdAt!: Date;
   updatedAt!: Date;
 }

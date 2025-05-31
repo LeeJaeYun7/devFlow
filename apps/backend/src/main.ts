@@ -23,7 +23,9 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.use(cookieParser(JWT_SECRET));
   app.enableCors({
-    origin: isProd ? 'https://asklia.io' : 'http://localhost:4500',
+    origin: isProd
+      ? ['https://asklia.io', 'https://admin.asklia.io']
+      : ['http://localhost:4500', 'http://localhost:4100'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,

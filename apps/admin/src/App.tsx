@@ -14,6 +14,15 @@ import CallbackMain from '@lia/react/components/login/callback/Main';
 import { UserMain } from './components/user/Main';
 import { SystemPromptMain } from './components/systemPrompt/Main';
 import { CollectStorkDataMain } from './components/collectStorkData/Main';
+import { CheckAdmin } from './layouts/CheckAdmin';
+
+function AdminLayout() {
+  return (
+    <CheckAdmin>
+      <RootLayout sidebar={<AdminSidebar />} requireLogin={false} />
+    </CheckAdmin>
+  );
+}
 
 export default function App() {
   return (
@@ -21,7 +30,7 @@ export default function App() {
       <SnackbarProvider>
         <CssBaseline />
         <Routes>
-          <Route path="/" element={<RootLayout sidebar={<AdminSidebar />} requireLogin={false} />}>
+          <Route path="/" element={<AdminLayout />}>
             <Route path="/" element={<Navigate to={AdminUrlMap.user} />} />
             <Route path={AdminUrlMap.user} element={<UserMain />} />
             <Route path={AdminUrlMap.systemPrompt} element={<SystemPromptMain />} />

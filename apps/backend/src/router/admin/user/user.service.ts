@@ -14,6 +14,7 @@ import {
   TotalMetricMap,
 } from '../../../module/mongo/model/metric/interfaces/metric.constant';
 import { getDateKey } from '../../../util/date';
+import { UserMessageQuotaModel } from '../../../module/mongo/model/user/models/user_message_quota.model';
 
 @Injectable()
 export class AdminUserService {
@@ -25,7 +26,10 @@ export class AdminUserService {
     private readonly dailyMetricModel: Model<DailyMetricModel>,
 
     @InjectModel(TotalMetricModel.name)
-    private readonly totalMetricModel: Model<TotalMetricModel>
+    private readonly totalMetricModel: Model<TotalMetricModel>,
+
+    @InjectModel(UserMessageQuotaModel.name)
+    private readonly userMessageQuotaModel: Model<UserMessageQuotaModel>
   ) {}
 
   public async listUser(dto: UserListDto): ServiceReturnType<UserListResponse> {
@@ -35,13 +39,20 @@ export class AdminUserService {
       .find({})
       .skip((page - 1) * limit)
       .sort({ createdAt: -1 })
-      .limit(limit);
+      .limit(limit)
+      .lean();
+
+    const userMessageQuota = await this.userMessageQuotaModel.find({
+      userId: { $in: data.map((user) => user._id) },
+    });
 
     return {
       data: data.map((user) => ({
         provider: user.provider,
         email: user.email,
         createdAt: user.createdAt,
+        lastLoginAt: user.lastLoginAt,
+        remainingMessages: userMessageQuota.find((quota) => quota.userId === user._id)?.remainingMessages ?? 0,
       })),
       meta: {
         total: data.length,
