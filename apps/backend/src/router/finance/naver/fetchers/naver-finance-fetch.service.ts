@@ -16,7 +16,7 @@ export class NaverStockFetcherService {
 
     const browser = await puppeteer.launch({
       headless: true,
-      executablePath: '/usr/bin/google-chrome-stable', // 예: 리눅스 서버
+      executablePath: '/usr/bin/chromium-browser',
     });
 
     const page = await browser.newPage();
@@ -102,8 +102,8 @@ export class NaverStockFetcherService {
 
     const browser = await puppeteer.launch({
       headless: true,
-      executablePath: '/usr/bin/google-chrome-stable', // 예: 리눅스 서버
-    });
+      executablePath: '/usr/bin/chromium-browser',
+     });
 
     const page = await browser.newPage();
     await page.setUserAgent(
