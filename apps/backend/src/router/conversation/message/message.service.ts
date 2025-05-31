@@ -63,7 +63,7 @@ export class MessageService {
   }
 
   public async createMessage(dto: MessageCreateDto): ServiceReturnType<MessageCreateResponse> {
-    await this.checkUserMessageQuota();
+    // await this.checkUserMessageQuota();
     const { chatId } = dto;
 
     try {
@@ -81,7 +81,7 @@ export class MessageService {
             this.sseService.sendEvent({ type: 'chatTitle', data: { chatId, title } });
           },
           endCb: async (title) => {
-            await this.chatModel.updateOne({ _id: new Types.ObjectId(chatId) }, { $set: { title } });
+            await this.chatModel.updateOne({ _id: chatId }, { $set: { title } });
           },
         },
       });
@@ -90,9 +90,9 @@ export class MessageService {
         createdAt: new Date(),
       };
     } finally {
-      const user = this.customRequestContext.get('user');
-      const userId = user.id;
-      await this.userMessageQuotaModel.updateOne({ userId }, { $inc: { remainingMessages: -1 } });
+      //const user = this.customRequestContext.get('user');
+      //const userId = user.id;
+      //await this.userMessageQuotaModel.updateOne({ userId }, { $inc: { remainingMessages: -1 } });
     }
   }
 
