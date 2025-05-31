@@ -22,6 +22,9 @@ ENV PORT=4600
 
 WORKDIR /app
 
+# 🔥 Chromium 설치 추가!
+RUN apk add --no-cache chromium && apk info -L chromium
+
 RUN addgroup --system backend && \
   adduser --system -G backend backend
 
