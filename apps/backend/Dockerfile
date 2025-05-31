@@ -4,7 +4,11 @@ FROM node:22.13-alpine AS base
 WORKDIR /app
 
 # Chromium 설치
-RUN apk add --no-cache chromium
+RUN apk add --no-cache chromium \
+    && echo "🔍 chromium-browser 위치:" \
+    && which chromium-browser || echo "❌ chromium-browser not found" \
+    && which chromium || echo "❌ chromium not found" \
+    && find /usr -name chromium* || echo "❌ chromium 경로 찾기 실패"
 
 # pnpm 설치
 RUN npm install -g pnpm@9.15

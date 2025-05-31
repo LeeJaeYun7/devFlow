@@ -16,7 +16,7 @@ export class NaverStockFetcherService {
 
     const browser = await puppeteer.launch({
       headless: true,
-      executablePath: '/usr/lib/chromium/chromium-launcher',
+      executablePath: '/usr/lib/chromium/chromium',
     });
 
     const page = await browser.newPage();
@@ -102,7 +102,7 @@ export class NaverStockFetcherService {
 
     const browser = await puppeteer.launch({
       headless: true,
-      executablePath: '/usr/lib/chromium/chromium-launcher',
+      executablePath: '/usr/lib/chromium/chromium',
     });
 
     const page = await browser.newPage();
