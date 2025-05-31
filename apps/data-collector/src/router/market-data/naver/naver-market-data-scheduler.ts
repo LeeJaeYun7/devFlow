@@ -24,7 +24,11 @@ export class NaverMarketScheduler {
     }
     this.logger.log(`Found ${symbols.length} symbols in database`);
 
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({
+      headless: true,
+      executablePath: '/usr/bin/google-chrome-stable', // 예: 리눅스 서버
+    });
+
     const page = await browser.newPage();
     await page.setUserAgent(
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
@@ -172,8 +176,12 @@ export class NaverMarketScheduler {
       return;
     }
     this.logger.log(`Found ${symbols.length} symbols in database`);
+  
+    const browser = await puppeteer.launch({
+      headless: true,
+      executablePath: '/usr/bin/google-chrome-stable', // 예: 리눅스 서버
+    });
 
-    const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
     await page.setUserAgent(
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +

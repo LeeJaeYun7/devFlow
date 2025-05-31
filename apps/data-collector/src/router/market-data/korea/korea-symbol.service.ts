@@ -14,7 +14,11 @@ export class KoreaSymbolService {
   ) {}
 
   public async fetchAndStoreTopSymbols(): Promise<void> {
-    const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
+    const browser = await puppeteer.launch({
+      headless: true,
+      executablePath: '/usr/bin/google-chrome-stable', // 예: 리눅스 서버
+    });
+
     const page = await browser.newPage();
     const symbols = new Set<string>();
 

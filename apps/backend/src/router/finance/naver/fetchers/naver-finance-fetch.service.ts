@@ -14,7 +14,11 @@ export class NaverStockFetcherService {
       return null;
     }
 
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({
+      headless: true,
+      executablePath: '/usr/bin/google-chrome-stable', // 예: 리눅스 서버
+    });
+
     const page = await browser.newPage();
     await page.setUserAgent(
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
@@ -96,7 +100,11 @@ export class NaverStockFetcherService {
       return null;
     }
 
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({
+      headless: true,
+      executablePath: '/usr/bin/google-chrome-stable', // 예: 리눅스 서버
+    });
+
     const page = await browser.newPage();
     await page.setUserAgent(
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
@@ -221,10 +229,6 @@ export class NaverStockFetcherService {
       const currentPrice = prices[0];
       const previousPrice = prices[1];
       const changePercent = Number((((currentPrice - previousPrice) / previousPrice) * 100).toFixed(2));
-
-      console.log('marketCap', fundamentalData.marketCap);
-      console.log('high52Week', fundamentalData.high52Week);
-      console.log('low52Week', fundamentalData.low52Week);
 
       return {
         ohlcvAndIndicators,
