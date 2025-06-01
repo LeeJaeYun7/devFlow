@@ -42,6 +42,15 @@ resource "aws_ecs_task_definition" "api" {
         retries     = 3
         startPeriod = 30
       }
+      linuxParameters: {
+        tmpfs: [
+          {
+            containerPath: "/dev/shm",
+            size: 1024,
+            mountOptions: ["rw", "nosuid", "nodev"]
+          }
+        ]
+      }
     }
   ])
 }
