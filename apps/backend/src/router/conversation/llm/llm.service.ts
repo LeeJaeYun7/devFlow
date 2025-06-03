@@ -48,9 +48,6 @@ export class LlmService {
       { role: 'user', content: message },
     ];
 
-    console.log('systemPrompt는?');
-    console.log(newMessages[0]);
-
     if (!model) {
       console.error('Model is null');
       return;
