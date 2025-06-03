@@ -4,7 +4,7 @@ import { MessageCreateDto, MessageCreateResponse } from '@lia/api/conversation/m
 import { MessageListDto, MessageListResponse } from '@lia/api/conversation/message/list.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { MessageModel } from '../../../module/mongo/model/conversation/models/message.model';
-import { FilterQuery, Model, Types } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import { ServiceReturnType } from '@lia/api/types/base.type';
 import { MessageRoleMap } from '@lia/api/conversation/message/message.constant';
 import { UserMessageQuotaModel } from '../../../module/mongo/model/user/models/user_message_quota.model';
@@ -63,7 +63,7 @@ export class MessageService {
   }
 
   public async createMessage(dto: MessageCreateDto): ServiceReturnType<MessageCreateResponse> {
-    // await this.checkUserMessageQuota();
+    await this.checkUserMessageQuota();
     const { chatId } = dto;
 
     try {
@@ -90,9 +90,9 @@ export class MessageService {
         createdAt: new Date(),
       };
     } finally {
-      //const user = this.customRequestContext.get('user');
-      //const userId = user.id;
-      //await this.userMessageQuotaModel.updateOne({ userId }, { $inc: { remainingMessages: -1 } });
+      const user = this.customRequestContext.get('user');
+      const userId = user.id;
+      await this.userMessageQuotaModel.updateOne({ userId }, { $inc: { remainingMessages: -1 } });
     }
   }
 

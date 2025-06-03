@@ -22,7 +22,7 @@ export class NaverStockService {
   public async saveStockHistory(
     symbol: string,
     ohlcvAndIndicators: NaverStockHistoryItem[],
-    fundamentalData: NaverStockFundamental,
+    fundamentalData: NaverStockFundamental
   ) {
     try {
       const stockHistory = await this.stockHistoryModel.findOneAndUpdate(

@@ -177,7 +177,7 @@ export class NaverMarketScheduler {
       return;
     }
     this.logger.log(`Found ${symbols.length} symbols in database`);
-  
+
     const browser = await puppeteer.launch({
       headless: true,
       executablePath: '/usr/lib/chromium/chromium',

@@ -6,6 +6,8 @@ import { OpenRouterService } from './open_router/open_router.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MessageModel, MessageSchema } from '../../../module/mongo/model/conversation/models/message.model';
 import { ParserService } from './parser.service';
+import { FunctionCallService } from './function-call.service';
+import { LlmStreamService } from './llm.stream.service';
 import { SystemCharacterModel, SystemCharacterSchema } from '../../../module/mongo/model/system_character.model';
 import { SystemModelModel, SystemModelSchema } from '../../../module/mongo/model/system_model.model';
 
@@ -17,7 +19,7 @@ import { SystemModelModel, SystemModelSchema } from '../../../module/mongo/model
     MongooseModule.forFeature([{ name: SystemCharacterModel.name, schema: SystemCharacterSchema }]),
     MongooseModule.forFeature([{ name: SystemModelModel.name, schema: SystemModelSchema }]),
   ],
-  providers: [LlmService, OpenRouterService, ParserService],
+  providers: [LlmService, OpenRouterService, ParserService, LlmStreamService, FunctionCallService],
   exports: [LlmService],
 })
 export class LlmModule {}

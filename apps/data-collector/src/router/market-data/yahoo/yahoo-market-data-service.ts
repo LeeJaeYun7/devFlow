@@ -34,7 +34,7 @@ export class YahooStockService {
             summaryDetail: data.summaryDetail,
             defaultKeyStatistics: data.defaultKeyStatistics,
             financialData: data.financialData,
-            lastUpdated: new Date(),
+            updatedAt: new Date(),
           },
         },
         { upsert: true, new: true }
@@ -84,9 +84,9 @@ export class YahooStockService {
             symbol,
             interval,
             data: formattedData,
-            lastUpdated: new Date(),
+            updatedAt: new Date(),
           },
-       },
+        },
         { upsert: true, new: true }
       );
       return stockHistory;
@@ -135,7 +135,7 @@ export class YahooStockService {
             earnings: data.earnings,
             earningsTrend: data.earningsTrend,
             earningsHistory: data.earningsHistory,
-            lastUpdated: new Date(),
+            updatedAt: new Date(),
           },
         },
         { upsert: true, new: true }
@@ -178,7 +178,7 @@ export class YahooStockService {
           $set: {
             symbol,
             news,
-            lastUpdated: new Date(),
+            updatedAt: new Date(),
           },
         },
         { upsert: true, new: true }

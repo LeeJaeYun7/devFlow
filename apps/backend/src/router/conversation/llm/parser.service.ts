@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { Parser } from 'htmlparser2';
-
 @Injectable()
 export class ParserService {
   public createParser(cb: (content: string) => void) {
@@ -19,7 +18,7 @@ export class ParserService {
       },
       ontext: (text) => {
         if (!isThinking) {
-          cb(text);
+          cb(text); // 그냥 text 그대로 전달
         }
       },
     });

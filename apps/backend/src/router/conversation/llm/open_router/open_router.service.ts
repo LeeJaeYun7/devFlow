@@ -48,6 +48,10 @@ export class OpenRouterService {
 
   public async chatStream(body: OpenRouterRequestBody) {
     try {
+
+      console.log('body');
+      console.dir(body);
+
       return await axios.post<Readable>(
         this.openRouterUrl,
         {

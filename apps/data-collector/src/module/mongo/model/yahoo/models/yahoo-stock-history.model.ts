@@ -12,9 +12,6 @@ export class YahooStockHistory extends Document {
 
   @Prop({ type: Object, required: true })
   data!: YahooStockHistoryItem[];
-
-  @Prop({ required: true })
-  lastUpdated!: Date;
 }
 
 export const YahooStockHistorySchema = SchemaFactory.createForClass(YahooStockHistory);
