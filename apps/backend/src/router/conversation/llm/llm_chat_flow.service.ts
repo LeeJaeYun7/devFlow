@@ -1,4 +1,3 @@
-// src/llm/llm.stream.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -29,7 +28,9 @@ export class LlmChatFlowService {
   ) {}
 
   public async handleTitleStream({ message, cb, endCb }: LLMStreamParam) {
+    console.log('[handleTitleStream] 시작', { message });
     const systemModel = await this.systemModelModel.findOne({ target: SystemModelTargetMap.title });
+    console.log('[handleTitleStream] systemModel', systemModel);
 
     let title = '';
     let lastSentTitle = '';
@@ -48,6 +49,7 @@ export class LlmChatFlowService {
       messages,
       model: systemModel?.modelId,
       parserCb: (content) => {
+        console.log('[handleTitleStream] 수신 content', content);
         title += content;
         if (title !== lastSentTitle) {
           lastSentTitle = title;
@@ -57,6 +59,7 @@ export class LlmChatFlowService {
     });
 
     stream.on('end', () => {
+      console.log('[handleTitleStream] 스트림 종료', { finalTitle: title });
       if (title && title !== lastSentTitle) {
         cb(title);
       }
@@ -72,6 +75,7 @@ export class LlmChatFlowService {
     cb: (content: string) => void,
     endCb: (finalContent: string) => Promise<void>
   ) {
+    console.log('[handleMessageStream] 시작', { chatId, initialMessages });
     await this.saveMessage(chatId, initialMessages[initialMessages.length - 1].content, MessageRoleMap.user);
 
     const model = await this.systemModelModel
@@ -81,8 +85,10 @@ export class LlmChatFlowService {
       .lean();
 
     if (!model) {
+      console.error('[handleMessageStream] System model not found');
       throw new SystemError('System model not found');
     }
+    console.log('[handleMessageStream] model', model);
 
     let finalContent = '';
     let isToolCall = false;
@@ -93,16 +99,19 @@ export class LlmChatFlowService {
       tools,
       model: model.modelId,
       parserCb: (content) => {
+        console.log('[handleMessageStream] 수신 content', content);
         if (!isToolCall) {
           finalContent += content;
           cb(content);
         }
       },
       cb: (chunk) => {
+        console.log('[handleMessageStream] chunk delta', JSON.stringify(chunk.choices[0]?.delta));
         const toolCalls = chunk.choices[0]?.delta?.tool_calls;
         if (toolCalls) {
           isToolCall = true;
           for (const toolCall of toolCalls) {
+            console.log('[handleMessageStream] 수신 toolCall', toolCall);
             const index = toolCall.index;
             if (index >= firstResponseTools.length) {
               firstResponseTools.push({
@@ -124,13 +133,14 @@ export class LlmChatFlowService {
     });
 
     firstResponseStream.on('end', async () => {
+      console.log('[handleMessageStream] 스트림 종료', { isToolCall, finalContent });
       if (!isToolCall) {
         endCb(finalContent);
         await this.saveMessage(chatId, finalContent, MessageRoleMap.assistant);
         return;
       }
 
-      // Tool call detected — prepare second round
+      console.log('[handleMessageStream] Tool call detected, second round 시작');
       const newMessages: OpenRouterMessage[] = [
         ...initialMessages,
         {
@@ -139,10 +149,12 @@ export class LlmChatFlowService {
           tool_calls: firstResponseTools,
         },
       ];
+      console.log('[handleMessageStream] newMessages', newMessages);
 
-      // Execute tool functions
       for (const toolCall of firstResponseTools) {
+        console.log('[handleMessageStream] functionCall 처리', toolCall);
         const functionResult = await this.functionCallService.processFunctionCall(toolCall);
+        console.log('[handleMessageStream] functionResult', functionResult);
         newMessages.push({
           role: MessageRoleMap.tool,
           tool_call_id: toolCall.id,
@@ -162,6 +174,7 @@ export class LlmChatFlowService {
     cb: (content: string) => void,
     endCb: (finalContent: string) => Promise<void>
   ) {
+    console.log('[handleSecondStream] 시작', { messages, chatId });
     let finalContent = '';
 
     const secondResponseStream = await this.llmStreamParserService.createStream({
@@ -169,12 +182,14 @@ export class LlmChatFlowService {
       tools,
       model: model?.modelId,
       parserCb: (content) => {
+        console.log('[handleSecondStream] 수신 content', content);
         finalContent += content;
         cb(content);
       },
     });
 
     secondResponseStream.on('end', async () => {
+      console.log('[handleSecondStream] 스트림 종료', { finalContent });
       endCb(finalContent);
       await this.saveMessage(chatId, finalContent, MessageRoleMap.assistant);
     });
@@ -182,6 +197,7 @@ export class LlmChatFlowService {
 
   private async saveMessage(chatId: string, content: string | null, role: MessageRole) {
     if (!content) return;
+    console.log('[saveMessage] 저장', { chatId, role, content });
     await this.messageModel.insertMany([
       {
         chatId,

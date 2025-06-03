@@ -15,8 +15,8 @@ export class FunctionCallService {
       get_technical_data: async (args: Args) => {
         const symbol = args.symbol;
         if (this.isKoreanStock(symbol)) {
-          const cleanSymbol = symbol.replace(/\.(KS|KQ)$/, '');
-          return this.naverFinanceService.getTechnicalData(cleanSymbol);
+          const koreanSymbol = symbol.replace(/\.(KS|KQ)$/, '');
+          return this.naverFinanceService.getTechnicalData(koreanSymbol);
         } else {
           return this.yahooFinanceService.getTechnicalData(symbol);
         }
@@ -24,8 +24,8 @@ export class FunctionCallService {
       get_fundamental_data: async (args: Args) => {
         const symbol = args.symbol;
         if (this.isKoreanStock(symbol)) {
-          const cleanSymbol = symbol.replace(/\.(KS|KQ)$/, '');
-          return this.naverFinanceService.getFundamentalData(cleanSymbol);
+          const koreanSymbol = symbol.replace(/\.(KS|KQ)$/, '');
+          return this.naverFinanceService.getFundamentalData(koreanSymbol);
         } else {
           return this.yahooFinanceService.getFundamentalData(symbol);
         }
