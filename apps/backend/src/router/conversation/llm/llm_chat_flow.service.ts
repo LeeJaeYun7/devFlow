@@ -75,7 +75,8 @@ export class LlmChatFlowService {
     cb: (content: string) => void,
     endCb: (finalContent: string) => Promise<void>
   ) {
-    console.log('[handleMessageStream] 시작', { chatId, initialMessages });
+    console.log('[handleMessageStream] 시작');
+
     await this.saveMessage(chatId, initialMessages[initialMessages.length - 1].content, MessageRoleMap.user);
 
     const model = await this.systemModelModel
@@ -149,7 +150,7 @@ export class LlmChatFlowService {
           tool_calls: firstResponseTools,
         },
       ];
-      console.log('[handleMessageStream] newMessages', newMessages);
+      console.log('[handleMessageStream] newMessages');
 
       for (const toolCall of firstResponseTools) {
         console.log('[handleMessageStream] functionCall 처리', toolCall);
