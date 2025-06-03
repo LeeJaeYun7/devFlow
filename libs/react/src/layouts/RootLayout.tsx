@@ -1,32 +1,30 @@
 import { Box, useMediaQuery, useTheme } from '@mui/material';
 import { useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { useUser } from '../context/UserProvider';
 import { useUserMySelf } from '../hooks/useUser';
 
 const sidebarWidth = 280;
 
 interface RootLayoutProps {
+  topbar?: React.ReactNode;
   sidebar?: React.ReactNode;
   requireLogin?: boolean;
 }
 
-export function RootLayout({ sidebar, requireLogin = true }: RootLayoutProps) {
-  const navigate = useNavigate();
-
+export function RootLayout({ topbar, sidebar }: RootLayoutProps) {
   const theme = useTheme();
   const isNotMobile = useMediaQuery(theme.breakpoints.up('sm'));
   const { setIsLogin } = useUser();
   const { error } = useUserMySelf();
 
   useEffect(() => {
-    if (error && requireLogin) {
+    if (error) {
       setIsLogin(false);
-      navigate('/login');
     } else {
       setIsLogin(true);
     }
-  }, [error, requireLogin]);
+  }, [error]);
 
   return (
     <Box
@@ -37,6 +35,7 @@ export function RootLayout({ sidebar, requireLogin = true }: RootLayoutProps) {
         bgcolor: 'background.default',
       }}
     >
+      <Box sx={{ marginLeft: isNotMobile ? `${sidebarWidth - 24}px` : 0 }}>{topbar}</Box>
       <Box sx={{ display: 'flex', flex: 1 }}>
         {sidebar}
 

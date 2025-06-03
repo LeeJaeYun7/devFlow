@@ -1,16 +1,5 @@
-import {
-  Box,
-  CircularProgress,
-  IconButton,
-  Paper,
-  TextField,
-  Container,
-  TextFieldProps,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
+import { Box, Container, useTheme, useMediaQuery, SxProps, Theme } from '@mui/material';
 import { useEffect, useState, useCallback, useRef } from 'react';
-import SendIcon from '@mui/icons-material/Send';
 import { ChatContent } from './Content';
 import { useCreateMessage, useMessageList } from '../../../hooks/useMessage';
 import { useUser } from '../../../context/UserProvider';
@@ -18,19 +7,24 @@ import { useUserMySelf } from '@lia/react/hooks/useUser';
 import { enqueueSnackbar } from 'notistack';
 import { useSSEEvent } from '../../../context/SSEContext';
 import { FirstRecommend } from './FirstRecommend';
+import InputLayer from './InputLayer';
+import LoginModal from '@lia/react/components/login/LoginModal';
 
 export function ChatMain() {
-  const { nowChatId } = useUser();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const { nowChatId, isLogin } = useUser();
   const { refetch: refetchUserMySelf, data: userMySelf } = useUserMySelf();
-  const [message, setMessage] = useState('');
   const { data: messageList, refetch: refetchMessageList } = useMessageList({
     chatId: nowChatId,
     page: 1,
     limit: 50,
   });
   const { mutateAsync: createMessage } = useCreateMessage();
+
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [message, setMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [tempUserContent, setTempUserContent] = useState('');
   const [aiStreamContent, setAiStreamContent] = useState('');
@@ -70,6 +64,11 @@ export function ChatMain() {
   useSSEEvent('chatMessage', handleChatMessage);
 
   const handleSendMessage = async () => {
+    if (!isLogin) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+
     if (!message.trim()) return;
 
     if ((userMySelf?.data?.remainMessageQuota ?? 0) === 0) {
@@ -113,174 +112,120 @@ export function ChatMain() {
   }, [messageList?.data]);
 
   return (
-    <Box
-      sx={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        bgcolor: 'background.default',
-        overflow: 'hidden',
-      }}
-    >
-      <Container
-        maxWidth="lg"
+    <>
+      <LoginModal open={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
+      <Box
         sx={{
-          flex: 1,
+          height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          px: { xs: 0, md: 3 },
-          height: '100%',
-          position: 'relative',
+          bgcolor: 'background.default',
+          overflow: 'hidden',
         }}
       >
-        {isNothing && <FirstRecommend />}
-
-        {!isNothing && (
-          <Box
-            sx={{
-              flex: 1,
-              overflow: 'hidden',
-              position: 'relative',
-            }}
-          >
+        <Container
+          maxWidth="lg"
+          sx={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            px: { xs: 0, md: 3 },
+            height: '100%',
+            position: 'relative',
+          }}
+        >
+          {isNothing ? (
             <Box
-              ref={chatContainerRef}
               sx={{
                 height: '100%',
-                overflowY: 'auto',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                msOverflowStyle: 'none', // IE, Edge
-                scrollbarWidth: 'none', // Firefox
-                '&::-webkit-scrollbar': {
-                  // Chrome, Safari
-                  display: 'none',
-                },
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: 2,
+                px: { xs: 2, md: 3 },
               }}
             >
-              <Box
-                sx={{
-                  py: { xs: 2, md: 3 },
-                  px: { xs: 2, md: 3 },
-                }}
-              >
-                <ChatContent
-                  messageData={messageList?.data ?? []}
-                  aiStreamContent={aiStreamContent}
-                  tempUserContent={tempUserContent}
+              <FirstRecommend />
+              <Box sx={{ width: '100%' }}>
+                <InputLayer
+                  isSending={isSending}
+                  message={message}
+                  setMessage={setMessage}
+                  handleSendMessage={handleSendMessage}
                 />
               </Box>
             </Box>
-          </Box>
-        )}
-
-        {/* 입력 영역 */}
-        <Box
-          sx={{
-            position: isMobile && isNothing ? 'fixed' : 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            px: { xs: 2, md: 11 },
-            pb: { xs: 2, md: 0 },
-            pt: 2,
-            bgcolor: 'background.default',
-            borderTop: 1,
-            borderColor: 'divider',
-            boxShadow: '0px -4px 10px rgba(0, 0, 0, 0.05)',
-          }}
-        >
-          <Paper
-            elevation={0}
-            sx={{
-              p: { xs: 1.5, md: 2 },
-              bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'),
-              borderRadius: '16px',
-              mx: 'auto',
-              width: '100%',
-            }}
-          >
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-              <InputTextField
-                isSending={isSending}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSendMessage();
-                  }
+          ) : (
+            <>
+              <Box
+                sx={{
+                  flex: 1,
+                  overflow: 'hidden',
+                  position: 'relative',
                 }}
-              />
-              {isSending ? (
-                <CircularProgress
-                  size={24}
+              >
+                <Box
+                  ref={chatContainerRef}
                   sx={{
-                    color: 'text.secondary',
-                    mx: 1,
-                  }}
-                />
-              ) : (
-                <IconButton
-                  color="primary"
-                  onClick={handleSendMessage}
-                  disabled={!message.trim() || isSending}
-                  sx={{
-                    bgcolor: 'primary.main',
-                    color: 'white',
-                    '&:hover': { bgcolor: 'primary.dark' },
-                    '&.Mui-disabled': { bgcolor: 'action.disabledBackground' },
-                    width: 32,
-                    height: 32,
+                    height: '100%',
+                    overflowY: 'auto',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    msOverflowStyle: 'none', // IE, Edge
+                    scrollbarWidth: 'none', // Firefox
+                    '&::-webkit-scrollbar': {
+                      // Chrome, Safari
+                      display: 'none',
+                    },
                   }}
                 >
-                  <SendIcon sx={{ fontSize: 18 }} />
-                </IconButton>
-              )}
-            </Box>
-          </Paper>
-        </Box>
-      </Container>
-    </Box>
+                  <Box
+                    sx={{
+                      py: { xs: 2, md: 3 },
+                      px: { xs: 2, md: 3 },
+                    }}
+                  >
+                    <ChatContent
+                      messageData={messageList?.data ?? []}
+                      aiStreamContent={aiStreamContent}
+                      tempUserContent={tempUserContent}
+                    />
+                  </Box>
+                </Box>
+              </Box>
+
+              <Box sx={getInputLayerSx(isMobile)}>
+                <InputLayer
+                  isSending={isSending}
+                  message={message}
+                  setMessage={setMessage}
+                  handleSendMessage={handleSendMessage}
+                />
+              </Box>
+            </>
+          )}
+        </Container>
+      </Box>
+    </>
   );
 }
 
-function InputTextField(props: TextFieldProps & { isSending: boolean }) {
-  const { isSending, ...rest } = props;
-  const [dots, setDots] = useState('');
-
-  useEffect(() => {
-    if (isSending) {
-      const interval = setInterval(() => {
-        setDots((prev) => (prev.length < 5 ? prev + '.' : ''));
-      }, 500);
-      return () => clearInterval(interval);
-    }
-
-    return () => {
-      setDots('');
-    };
-  }, [isSending]);
-
-  return (
-    <TextField
-      {...rest}
-      fullWidth
-      disabled={isSending}
-      multiline
-      placeholder={isSending ? `Generating${dots}` : 'Type message'}
-      variant="standard"
-      sx={{
-        '& .MuiInputBase-root': {
-          padding: '4px 8px',
-          fontSize: { xs: '0.875rem', md: '1rem' },
-        },
-        '& .MuiInput-underline:before': { borderBottom: 'none' },
-        '& .MuiInput-underline:after': { borderBottom: 'none' },
-      }}
-    />
-  );
+function getInputLayerSx(isMobile: boolean): SxProps<Theme> {
+  return {
+    position: isMobile ? 'fixed' : 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    px: { xs: 2, md: 11 },
+    pb: { xs: 2, md: 0 },
+    pt: 2,
+    bgcolor: 'background.default',
+    borderTop: 1,
+    borderColor: 'divider',
+    boxShadow: '0px -4px 10px rgba(0, 0, 0, 0.05)',
+  };
 }

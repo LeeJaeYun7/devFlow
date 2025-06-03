@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { CssBaseline } from '@mui/material';
 import { RootLayout } from '@lia/react/layouts/RootLayout';
 import { ServiceRootSidebar } from './layout/Sidebar';
+import ServiceTopbar from './layout/Topbar';
 import { SnackbarProvider } from 'notistack';
 import { SSEProvider } from './context/SSEContext';
 import { UserProvider } from './context/UserProvider';
@@ -26,7 +27,7 @@ export default function App() {
             <CssBaseline />
             <Suspense fallback={<div>로딩중...</div>}>
               <Routes>
-                <Route path="/" element={<RootLayout sidebar={<ServiceRootSidebar />} />}>
+                <Route path="/" element={<RootLayout topbar={<ServiceTopbar />} sidebar={<ServiceRootSidebar />} />}>
                   <Route path="/" element={<ChatMain />} />
                   <Route path="/profile" element={<ProfileMain />} />
                   <Route path="/faq" element={<FaqMain />} />

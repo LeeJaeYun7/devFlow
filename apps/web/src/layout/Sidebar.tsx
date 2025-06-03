@@ -3,7 +3,6 @@ import {
   useTheme,
   Drawer,
   Box,
-  Divider,
   List,
   ListItem,
   ListItemButton,
@@ -29,7 +28,7 @@ import NightsStayIcon from '@mui/icons-material/NightsStayOutlined';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import LaunchIcon from '@mui/icons-material/Launch';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { ServiceSidebarMenu, ServiceSidebarMenuProps } from './SidebarMenu';
+import { ServiceSidebarMenuProps } from './SidebarMenu';
 import { ColorModeContext } from '@lia/react/Theme';
 import { logout } from '../api/auth';
 import { useNavigate } from 'react-router-dom';
@@ -46,7 +45,7 @@ export function ServiceRootSidebar() {
   const { mutateAsync: createChat } = useCreateChat();
   const { mutateAsync: deleteAllChats } = useDeleteAllChats();
   const { data: chatList, isLoading: isChatListLoading } = useChatList({ page: 1, limit: 50 });
-  const { nowChatId, setNowChatId } = useUser();
+  const { nowChatId, setNowChatId, isLogin } = useUser();
   const queryClient = useQueryClient();
   const handleDrawerClose = () => setOpen(false);
 
@@ -55,16 +54,16 @@ export function ServiceRootSidebar() {
       const [firstChat] = chatList?.data?.data ?? [];
       if (firstChat) {
         setNowChatId(firstChat.chatId);
-      } else {
+      } else if (isLogin) {
         createChat().then((chat) => {
           setNowChatId(chat.data.chatId);
         });
       }
     }
-  }, [chatList, isChatListLoading, nowChatId, setNowChatId]);
+  }, [chatList, isChatListLoading, nowChatId, setNowChatId, isLogin]);
 
   useEffect(() => {
-    setOpen(isMobile ? false : true);
+    setOpen(!isMobile);
   }, [isMobile]);
 
   const MenuList: ServiceSidebarMenuProps[] = [
@@ -212,17 +211,18 @@ export function ServiceRootSidebar() {
           />
           <img
             src={theme.palette.mode === 'dark' ? '/icon/lia_logo_white.svg' : '/icon/lia_logo_black.svg'}
+            onClick={() => navigate('/')}
             alt="LIA"
-            style={{ width: '40%', objectFit: 'cover', padding: '16px' }}
+            style={{ width: '40%', objectFit: 'cover', padding: '16px', cursor: 'pointer' }}
           />
           <CreateChatButton />
           <ChatList />
-          <Divider sx={{ mt: 1 }} />
+          {/* <Divider sx={{ mt: 1 }} />
           <List sx={{ mt: 1, mb: 1 }}>
             {MenuList.map((menu) => (
               <ServiceSidebarMenu key={menu.title} title={menu.title} icon={menu.icon} onClick={menu.onClick} />
             ))}
-          </List>
+          </List> */}
         </Box>
       </Drawer>
     </>
