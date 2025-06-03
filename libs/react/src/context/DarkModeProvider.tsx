@@ -3,7 +3,7 @@ import { createCustomTheme, ColorModeContext } from '../Theme';
 import { Theme, ThemeProvider } from '@mui/material';
 
 export function DarkModeProvider({ children }: { children: React.ReactNode }) {
-  const [mode, setMode] = useState<'light' | 'dark'>('dark');
+  const [mode, setMode] = useState<'light' | 'dark'>('light');
   const colorMode = useMemo(
     () => ({
       toggleColorMode: () => {

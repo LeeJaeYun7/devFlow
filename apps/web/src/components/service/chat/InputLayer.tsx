@@ -1,4 +1,4 @@
-import { Box, Paper, CircularProgress, IconButton, TextFieldProps, TextField } from '@mui/material';
+import { Box, Paper, IconButton, TextFieldProps, TextField } from '@mui/material';
 import { useState, useEffect } from 'react';
 import SendIcon from '@mui/icons-material/Send';
 
@@ -33,31 +33,21 @@ export default function InputLayer({ isSending, message, setMessage, handleSendM
             }
           }}
         />
-        {isSending ? (
-          <CircularProgress
-            size={24}
-            sx={{
-              color: 'text.secondary',
-              mx: 1,
-            }}
-          />
-        ) : (
-          <IconButton
-            color="primary"
-            onClick={handleSendMessage}
-            disabled={!message.trim() || isSending}
-            sx={{
-              bgcolor: 'primary.main',
-              color: 'white',
-              '&:hover': { bgcolor: 'primary.dark' },
-              '&.Mui-disabled': { bgcolor: 'action.disabledBackground' },
-              width: 32,
-              height: 32,
-            }}
-          >
-            <SendIcon sx={{ fontSize: 18 }} />
-          </IconButton>
-        )}
+        <IconButton
+          color="primary"
+          onClick={handleSendMessage}
+          disabled={!message.trim() || isSending}
+          sx={{
+            bgcolor: 'primary.main',
+            color: 'white',
+            '&:hover': { bgcolor: 'primary.dark' },
+            '&.Mui-disabled': { bgcolor: 'action.disabledBackground' },
+            width: 32,
+            height: 32,
+          }}
+        >
+          <SendIcon sx={{ fontSize: 18 }} />
+        </IconButton>
       </Box>
     </Paper>
   );

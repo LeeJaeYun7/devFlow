@@ -17,10 +17,11 @@ export const createCustomTheme = (mode: PaletteMode) =>
         light: '#3384FF',
         dark: '#0047B3',
       },
+
       secondary: {
-        main: '#00C2FF', // 밝은 하늘색으로 변경
-        light: '#f8f9fb',
-        dark: '#2f2f2f',
+        main: '#757575',
+        light: '#8F8F8F',
+        dark: '#5C5C5C',
       },
 
       background: {

@@ -12,7 +12,9 @@ export function FirstRecommend() {
         p: { xs: 2, md: 4 },
         maxWidth: '1200px',
         mx: 'auto',
-        color: 'primary.main',
+        background: 'linear-gradient(45deg, #007AFF 30%, #0050A6 90%)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
       }}
     >
       <Typography variant="h1" sx={{ fontWeight: 500, textAlign: 'center' }}>

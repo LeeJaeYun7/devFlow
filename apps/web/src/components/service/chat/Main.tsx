@@ -2,7 +2,7 @@ import { Box, Container, useTheme, useMediaQuery, SxProps, Theme } from '@mui/ma
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { ChatContent } from './Content';
 import { useCreateMessage, useMessageList } from '../../../hooks/useMessage';
-import { useUser } from '../../../context/UserProvider';
+import { useUser } from '@lia/react/context/UserProvider';
 import { useUserMySelf } from '@lia/react/hooks/useUser';
 import { enqueueSnackbar } from 'notistack';
 import { useSSEEvent } from '../../../context/SSEContext';
@@ -64,6 +64,7 @@ export function ChatMain() {
   useSSEEvent('chatMessage', handleChatMessage);
 
   const handleSendMessage = async () => {
+    console.log('isLogin', isLogin);
     if (!isLogin) {
       setIsLoginModalOpen(true);
       return;
@@ -193,6 +194,7 @@ export function ChatMain() {
                       messageData={messageList?.data ?? []}
                       aiStreamContent={aiStreamContent}
                       tempUserContent={tempUserContent}
+                      isSending={isSending}
                     />
                   </Box>
                 </Box>

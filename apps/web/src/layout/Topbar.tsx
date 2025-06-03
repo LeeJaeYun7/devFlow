@@ -19,7 +19,7 @@ export default function ServiceTopbar() {
 
   return (
     <>
-      <AppBar position="static" sx={{ p: 1 }}>
+      <AppBar position="static" sx={{ p: 1, bgcolor: 'background.default' }}>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
           <Tooltip title="LIA">
             <IconButton onClick={onAvatarClick}>

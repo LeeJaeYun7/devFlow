@@ -1,8 +1,5 @@
 import { Box, useMediaQuery, useTheme } from '@mui/material';
-import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import { useUser } from '../context/UserProvider';
-import { useUserMySelf } from '../hooks/useUser';
 
 const sidebarWidth = 280;
 
@@ -15,16 +12,6 @@ interface RootLayoutProps {
 export function RootLayout({ topbar, sidebar }: RootLayoutProps) {
   const theme = useTheme();
   const isNotMobile = useMediaQuery(theme.breakpoints.up('sm'));
-  const { setIsLogin } = useUser();
-  const { error } = useUserMySelf();
-
-  useEffect(() => {
-    if (error) {
-      setIsLogin(false);
-    } else {
-      setIsLogin(true);
-    }
-  }, [error]);
 
   return (
     <Box
@@ -46,7 +33,6 @@ export function RootLayout({ topbar, sidebar }: RootLayoutProps) {
             display: 'flex',
             flexDirection: 'column',
             marginLeft: isNotMobile ? `${sidebarWidth}px` : 0,
-            marginTop: isNotMobile ? 0 : '56px',
             gap: 3,
           }}
         >

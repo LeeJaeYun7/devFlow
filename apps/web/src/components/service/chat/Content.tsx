@@ -3,16 +3,17 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Message } from '../../../hooks/useMessage';
 import { useMemo } from 'react';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import remarkEmoji from 'remark-emoji';
+import { Loading } from './Loading';
 
 interface ChatContentProps {
   messageData: Message[] | undefined;
   aiStreamContent?: string;
   tempUserContent?: string;
+  isSending: boolean;
 }
 
-export function ChatContent({ messageData, aiStreamContent, tempUserContent }: ChatContentProps) {
+export function ChatContent({ messageData, aiStreamContent, tempUserContent, isSending }: ChatContentProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -44,48 +45,57 @@ export function ChatContent({ messageData, aiStreamContent, tempUserContent }: C
     return messages;
   }, [messageData, aiStreamContent, tempUserContent]);
 
+  const shouldShowDate = (currentDate: Date, prevDate?: Date, isFirst = false) => {
+    if (isFirst) return true;
+    if (!prevDate) return false;
+
+    return (
+      currentDate.getFullYear() !== prevDate.getFullYear() ||
+      currentDate.getMonth() !== prevDate.getMonth() ||
+      currentDate.getDate() !== prevDate.getDate()
+    );
+  };
+
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', marginBottom: '100px' }}>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          textAlign: 'center',
-          pt: isMobile ? 0 : 6,
-          pb: isMobile ? 2 : 4,
-          borderBottom: 1,
-          borderColor: 'divider',
-        }}
-      >
-        <Box sx={{ width: 80, height: 80, mb: 2, borderRadius: '24px', overflow: 'hidden' }}>
-          <img src="/icon/lia.png" alt="LIA" style={{ width: '100%', height: '100%' }} />
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
-          <Typography variant="h6" fontWeight={500}>
-            LIA
-          </Typography>
-          <ArrowForwardIosIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
-        </Box>
-        <Typography variant="body2" color="text.secondary">
-          무슨 일인지 말씀을 해 주세요.
-        </Typography>
-      </Box>
-
       <Container maxWidth="lg" sx={{ flex: 1, px: { xs: 2, sm: 4 } }}>
         <Box
           sx={{
             display: 'flex',
             flexDirection: 'column-reverse',
-            gap: 3,
             height: '100%',
             overflowY: 'auto',
-            py: 3,
           }}
         >
+          {aiStreamContent && isSending && (
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'flex-start',
+                alignItems: 'center',
+                mt: 2,
+              }}
+            >
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  maxWidth: isMobile ? '100%' : '70%',
+                  borderRadius: 2,
+                  width: 100,
+                  height: 50,
+                }}
+              >
+                <Loading />
+              </Paper>
+            </Box>
+          )}
           {totalMessages.map((msg, idx) => {
             const isUser = msg.role === 'user';
             const date = new Date(msg.createdAt);
+            const prevDate = idx < totalMessages.length - 1 ? new Date(totalMessages[idx + 1].createdAt) : undefined;
+            const showDate = shouldShowDate(date, prevDate, idx === totalMessages.length - 1);
+
             const time = date.toLocaleTimeString('ko-KR', {
               hour: 'numeric',
               minute: 'numeric',
@@ -98,12 +108,33 @@ export function ChatContent({ messageData, aiStreamContent, tempUserContent }: C
                 sx={{
                   display: 'flex',
                   flexDirection: 'column',
+                  gap: 1,
                 }}
               >
-                {!isUser && (
-                  <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, mb: 1 }}>
-                    <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.5, fontWeight: 600 }}>
-                      LIA
+                {showDate && (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      mb: 1,
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        color: 'white',
+                        fontSize: '0.875rem',
+                        bgcolor: 'secondary.light',
+                        px: 2,
+                        py: 0.5,
+                        borderRadius: 1,
+                      }}
+                    >
+                      {date.toLocaleDateString('ko-KR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        weekday: 'long',
+                      })}
                     </Typography>
                   </Box>
                 )}
@@ -120,7 +151,7 @@ export function ChatContent({ messageData, aiStreamContent, tempUserContent }: C
                     elevation={0}
                     sx={{
                       p: 2,
-                      maxWidth: isMobile ? '100%' : '80%',
+                      maxWidth: isMobile ? '100%' : '70%',
                       bgcolor: isUser ? 'primary.main' : theme.palette.mode === 'dark' ? 'background.paper' : '#f8f9fb',
                       color: isUser ? 'primary.contrastText' : 'text.primary',
                       borderRadius: 2,

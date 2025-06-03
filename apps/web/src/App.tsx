@@ -6,7 +6,7 @@ import { ServiceRootSidebar } from './layout/Sidebar';
 import ServiceTopbar from './layout/Topbar';
 import { SnackbarProvider } from 'notistack';
 import { SSEProvider } from './context/SSEContext';
-import { UserProvider } from './context/UserProvider';
+import { UserProvider } from '@lia/react/context/UserProvider';
 
 // @lia/react components
 import LiaApp from '@lia/react/LiaApp';

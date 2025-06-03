@@ -7,6 +7,7 @@ import { ChatResponse, CreateChatDto } from '@lia/api/conversation/chat/create.d
 import { ChatListDto, ChatListResponse } from '@lia/api/conversation/chat/list.dto';
 import { CustomRequestContextService } from '../../../module/custom_request_context/custom_request_context.service';
 import { DeleteAllChatDto, DeleteAllChatResponse } from '@lia/api/conversation/chat/delete_all.dto';
+import { DeleteChatDto, DeleteChatResponse } from '@lia/api/conversation/chat/delete.dto';
 
 @Injectable()
 export class ChatService {
@@ -53,6 +54,13 @@ export class ChatService {
       chatId: createdChat.id,
       title: createdChat.title,
     };
+  }
+
+  public async deleteChat(dto: DeleteChatDto): ServiceReturnType<DeleteChatResponse> {
+    const user = this.customRequestContext.get('user');
+    const userId = user.id;
+
+    await this.chatModel.updateOne({ _id: dto.chatId, userId }, { $set: { deleted: true } });
   }
 
   public async deleteAllChats(_: DeleteAllChatDto): ServiceReturnType<DeleteAllChatResponse> {

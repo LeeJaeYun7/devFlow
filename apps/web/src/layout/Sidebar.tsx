@@ -11,39 +11,28 @@ import {
   ListItemIcon,
   Button,
   Typography,
+  Menu,
+  MenuItem,
 } from '@mui/material';
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import ChatIcon from '@mui/icons-material/Chat';
 import AddIcon from '@mui/icons-material/Add';
-import { useUser } from '../context/UserProvider';
-import { useChatList, useCreateChat, useDeleteAllChats } from '../hooks/useChat';
-import { useUserMySelf } from '@lia/react/hooks/useUser';
+import { useUser } from '@lia/react/context/UserProvider';
+import { useChatList, useCreateChat, useDeleteChat } from '../hooks/useChat';
 import { useSSEEvent } from '../context/SSEContext';
 import { useQueryClient } from '@tanstack/react-query';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import WbSunnyIcon from '@mui/icons-material/WbSunnyOutlined';
-import NightsStayIcon from '@mui/icons-material/NightsStayOutlined';
-import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
-import LaunchIcon from '@mui/icons-material/Launch';
-import LogoutIcon from '@mui/icons-material/Logout';
-import { ServiceSidebarMenuProps } from './SidebarMenu';
-import { ColorModeContext } from '@lia/react/Theme';
-import { logout } from '../api/auth';
 import { useNavigate } from 'react-router-dom';
-import HomeIcon from '@mui/icons-material/Home';
-import { enqueueSnackbar } from 'notistack';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 export function ServiceRootSidebar() {
   const navigate = useNavigate();
   const theme = useTheme();
-  const { data: userMySelf } = useUserMySelf();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const colorMode = useContext(ColorModeContext);
   const [open, setOpen] = useState(isMobile ? false : true);
   const { mutateAsync: createChat } = useCreateChat();
-  const { mutateAsync: deleteAllChats } = useDeleteAllChats();
   const { data: chatList, isLoading: isChatListLoading } = useChatList({ page: 1, limit: 50 });
   const { nowChatId, setNowChatId, isLogin } = useUser();
   const queryClient = useQueryClient();
@@ -65,50 +54,6 @@ export function ServiceRootSidebar() {
   useEffect(() => {
     setOpen(!isMobile);
   }, [isMobile]);
-
-  const MenuList: ServiceSidebarMenuProps[] = [
-    {
-      title: 'Home',
-      icon: <HomeIcon />,
-      onClick: () => navigate('/'),
-    },
-    {
-      title: 'Clear conversations',
-      icon: <DeleteOutlineIcon />,
-      onClick: async () => {
-        await deleteAllChats();
-        queryClient.invalidateQueries({ queryKey: ['chatList'], exact: false });
-        enqueueSnackbar('모든 채팅이 삭제되었습니다', {
-          variant: 'success',
-          autoHideDuration: 3000,
-        });
-        createChat();
-      },
-    },
-    {
-      title: `${theme.palette.mode === 'dark' ? 'Light' : 'Dark'} mode`,
-      icon: theme.palette.mode === 'dark' ? <WbSunnyIcon /> : <NightsStayIcon />,
-      onClick: colorMode.toggleColorMode,
-    },
-    {
-      title: `My account (${userMySelf?.data?.remainMessageQuota ?? 0})`,
-      icon: <PersonOutlineIcon />,
-      onClick: () => navigate('/profile'),
-    },
-    {
-      title: 'Updates & FAQ',
-      icon: <LaunchIcon />,
-      onClick: () => navigate('/faq'),
-    },
-    {
-      title: 'Log out',
-      icon: <LogoutIcon />,
-      onClick: async () => {
-        void logout();
-        navigate('/login');
-      },
-    },
-  ];
 
   useSSEEvent('chatTitle', (event) => {
     const data = JSON.parse(event.data) as { chatId: string; title: string };
@@ -217,12 +162,6 @@ export function ServiceRootSidebar() {
           />
           <CreateChatButton />
           <ChatList />
-          {/* <Divider sx={{ mt: 1 }} />
-          <List sx={{ mt: 1, mb: 1 }}>
-            {MenuList.map((menu) => (
-              <ServiceSidebarMenu key={menu.title} title={menu.title} icon={menu.icon} onClick={menu.onClick} />
-            ))}
-          </List> */}
         </Box>
       </Drawer>
     </>
@@ -232,7 +171,18 @@ export function ServiceRootSidebar() {
 function ChatList() {
   const navigate = useNavigate();
   const { data: chatList } = useChatList({ page: 1, limit: 50 });
+
   const { nowChatId, setNowChatId } = useUser();
+  const { mutateAsync: deleteChat } = useDeleteChat();
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleDeleteChat = async (chatId: string) => {
+    await deleteChat({ chatId });
+    if (nowChatId === chatId) {
+      setNowChatId('');
+    }
+  };
 
   return (
     <Box sx={{ flex: 1, overflow: 'auto', mt: 1 }}>
@@ -264,6 +214,35 @@ function ChatList() {
                   },
                 }}
               />
+              <IconButton
+                sx={{ p: 0.5 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setAnchorEl(e.currentTarget);
+                }}
+              >
+                <MoreVertIcon sx={{ fontSize: '1rem' }} />
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={!!anchorEl}
+                elevation={1}
+                onClose={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  setAnchorEl(null);
+                }}
+              >
+                <MenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteChat(chat.chatId);
+                    setAnchorEl(null);
+                  }}
+                >
+                  <DeleteOutlineIcon />
+                  <Typography sx={{ fontSize: '0.875rem', fontWeight: 500, ml: 1 }}>Delete</Typography>
+                </MenuItem>
+              </Menu>
             </ListItemButton>
           </ListItem>
         ))}

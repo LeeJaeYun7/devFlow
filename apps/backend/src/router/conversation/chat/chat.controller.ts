@@ -4,6 +4,7 @@ import { ChatResponse, CreateChatDto } from '@lia/api/conversation/chat/create.d
 import { ChatService } from './chat.service';
 import { ChatListDto, ChatListResponse } from '@lia/api/conversation/chat/list.dto';
 import { DeleteAllChatDto, DeleteAllChatResponse } from '@lia/api/conversation/chat/delete_all.dto';
+import { DeleteChatDto, DeleteChatResponse } from '@lia/api/conversation/chat/delete.dto';
 
 @ApiTags('Chat')
 @Controller('/conversation/chat')
@@ -28,6 +29,13 @@ export class ChatController {
       statusCode: HttpStatus.CREATED,
       data,
     } as ChatResponse;
+  }
+
+  @Delete()
+  @ApiResponse({ type: DeleteChatResponse })
+  public async deleteChat(@Body() body: DeleteChatDto): Promise<DeleteChatResponse> {
+    await this.chatService.deleteChat(body);
+    return { statusCode: HttpStatus.OK };
   }
 
   @Delete('/all')
