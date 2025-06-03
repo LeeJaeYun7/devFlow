@@ -30,9 +30,9 @@ export function ChatMain() {
   const [aiStreamContent, setAiStreamContent] = useState('');
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
+  const moveScrollToBottom = () => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight + 200;
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight + 400;
     }
   };
 
@@ -48,14 +48,12 @@ export function ChatMain() {
         setIsSending(false);
         setTempUserContent('');
         setAiStreamContent('');
-        scrollToBottom();
         return;
       }
 
       // 스트리밍 컨텐츠 누적 및 임시 메시지 업데이트
       if (data.content) {
         setAiStreamContent((prev) => prev + data.content);
-        scrollToBottom();
       }
     },
     [nowChatId, refetchMessageList]
@@ -64,7 +62,6 @@ export function ChatMain() {
   useSSEEvent('chatMessage', handleChatMessage);
 
   const handleSendMessage = async () => {
-    console.log('isLogin', isLogin);
     if (!isLogin) {
       setIsLoginModalOpen(true);
       return;
@@ -84,7 +81,6 @@ export function ChatMain() {
       setIsSending(true);
       setAiStreamContent('');
       setTempUserContent(message);
-      scrollToBottom();
 
       await createMessage({ chatId: nowChatId, content: message });
       await refetchUserMySelf();
@@ -102,14 +98,13 @@ export function ChatMain() {
     setIsSending(false);
     setMessage('');
     setAiStreamContent('');
-    scrollToBottom();
   }, [nowChatId]);
 
   const isNothing = (messageList?.data ?? []).length === 0 && tempUserContent === '';
 
   // 메시지 리스트가 변경될 때마다 스크롤
   useEffect(() => {
-    scrollToBottom();
+    moveScrollToBottom();
   }, [messageList?.data]);
 
   return (
@@ -195,6 +190,7 @@ export function ChatMain() {
                       aiStreamContent={aiStreamContent}
                       tempUserContent={tempUserContent}
                       isSending={isSending}
+                      moveScrollToBottom={moveScrollToBottom}
                     />
                   </Box>
                 </Box>

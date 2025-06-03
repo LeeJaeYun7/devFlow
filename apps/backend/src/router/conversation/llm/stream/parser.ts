@@ -1,8 +1,13 @@
-import { Injectable } from '@nestjs/common';
 import { Parser } from 'htmlparser2';
-@Injectable()
+
 export class ParserService {
-  public createParser(cb: (content: string) => void) {
+  private readonly parser: Parser;
+
+  constructor(cb: (content: string) => void) {
+    this.parser = this.createParser(cb);
+  }
+
+  private createParser(cb: (content: string) => void) {
     let isThinking = false;
 
     const parser = new Parser({
@@ -24,5 +29,10 @@ export class ParserService {
     });
 
     return parser;
+  }
+
+  public static createInstance(cb: (content: string) => void) {
+    const parser = new ParserService(cb);
+    return parser.parser;
   }
 }

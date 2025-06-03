@@ -29,7 +29,6 @@ export function RootLayout({ topbar, sidebar }: RootLayoutProps) {
         <Box
           sx={{
             flex: 1,
-            p: { xs: 2, sm: 3 },
             display: 'flex',
             flexDirection: 'column',
             marginLeft: isNotMobile ? `${sidebarWidth}px` : 0,

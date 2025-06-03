@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import axios, { AxiosError } from 'axios';
-import { OpenRouterRequestBody, OpenRouterResponseBody } from './open_router.type';
+import { OpenRouterRequestBody } from './open_router.type';
 import { Readable } from 'node:stream';
 import { BaseConfigService } from '@lia/config';
 
@@ -27,31 +27,8 @@ export class OpenRouterService {
     }
   }
 
-  public async chat(body: OpenRouterRequestBody) {
-    return await axios.post<OpenRouterResponseBody>(
-      this.openRouterUrl,
-      {
-        model: body.model ?? this.model,
-        messages: body.messages,
-        tools: body.tools,
-        tool_choice: 'auto',
-        temperature: this.temperature,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${this.openRouterApiKey}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-  }
-
   public async chatStream(body: OpenRouterRequestBody) {
     try {
-
-      console.log('body');
-      console.dir(body);
-
       return await axios.post<Readable>(
         this.openRouterUrl,
         {

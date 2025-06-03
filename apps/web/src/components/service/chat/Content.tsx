@@ -2,7 +2,7 @@ import { Box, Paper, useTheme, Typography, Container, useMediaQuery } from '@mui
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Message } from '../../../hooks/useMessage';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import remarkEmoji from 'remark-emoji';
 import { Loading } from './Loading';
 
@@ -11,9 +11,16 @@ interface ChatContentProps {
   aiStreamContent?: string;
   tempUserContent?: string;
   isSending: boolean;
+  moveScrollToBottom: () => void;
 }
 
-export function ChatContent({ messageData, aiStreamContent, tempUserContent, isSending }: ChatContentProps) {
+export function ChatContent({
+  messageData,
+  aiStreamContent,
+  tempUserContent,
+  isSending,
+  moveScrollToBottom,
+}: ChatContentProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -56,6 +63,10 @@ export function ChatContent({ messageData, aiStreamContent, tempUserContent, isS
     );
   };
 
+  useEffect(() => {
+    moveScrollToBottom();
+  }, [totalMessages, moveScrollToBottom]);
+
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', marginBottom: '100px' }}>
       <Container maxWidth="lg" sx={{ flex: 1, px: { xs: 2, sm: 4 } }}>
@@ -67,7 +78,7 @@ export function ChatContent({ messageData, aiStreamContent, tempUserContent, isS
             overflowY: 'auto',
           }}
         >
-          {aiStreamContent && isSending && (
+          {!aiStreamContent && isSending && (
             <Box
               sx={{
                 display: 'flex',

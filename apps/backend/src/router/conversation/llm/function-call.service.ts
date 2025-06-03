@@ -10,9 +10,9 @@ export class FunctionCallService {
     private readonly naverFinanceService: NaverFinanceService
   ) {}
 
-  public getToolFunctions(): Record<string, (args: any) => Promise<any>> {
+  public getToolFunctions(): Record<string, (args: Args) => Promise<any>> {
     return {
-      get_technical_data: async (args: any) => {
+      get_technical_data: async (args: Args) => {
         const symbol = args.symbol;
         if (this.isKoreanStock(symbol)) {
           const cleanSymbol = symbol.replace(/\.(KS|KQ)$/, '');
@@ -21,7 +21,7 @@ export class FunctionCallService {
           return this.yahooFinanceService.getTechnicalData(symbol);
         }
       },
-      get_fundamental_data: async (args: any) => {
+      get_fundamental_data: async (args: Args) => {
         const symbol = args.symbol;
         if (this.isKoreanStock(symbol)) {
           const cleanSymbol = symbol.replace(/\.(KS|KQ)$/, '');
@@ -57,21 +57,29 @@ export class FunctionCallService {
       throw new Error(`Missing 'symbol' key in JSON for ${functionName}: ${jsonStr}`);
     }
 
-    let args: any;
+    let args: Args;
     try {
       args = JSON.parse(jsonStr);
       if (!args.symbol || typeof args.symbol !== 'string' || args.symbol.length === 0) {
         throw new Error(`Invalid 'symbol' value: ${args.symbol}`);
       }
     } catch (e) {
-      throw new Error(`Failed to parse JSON for ${functionName}: ${jsonStr}`);
+      if (e instanceof Error) {
+        throw new Error(`Failed to parse JSON for ${functionName}: ${jsonStr}`);
+      }
+      throw e;
     }
 
     try {
       const toolResult = await toolFunctions[functionName](args);
       return toolResult;
-    } catch (e: any) {
-      throw new Error(`Error executing ${functionName}: ${e.message}`);
+    } catch (e) {
+      if (e instanceof Error) {
+        throw new Error(`Error executing ${functionName}: ${e.message}`);
+      }
+      throw e;
     }
   }
 }
+
+type Args = Record<string, any>;
