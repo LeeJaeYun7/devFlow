@@ -224,6 +224,8 @@ export class NaverMarketScheduler {
             const marketCap = getTextByThLabel('시가총액');
             const sharesOutstanding = getTextByThLabel('상장주식수');
             const capital = getTextByThLabel('자본금');
+            const high52Week = getTextByThLabel('52주 최고');
+            const low52Week = getTextByThLabel('52주 최저');
 
             return {
               currentPrice,
@@ -233,6 +235,8 @@ export class NaverMarketScheduler {
               marketCap,
               sharesOutstanding,
               capital,
+              high52Week,
+              low52Week,
             };
           });
 
@@ -245,15 +249,15 @@ export class NaverMarketScheduler {
           // naverStockService를 통해 저장
           await this.naverStockService.saveStockInfo(symbol, {
             summaryDetail: {
-              regularMarketOpen: Number(fundamentalResult.currentPrice) || 0,
-              marketCap: Number(fundamentalResult.marketCap) || 0,
-              fiftyTwoWeekHigh: 0, // 이 값은 별도로 크롤링 필요
-              fiftyTwoWeekLow: 0, // 이 값은 별도로 크롤링 필요
-              forwardPE: Number(fundamentalResult.PER) || 0,
-              regularMarketVolume: Number(fundamentalResult.VOLUME) || 0,
+              currentPrice: Number(fundamentalResult.currentPrice) || 0,
+              marketCap: this.parseMarketCap(fundamentalResult.marketCap) || 0,
+              high52Week: Number(fundamentalResult.high52Week) || 0,
+              low52Week: Number(fundamentalResult.low52Week) || 0,
+              volume: Number(fundamentalResult.VOLUME) || 0,
             },
             defaultKeyStatistics: {
-              trailingEps: Number(fundamentalResult.EPS) || 0,
+              PER: Number(fundamentalResult.PER) || 0,
+              EPS: Number(fundamentalResult.EPS) || 0,
               sharesOutstanding: Number(fundamentalResult.sharesOutstanding) || 0,
             },
             financialData: {
@@ -271,5 +275,14 @@ export class NaverMarketScheduler {
     } finally {
       await browser.close();
     }
+  }
+
+  private parseMarketCap(value: string | number | undefined | null): number {
+    if (!value) return 0;
+    const stringValue = String(value);
+    const matched = stringValue.match(/[\d,.]+/);
+    if (!matched) return 0;
+    const eokValue = Number(matched[0].replace(/,/g, ''));
+    return eokValue * 100_000_000;
   }
 }

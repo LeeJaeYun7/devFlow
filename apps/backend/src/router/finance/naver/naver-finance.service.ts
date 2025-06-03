@@ -47,10 +47,10 @@ export class NaverFinanceService {
     console.log('naver get stockInfo', stockInfo);
 
     const fundamentalData: NaverStockFundamentalDto = {
-      currentPrice: stockInfo?.summaryDetail?.regularMarketOpen ?? 0,
-      PER: stockInfo?.summaryDetail?.forwardPE ?? 0,
-      EPS: stockInfo?.defaultKeyStatistics?.trailingEps ?? 0,
-      VOLUME: stockInfo?.summaryDetail?.regularMarketVolume ?? 0,
+      currentPrice: stockInfo?.summaryDetail?.currentPrice ?? 0,
+      PER: stockInfo?.defaultKeyStatistics?.PER ?? 0,
+      EPS: stockInfo?.defaultKeyStatistics?.EPS ?? 0,
+      VOLUME: stockInfo?.summaryDetail?.volume ?? 0,
       marketCap: stockInfo?.summaryDetail?.marketCap ?? 0,
       sharesOutstanding: stockInfo?.defaultKeyStatistics?.sharesOutstanding ?? 0,
       capital: stockInfo?.financialData?.totalCash ?? 0,

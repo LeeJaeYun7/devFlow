@@ -1,14 +1,13 @@
 export interface NaverSummaryDetail {
-  regularMarketOpen: number;
+  currentPrice: number;
   marketCap: number;
-  fiftyTwoWeekHigh: number;
-  fiftyTwoWeekLow: number;
-  forwardPE: number;
-  regularMarketVolume: number;
+  high52Week: number;
+  low52Week: number;
+  volume: number;
 }
-
 export interface NaverDefaultKeyStatistics {
-  trailingEps: number;
+  PER: number;
+  EPS: number;
   sharesOutstanding: number;
 }
 

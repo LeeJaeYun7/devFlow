@@ -92,7 +92,7 @@ export class NaverStockFetcherService {
         PER: Number(fundamentalResult.PER) || 0,
         EPS: Number(fundamentalResult.EPS) || 0,
         VOLUME: Number(fundamentalResult.VOLUME) || 0,
-        marketCap: Number(fundamentalResult.marketCap) || 0,
+        marketCap: this.parseMarketCap(fundamentalResult.marketCap) || 0,
         sharesOutstanding: Number(fundamentalResult.sharesOutstanding) || 0,
         capital: Number(fundamentalResult.capital) || 0,
       };
@@ -117,6 +117,7 @@ export class NaverStockFetcherService {
         executablePath: '/usr/lib/chromium/chromium',
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
       });
+
       this.logger.debug(`[${symbol}] Puppeteer launched.`);
 
       const page = await browser.newPage();

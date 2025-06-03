@@ -21,9 +21,6 @@ export class NaverStockHistory extends Document {
 
   @Prop({ required: false })
   low52Week?: number;
-
-  @Prop({ required: true })
-  lastUpdated!: Date;
 }
 
 export const NaverStockHistorySchema = SchemaFactory.createForClass(NaverStockHistory);

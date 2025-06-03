@@ -82,13 +82,13 @@ export class NaverStockService {
           _id: new Types.ObjectId(),
           symbol,
           summaryDetail: {
-            regularMarketPrice: fundamentalData.currentPrice,
+            currentPrice: fundamentalData.currentPrice,
             marketCap: fundamentalData.marketCap,
             volume: fundamentalData.VOLUME,
           },
           defaultKeyStatistics: {
-            trailingPE: fundamentalData.PER,
-            trailingEps: fundamentalData.EPS,
+            PER: fundamentalData.PER,
+            EPS: fundamentalData.EPS,
             sharesOutstanding: fundamentalData.sharesOutstanding,
           },
           financialData: {
