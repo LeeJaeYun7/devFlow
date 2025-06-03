@@ -109,6 +109,7 @@ export function ChatContent({ messageData, aiStreamContent, tempUserContent, isS
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 1,
+                  marginTop: '20px',
                 }}
               >
                 {showDate && (
