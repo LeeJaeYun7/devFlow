@@ -18,7 +18,8 @@ export class FunctionCallService {
           const koreanSymbol = symbol.replace(/\.(KS|KQ)$/, '');
           return this.naverFinanceService.getTechnicalData(koreanSymbol);
         } else {
-          return this.yahooFinanceService.getTechnicalData(symbol);
+          const usaSymbol = symbol.replace(/\./g, '-');
+          return this.yahooFinanceService.getTechnicalData(usaSymbol);
         }
       },
       get_fundamental_data: async (args: Args) => {
@@ -27,7 +28,8 @@ export class FunctionCallService {
           const koreanSymbol = symbol.replace(/\.(KS|KQ)$/, '');
           return this.naverFinanceService.getFundamentalData(koreanSymbol);
         } else {
-          return this.yahooFinanceService.getFundamentalData(symbol);
+          const usaSymbol = symbol.replace(/\./g, '-');
+          return this.yahooFinanceService.getFundamentalData(usaSymbol);
         }
       },
     };
