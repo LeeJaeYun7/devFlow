@@ -1,4 +1,4 @@
-  resource "aws_ecs_cluster" "api" {
+resource "aws_ecs_cluster" "api" {
   name = "api-cluster"
 }
 
@@ -13,8 +13,8 @@ resource "aws_ecs_task_definition" "api" {
 
   container_definitions = jsonencode([
     {
-      name      = "api"
-      image     = "${aws_ecr_repository.backend.repository_url}:latest"
+      name         = "api"
+      image        = "${aws_ecr_repository.backend.repository_url}:latest"
       portMappings = [{ containerPort = 4600, hostPort = 4600 }]
       environment = [
         { name = "MONGODB_URI", value = var.MONGODB_URI },
@@ -25,7 +25,8 @@ resource "aws_ecs_task_definition" "api" {
         { name = "OPENROUTER_URL", value = var.OPENROUTER_URL },
         { name = "OPENROUTER_API_KEY", value = var.OPENROUTER_API_KEY },
         { name = "OPENROUTER_MODEL", value = var.OPENROUTER_MODEL },
-        { name = "OPENROUTER_TEMPERATURE", value = var.OPENROUTER_TEMPERATURE }
+        { name = "OPENROUTER_TEMPERATURE", value = var.OPENROUTER_TEMPERATURE },
+        { name = "DART_API_KEY", value = var.DART_API_KEY }
       ]
       logConfiguration = {
         logDriver = "awslogs"
@@ -42,12 +43,12 @@ resource "aws_ecs_task_definition" "api" {
         retries     = 3
         startPeriod = 30
       }
-      linuxParameters: {
-        tmpfs: [
+      linuxParameters : {
+        tmpfs : [
           {
-            containerPath: "/dev/shm",
-            size: 1024,
-            mountOptions: ["rw", "nosuid", "nodev"]
+            containerPath : "/dev/shm",
+            size : 1024,
+            mountOptions : ["rw", "nosuid", "nodev"]
           }
         ]
       }
@@ -116,10 +117,11 @@ resource "aws_ecs_task_definition" "data_collector" {
 
   container_definitions = jsonencode([
     {
-      name      = "data-collector"
-      image     = "${aws_ecr_repository.data_collector.repository_url}:latest"
+      name  = "data-collector"
+      image = "${aws_ecr_repository.data_collector.repository_url}:latest"
       environment = [
-        { name = "MONGODB_URI", value = var.MONGODB_URI }
+        { name = "MONGODB_URI", value = var.MONGODB_URI },
+        { name = "DART_API_KEY", value = var.DART_API_KEY }
       ]
       logConfiguration = {
         logDriver = "awslogs"

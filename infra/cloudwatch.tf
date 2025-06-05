@@ -6,4 +6,4 @@ resource "aws_cloudwatch_log_group" "api" {
 resource "aws_cloudwatch_log_group" "data_collector" {
   name              = "/ecs/data_collector"
   retention_in_days = 14
-} 
+}

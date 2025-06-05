@@ -7,10 +7,10 @@ resource "aws_lb" "api" {
 }
 
 resource "aws_lb_target_group" "api" {
-  name     = "api-tg"
-  port     = 4600
-  protocol = "HTTP"
-  vpc_id   = aws_vpc.main.id
+  name        = "api-tg"
+  port        = 4600
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.main.id
   target_type = "ip"
   health_check {
     path                = "/api/health-check"

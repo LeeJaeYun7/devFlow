@@ -76,3 +76,9 @@ variable "OPENROUTER_TEMPERATURE" {
   type        = string
   sensitive   = true
 }
+
+variable "DART_API_KEY" {
+  description = "Dart API key"
+  type        = string
+  sensitive   = true
+}

@@ -1,8 +1,8 @@
 # ACM 인증서 (us-east-1, CloudFront용)
 resource "aws_acm_certificate" "cert" {
-  provider          = aws.virginia
-  domain_name       = var.domain_name
-  validation_method = "DNS"
+  provider                  = aws.virginia
+  domain_name               = var.domain_name
+  validation_method         = "DNS"
   subject_alternative_names = [var.www_domain_name]
 
   lifecycle {

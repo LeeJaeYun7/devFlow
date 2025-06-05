@@ -41,7 +41,7 @@ resource "aws_route53_record" "api_alb" {
     zone_id                = aws_lb.api.zone_id
     evaluate_target_health = true
   }
-} 
+}
 
 ##### Admin Service #####
 resource "aws_route53_record" "admin_site" {
