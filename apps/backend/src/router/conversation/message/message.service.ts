@@ -9,10 +9,12 @@ import { ServiceReturnType } from '@lia/api/types/base.type';
 import { MessageRoleMap } from '@lia/api/conversation/message/message.constant';
 import { UserMessageQuotaModel } from '../../../module/mongo/model/user/models/user_message_quota.model';
 import { DEFAULT_MESSAGE_QUOTA } from '../../../constants/message.constant';
+import { ChatQuotaNotEnoughError } from '../chat/chat.error';
 import { MessageQuotaNotEnoughError } from './message.error';
 import { CustomRequestContextService } from '../../../module/custom_request_context/custom_request_context.service';
 import { SseService } from '../../sse/sse.service';
 import { ChatModel } from '../../../module/mongo/model/conversation/models/chat.model';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class MessageService {
@@ -65,6 +67,7 @@ export class MessageService {
   public async createMessage(dto: MessageCreateDto): ServiceReturnType<MessageCreateResponse> {
     await this.checkUserMessageQuota();
     const { chatId } = dto;
+    await this.checkChatMessageQuota(chatId);
 
     try {
       await this.llmService.getAnalysisStream({
@@ -108,6 +111,20 @@ export class MessageService {
       );
     } else if (!userMessageQuota || userMessageQuota.remainingMessages <= 0) {
       throw new MessageQuotaNotEnoughError();
+    }
+
+    return true;
+  }
+
+  private async checkChatMessageQuota(chatId: string): Promise<boolean>{
+    const chat = await this.chatModel.findById(chatId).lean();
+
+    if (!chat) {
+      throw new Error('Chat not found');
+    }
+
+    if (chat.leftMessageCount !== undefined && chat.leftMessageCount <= 0) {
+      throw new ChatQuotaNotEnoughError();
     }
 
     return true;

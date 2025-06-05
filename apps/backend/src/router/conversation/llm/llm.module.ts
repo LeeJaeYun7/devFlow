@@ -10,6 +10,7 @@ import { LlmChatFlowService } from './llm_chat_flow.service';
 import { LlmStreamParserService } from './stream/llm_stream_parser.service';
 import { SystemCharacterModel, SystemCharacterSchema } from '../../../module/mongo/model/system_character.model';
 import { SystemModelModel, SystemModelSchema } from '../../../module/mongo/model/system_model.model';
+import { ChatModel, ChatSchema } from '../../../module/mongo/model/conversation/models/chat.model';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { SystemModelModel, SystemModelSchema } from '../../../module/mongo/model
     MongooseModule.forFeature([{ name: MessageModel.name, schema: MessageSchema }]),
     MongooseModule.forFeature([{ name: SystemCharacterModel.name, schema: SystemCharacterSchema }]),
     MongooseModule.forFeature([{ name: SystemModelModel.name, schema: SystemModelSchema }]),
+    MongooseModule.forFeature([{ name: ChatModel.name, schema: ChatSchema }]),
   ],
   providers: [LlmService, OpenRouterService, LlmStreamParserService, LlmChatFlowService, FunctionCallService],
   exports: [LlmService],

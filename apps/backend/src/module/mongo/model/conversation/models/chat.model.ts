@@ -12,6 +12,9 @@ export class ChatModel extends Document<string> {
 
   @Prop({ required: false, default: false })
   deleted!: boolean;
+
+  @Prop({ required: true, default: 16 })
+  leftMessageCount!: number;
 }
 
 export const ChatSchema = SchemaFactory.createForClass(ChatModel);

@@ -6,7 +6,7 @@ import { FunctionCallService } from './function-call.service';
 import { tools } from './open_router/lia-tools.constant';
 
 import { OpenRouterMessage, OpenRouterStreamChunkToolCall } from './open_router/open_router.type';
-
+import { ChatModel } from '../../../module/mongo/model/conversation/models/chat.model';
 import { MessageModel } from '../../../module/mongo/model/conversation/models/message.model';
 import { SystemModelModel } from '../../../module/mongo/model/system_model.model';
 import { SystemModelTargetMap } from '@lia/api/admin/system_model/system_model.constant';
@@ -17,6 +17,9 @@ import { LlmStreamParserService } from './stream/llm_stream_parser.service';
 @Injectable()
 export class LlmChatFlowService {
   constructor(
+    @InjectModel(ChatModel.name)
+    private readonly chatModel: Model<ChatModel>,
+
     @InjectModel(MessageModel.name)
     private readonly messageModel: Model<MessageModel>,
 
@@ -76,8 +79,7 @@ export class LlmChatFlowService {
     endCb: (finalContent: string) => Promise<void>
   ) {
     console.log('[handleMessageStream] 시작');
-
-    await this.saveMessage(chatId, initialMessages[initialMessages.length - 1].content, MessageRoleMap.user);
+    const userMessage = initialMessages[initialMessages.length - 1].content;
 
     const model = await this.systemModelModel
       .findOne({
@@ -136,8 +138,9 @@ export class LlmChatFlowService {
     firstResponseStream.on('end', async () => {
       console.log('[handleMessageStream] 스트림 종료', { isToolCall, finalContent });
       if (!isToolCall) {
-        endCb(finalContent);
+        await this.saveMessage(chatId, userMessage, MessageRoleMap.user);
         await this.saveMessage(chatId, finalContent, MessageRoleMap.assistant);
+        endCb(finalContent);
         return;
       }
 
@@ -164,12 +167,13 @@ export class LlmChatFlowService {
         });
       }
 
-      await this.handleSecondStream(newMessages, model, chatId, cb, endCb);
+      await this.handleSecondStream(newMessages, userMessage, model, chatId, cb, endCb);
     });
   }
 
   private async handleSecondStream(
     messages: OpenRouterMessage[],
+    userMessage: string | null,
     model: SystemModelModel,
     chatId: string,
     cb: (content: string) => void,
@@ -190,9 +194,9 @@ export class LlmChatFlowService {
     });
 
     secondResponseStream.on('end', async () => {
-      console.log('[handleSecondStream] 스트림 종료', { finalContent });
-      endCb(finalContent);
+      await this.saveMessage(chatId, userMessage, MessageRoleMap.user);
       await this.saveMessage(chatId, finalContent, MessageRoleMap.assistant);
+      endCb(finalContent);
     });
   }
 
@@ -207,6 +211,8 @@ export class LlmChatFlowService {
         createdAt: new Date(),
       },
     ]);
+
+    await this.chatModel.updateOne({ _id: chatId }, { $inc: { leftMessageCount: -1 } });
   }
 }
 
