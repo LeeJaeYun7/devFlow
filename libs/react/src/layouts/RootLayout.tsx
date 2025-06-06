@@ -1,4 +1,4 @@
-import { Box, useMediaQuery, useTheme } from '@mui/material';
+import { Box, SxProps, Theme, useMediaQuery, useTheme } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 
 const sidebarWidth = 280;
@@ -6,10 +6,10 @@ const sidebarWidth = 280;
 interface RootLayoutProps {
   topbar?: React.ReactNode;
   sidebar?: React.ReactNode;
-  requireLogin?: boolean;
+  contentSx?: SxProps<Theme>;
 }
 
-export function RootLayout({ topbar, sidebar }: RootLayoutProps) {
+export function RootLayout({ topbar, sidebar, contentSx }: RootLayoutProps) {
   const theme = useTheme();
   const isNotMobile = useMediaQuery(theme.breakpoints.up('sm'));
 
@@ -41,6 +41,7 @@ export function RootLayout({ topbar, sidebar }: RootLayoutProps) {
               width: '100%',
               borderRadius: 2,
               overflow: 'hidden',
+              ...contentSx,
             }}
           >
             <Outlet />

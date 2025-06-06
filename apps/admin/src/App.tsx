@@ -19,7 +19,7 @@ import { CheckAdmin } from './layouts/CheckAdmin';
 function AdminLayout() {
   return (
     <CheckAdmin>
-      <RootLayout sidebar={<AdminSidebar />} requireLogin={false} />
+      <RootLayout sidebar={<AdminSidebar />} contentSx={{ p: 3 }} />
     </CheckAdmin>
   );
 }

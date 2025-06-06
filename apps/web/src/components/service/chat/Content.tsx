@@ -28,12 +28,7 @@ export function ChatContent({
     const messages = [];
 
     if (aiStreamContent) {
-      messages.push({
-        id: `temp-${Date.now()}`,
-        content: aiStreamContent,
-        role: 'assistant',
-        createdAt: new Date(),
-      });
+      messages.push(...SplitAiContent(aiStreamContent));
     }
 
     if (tempUserContent) {
@@ -46,7 +41,14 @@ export function ChatContent({
     }
 
     if (messageData) {
-      messages.push(...messageData);
+      for (const msg of messageData) {
+        if (msg.role === 'assistant') {
+          console.log(msg.content, SplitAiContent(msg.content));
+          messages.push(...SplitAiContent(msg.content));
+        } else {
+          messages.push(msg);
+        }
+      }
     }
 
     return messages;
@@ -68,7 +70,7 @@ export function ChatContent({
   }, [totalMessages, moveScrollToBottom]);
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', marginBottom: '100px' }}>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Container maxWidth="lg" sx={{ flex: 1, px: { xs: 2, sm: 4 } }}>
         <Box
           sx={{
@@ -183,4 +185,37 @@ export function ChatContent({
       </Container>
     </Box>
   );
+}
+
+function SplitAiContent(content: string) {
+  const lines = content.split('\n');
+  const messages: Message[] = [];
+
+  let nowContent = '';
+
+  for (const line of lines) {
+    // bold가 있으면 새로운 메세지로 처리
+    if (nowContent && line.startsWith('**') && line.endsWith('**')) {
+      messages.push({
+        id: `temp-${Date.now()}`,
+        content: nowContent,
+        role: 'assistant',
+        createdAt: new Date(),
+      });
+      nowContent = line + '\n\n';
+      continue;
+    }
+    nowContent += line + '\n';
+  }
+
+  if (nowContent) {
+    messages.push({
+      id: `temp-${Date.now()}`,
+      content: nowContent,
+      role: 'assistant',
+      createdAt: new Date(),
+    });
+  }
+
+  return messages.reverse();
 }

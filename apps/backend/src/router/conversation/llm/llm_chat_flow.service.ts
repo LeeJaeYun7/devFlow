@@ -13,6 +13,7 @@ import { SystemModelTargetMap } from '@lia/api/admin/system_model/system_model.c
 import { MessageRole, MessageRoleMap } from '@lia/api/conversation/message/message.constant';
 import { SystemError } from '../../../util/base.error';
 import { LlmStreamParserService } from './stream/llm_stream_parser.service';
+import { appendFileSync } from 'node:fs';
 
 @Injectable()
 export class LlmChatFlowService {
@@ -104,6 +105,7 @@ export class LlmChatFlowService {
       model: model.modelId,
       parserCb: (content) => {
         console.log('[handleMessageStream] 수신 content', content);
+        appendFileSync('test.txt', content + '\n');
         if (!isToolCall) {
           finalContent += content;
           cb(content);

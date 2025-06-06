@@ -26,7 +26,7 @@ export default function LoginModal({ open, onClose }: LoginModalProps) {
           width: 400,
           bgcolor: 'background.paper',
           borderRadius: 2,
-          boxShadow: 8,
+          border: '0px solid',
           p: 4,
           pb: 10,
           pt: 10,
