@@ -37,8 +37,12 @@ export class OpenRouterService {
         {
           model: body.model ?? this.model,
           messages: body.messages,
-          tools: body.tools,
-          tool_choice: 'auto',
+          ...(body.tools && body.tools.length > 0
+            ? {
+                tools: body.tools,
+                tool_choice: 'auto',
+              }
+            : {}),
           temperature: this.temperature,
           stream: true,
         },
