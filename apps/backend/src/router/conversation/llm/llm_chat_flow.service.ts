@@ -49,7 +49,7 @@ export class LlmChatFlowService {
       },
     ];
 
-    const stream = await this.llmStreamParserService.createStream({
+    const stream = await this.llmStreamParserService.createTitleStream({
       messages,
       tools,
       model: systemModel?.modelId,
@@ -104,8 +104,6 @@ export class LlmChatFlowService {
       tools,
       model: model.modelId,
       parserCb: (content) => {
-        console.log('[handleMessageStream] 수신 content', content);
-        appendFileSync('test.txt', content + '\n');
         if (!isToolCall) {
           finalContent += content;
           cb(content);
@@ -182,7 +180,7 @@ export class LlmChatFlowService {
     cb: (content: string) => void,
     endCb: (finalContent: string) => Promise<void>
   ) {
-    console.log('[handleSecondStream] 시작', { messages, chatId });
+    console.log('[handleSecondStream] 시작');
     let finalContent = '';
 
     const secondResponseStream = await this.llmStreamParserService.createStream({
