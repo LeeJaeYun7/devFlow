@@ -7,6 +7,34 @@ import { ParserService } from './parser';
 export class LlmStreamParserService {
   constructor(private readonly openRouterService: OpenRouterService) {}
 
+  public async createTitleStream(param: SendMessageParam) {
+    const stream = await this.openRouterService.chatStream({
+      model: param.model,
+      messages: param.messages,
+    });
+
+    const parser = ParserService.createInstance(param.parserCb);
+
+    stream.data.on('data', (chunk: Buffer) => {
+      const dataList = this.toDataList(chunk);
+      for (const data of dataList) {
+        try {
+          const parsed = JSON.parse(data) as OpenRouterStreamChunk;
+          const content = parsed.choices[0]?.delta?.content;
+          if (content) {
+            parser.write(content);
+          }
+
+          param.cb?.(parsed);
+        } catch {
+          // ignore
+        }
+      }
+    });
+
+    return stream.data;
+  }
+
   public async createStream(param: SendMessageParam) {
     const stream = await this.openRouterService.chatStream({
       model: param.model,
