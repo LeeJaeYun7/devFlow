@@ -28,7 +28,7 @@ export function ChatContent({
     const messages = [];
 
     if (aiStreamContent) {
-      messages.push(...SplitAiContent(aiStreamContent));
+      messages.push(...splitAiContent(aiStreamContent, new Date()));
     }
 
     if (tempUserContent) {
@@ -43,8 +43,7 @@ export function ChatContent({
     if (messageData) {
       for (const msg of messageData) {
         if (msg.role === 'assistant') {
-          console.log(msg.content, SplitAiContent(msg.content));
-          messages.push(...SplitAiContent(msg.content));
+          messages.push(...splitAiContent(msg.content, msg.createdAt));
         } else {
           messages.push(msg);
         }
@@ -187,20 +186,21 @@ export function ChatContent({
   );
 }
 
-function SplitAiContent(content: string) {
+function splitAiContent(content: string, targetDate: Date) {
   const lines = content.split('\n');
   const messages: Message[] = [];
 
   let nowContent = '';
+  let tempId = new Date(targetDate).getTime();
 
   for (const line of lines) {
     // bold가 있으면 새로운 메세지로 처리
     if (nowContent && line.startsWith('**') && line.endsWith('**')) {
       messages.push({
-        id: `temp-${Date.now()}`,
+        id: `temp-${tempId++}`,
         content: nowContent,
         role: 'assistant',
-        createdAt: new Date(),
+        createdAt: targetDate,
       });
       nowContent = line + '\n\n';
       continue;
@@ -210,10 +210,10 @@ function SplitAiContent(content: string) {
 
   if (nowContent) {
     messages.push({
-      id: `temp-${Date.now()}`,
+      id: `temp-${tempId++}`,
       content: nowContent,
       role: 'assistant',
-      createdAt: new Date(),
+      createdAt: targetDate,
     });
   }
 
