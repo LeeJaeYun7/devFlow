@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { LlmService } from '../llm/llm.service';
 import { MessageCreateDto, MessageCreateResponse } from '@lia/api/conversation/message/create.dto';
 import { MessageListDto, MessageListResponse } from '@lia/api/conversation/message/list.dto';
@@ -18,6 +18,9 @@ import { Types } from 'mongoose';
 
 @Injectable()
 export class MessageService {
+
+  private readonly logger = new Logger(MessageService.name);
+
   constructor(
     @InjectModel(ChatModel.name)
     private readonly chatModel: Model<ChatModel>,
@@ -65,39 +68,52 @@ export class MessageService {
   }
 
   public async createMessage(dto: MessageCreateDto): ServiceReturnType<MessageCreateResponse> {
+    this.logger.debug(`createMessage called with dto: ${JSON.stringify(dto)}`);
     await this.checkUserMessageQuota();
     const { chatId } = dto;
     await this.checkChatMessageQuota(chatId);
+
+    this.logger.debug(`User and Chat quotas validated. Proceeding to analysis stream.`);
 
     try {
       await this.llmService.getAnalysisStream({
         chatId,
         message: dto.content,
         cb: (content) => {
+          this.logger.debug(`Received chunk from LLM: ${content}`);
           this.sseService.sendEvent({ type: 'chatMessage', data: { chatId, content } });
         },
         endCb: async () => {
+          this.logger.debug(`Analysis stream ended.`);
           this.sseService.sendEvent({ type: 'chatMessage', data: { chatId, isEnd: true } });
         },
         titleParam: {
           cb: (title) => {
+            this.logger.debug(`Title generated: ${title}`);
             this.sseService.sendEvent({ type: 'chatTitle', data: { chatId, title } });
           },
           endCb: async (title) => {
+            this.logger.debug(`Updating chat title in DB: ${title}`);
             await this.chatModel.updateOne({ _id: chatId }, { $set: { title } });
           },
         },
       });
+      this.logger.debug(`getAnalysisStream completed.`);
       return {
         aiResponse: '',
         createdAt: new Date(),
       };
+    } catch (error) {
+      this.logger.error(`Error in createMessage: ${error.stack || error.message}`);
+      throw error;
     } finally {
       const user = this.customRequestContext.get('user');
       const userId = user.id;
       await this.userMessageQuotaModel.updateOne({ userId }, { $inc: { remainingMessages: -1 } });
+      this.logger.debug(`User message quota decremented for userId: ${userId}`);
     }
   }
+
 
   private async checkUserMessageQuota(): Promise<boolean> {
     const user = this.customRequestContext.get('user');
