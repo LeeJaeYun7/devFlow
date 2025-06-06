@@ -50,6 +50,7 @@ export class LlmChatFlowService {
 
     const stream = await this.llmStreamParserService.createStream({
       messages,
+      tools,
       model: systemModel?.modelId,
       parserCb: (content) => {
         console.log('[handleTitleStream] 수신 content', content);
