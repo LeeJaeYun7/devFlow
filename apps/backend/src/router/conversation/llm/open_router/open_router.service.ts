@@ -28,6 +28,20 @@ export class OpenRouterService {
   }
 
   public async chatStream(body: OpenRouterRequestBody) {
+    this.logger.debug(`chatStream request body: ${JSON.stringify({
+        model: body.model ?? this.model,
+        messages: body.messages,
+        tools: body.tools,
+        tool_choice: 'auto',
+        temperature: this.temperature,
+        stream: true,
+      })}`);
+
+    this.logger.debug(`chatStream headers: ${JSON.stringify({
+        Authorization: `Bearer ${this.openRouterApiKey}`,
+        'Content-Type': 'application/json',
+      })}`);
+
     try {
       return await axios.post<Readable>(
         this.openRouterUrl,
@@ -50,6 +64,7 @@ export class OpenRouterService {
     } catch (e) {
       if (e instanceof AxiosError) {
         this.logger.error(`LLM Error: ${e.response?.status} ${e.response?.statusText}`);
+        this.logger.error(`LLM Error response data: ${JSON.stringify(e.response?.data)}`);
       } else {
         this.logger.error(e);
       }
