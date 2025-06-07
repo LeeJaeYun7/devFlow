@@ -14,11 +14,9 @@ import { MessageQuotaNotEnoughError } from './message.error';
 import { CustomRequestContextService } from '../../../module/custom_request_context/custom_request_context.service';
 import { SseService } from '../../sse/sse.service';
 import { ChatModel } from '../../../module/mongo/model/conversation/models/chat.model';
-import { Types } from 'mongoose';
 
 @Injectable()
 export class MessageService {
-
   private readonly logger = new Logger(MessageService.name);
 
   constructor(
@@ -104,7 +102,11 @@ export class MessageService {
         createdAt: new Date(),
       };
     } catch (error) {
-      this.logger.error(`Error in createMessage: ${error.stack || error.message}`);
+      if (error instanceof Error) {
+        this.logger.error(`Error in createMessage: ${error.stack || error.message}`);
+        throw error;
+      }
+      this.logger.error(`Error in createMessage: ${error}`);
       throw error;
     } finally {
       const user = this.customRequestContext.get('user');
@@ -113,7 +115,6 @@ export class MessageService {
       this.logger.debug(`User message quota decremented for userId: ${userId}`);
     }
   }
-
 
   private async checkUserMessageQuota(): Promise<boolean> {
     const user = this.customRequestContext.get('user');
@@ -132,7 +133,7 @@ export class MessageService {
     return true;
   }
 
-  private async checkChatMessageQuota(chatId: string): Promise<boolean>{
+  private async checkChatMessageQuota(chatId: string): Promise<boolean> {
     const chat = await this.chatModel.findById(chatId).lean();
 
     if (!chat) {

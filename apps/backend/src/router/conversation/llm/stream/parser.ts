@@ -36,3 +36,5 @@ export class ParserService {
     return parser.parser;
   }
 }
+
+export { Parser };
