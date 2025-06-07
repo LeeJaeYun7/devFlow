@@ -50,8 +50,6 @@ async function bootstrap() {
       cookie: {
         maxAge: cookieTime * 1000,
         httpOnly: true,
-        secure: isProd,
-        domain: isProd ? '.asklia.io' : undefined,
       },
     })
   );
