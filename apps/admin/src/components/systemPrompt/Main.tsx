@@ -5,7 +5,6 @@ import { useSystemModelList, usePatchSystemModel } from '../../hooks/useSystemMo
 import {
   SystemModel,
   SystemModelTargetList,
-  SystemModelList,
   SystemModelTarget,
 } from '@lia/api/admin/system_model/system_model.constant';
 
@@ -14,15 +13,39 @@ import OpenAIIcon from './icon/openai.svg';
 import GoogleIcon from './icon/google.svg';
 import MetaIcon from './icon/meta.svg';
 
+const supportedProvider = ['anthropic', 'openai', 'google', 'meta-llama'];
+const requiredParameters = ['tools', 'tool_choice'];
+
 export function SystemPromptMain() {
   const { data: prompt } = useSystemPrompt();
   const [input, setInput] = useState('');
   const patchMutation = usePatchSystemPrompt();
   const { data: modelList } = useSystemModelList();
 
+  const [useableModelList, setUseableModelList] = useState<string[]>([]);
+
   useEffect(() => {
     if (prompt) setInput(prompt);
   }, [prompt]);
+
+  useEffect(() => {
+    fetch('https://openrouter.ai/api/v1/models')
+      .then((res) => res.json())
+      .then((data: { data: OpenRouterModel[] }) => {
+        const list = data.data.filter((model) => {
+          const isSupportedProvider = supportedProvider.includes(model.id.split('/')[0]);
+
+          for (const parameter of requiredParameters) {
+            if (!model.supported_parameters.includes(parameter)) {
+              return false;
+            }
+          }
+
+          return isSupportedProvider;
+        });
+        setUseableModelList(list.map((model) => model.id).sort());
+      });
+  }, []);
 
   return (
     <Box>
@@ -43,7 +66,7 @@ export function SystemPromptMain() {
               <Typography variant="body1" fontWeight={500} sx={{ width: '100px' }}>
                 {target.charAt(0).toUpperCase() + target.slice(1)}
               </Typography>
-              <ModelSelect target={target} nowModel={selectedModel} />
+              <ModelSelect target={target} nowModel={selectedModel} modelList={useableModelList} />
             </Box>
           );
         })}
@@ -103,7 +126,15 @@ function getTokenCount(prompt: string) {
   return Math.ceil(tokenCount);
 }
 
-function ModelSelect({ target, nowModel }: { target: SystemModelTarget; nowModel: string | undefined }) {
+function ModelSelect({
+  target,
+  nowModel,
+  modelList,
+}: {
+  target: SystemModelTarget;
+  nowModel: string | undefined;
+  modelList: string[];
+}) {
   const [selectedModel, setSelectedModel] = useState<string | undefined>(nowModel);
   const patchModelMutation = usePatchSystemModel();
 
@@ -111,12 +142,12 @@ function ModelSelect({ target, nowModel }: { target: SystemModelTarget; nowModel
     <Autocomplete
       size="small"
       sx={{ width: '250px' }}
-      options={SystemModelList}
+      options={modelList}
       value={selectedModel}
       onChange={(_, newValue) => {
         const value = newValue as SystemModel;
         setSelectedModel(value);
-        if (SystemModelList.includes(value)) {
+        if (modelList.includes(value)) {
           patchModelMutation.mutate({ target, modelId: value });
         }
       }}
@@ -175,7 +206,7 @@ function getModelIcon(modelFull: string) {
     case 'google':
       icon = GoogleIcon;
       break;
-    case 'meta':
+    case 'meta-llama':
       icon = MetaIcon;
       break;
     default:
@@ -183,4 +214,10 @@ function getModelIcon(modelFull: string) {
   }
 
   return icon;
+}
+
+interface OpenRouterModel {
+  id: string;
+  name: string;
+  supported_parameters: string[];
 }

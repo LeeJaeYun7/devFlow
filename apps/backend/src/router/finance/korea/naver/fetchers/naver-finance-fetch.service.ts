@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import puppeteer from 'puppeteer';
 import { NaverStockTechnicalDto } from '../dto/technical-data.dto';
 import { NaverStockFundamentalDto } from '../dto/fundamental-data.dto';
-import { NaverStockHistoryItem } from '../../../../module/mongo/model/naver/interfaces/naver-stock-history-interface';
+import { NaverStockHistoryItem } from '../../../../../module/mongo/model/korea/naver/interfaces/naver-stock-history-interface';
 
 @Injectable()
 export class NaverStockFetcherService {

@@ -3,9 +3,12 @@ import { Box, Typography, Paper, Grid, Chip } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import { StatisticsCard } from '@lia/react/components/card/Statistics';
 import { useUserList, useUserMetric } from '../../hooks/useUser';
+import { useState } from 'react';
 
 export function UserMain() {
-  const { data: userList } = useUserList({ page: 1, limit: 10 });
+  const [page, setPage] = useState(0);
+  const [limit, setLimit] = useState(20);
+  const { data: userList, refetch } = useUserList({ page: page + 1, limit });
   const { data: userMetric } = useUserMetric({});
 
   const metrics = [
@@ -22,10 +25,10 @@ export function UserMain() {
       diffPercent: userMetric?.data.totalUser.diffRate ?? 0,
     },
     {
-      label: 'Run',
-      value: userMetric?.data.run.value ?? 0,
-      diff: userMetric?.data.run.diff ?? 0,
-      diffPercent: userMetric?.data.run.diffRate ?? 0,
+      label: 'NRU',
+      value: userMetric?.data?.nru?.value ?? 0,
+      diff: userMetric?.data?.nru?.diff ?? 0,
+      diffPercent: userMetric?.data?.nru?.diffRate ?? 0,
     },
     {
       label: 'D1 Retention',
@@ -66,8 +69,16 @@ export function UserMain() {
               id: user.email + i,
             })) ?? []
           }
-          initialState={{ pagination: { paginationModel: { pageSize: 20 } } }}
-          pageSizeOptions={[10, 20, 50, 100]}
+          rowCount={userList?.data.meta.total}
+          paginationMode="server"
+          initialState={{ pagination: { paginationModel: { page, pageSize: limit } } }}
+          paginationModel={{ page, pageSize: limit }}
+          onPaginationModelChange={(model) => {
+            setPage(model.page);
+            setLimit(model.pageSize);
+            refetch();
+          }}
+          pageSizeOptions={[20, 50, 100]}
           columns={[
             {
               field: 'email',
@@ -76,7 +87,7 @@ export function UserMain() {
             },
             {
               field: 'sso',
-              headerName: 'SNS',
+              headerName: 'SSO',
               renderCell: (params) => {
                 return (
                   <Chip
