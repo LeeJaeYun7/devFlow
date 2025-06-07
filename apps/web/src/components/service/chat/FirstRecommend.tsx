@@ -17,7 +17,9 @@ export function FirstRecommend() {
         WebkitTextFillColor: 'transparent',
       }}
     >
-      <Typography variant="h1" sx={{ fontWeight: 500, textAlign: 'center' }}>
+      <Typography
+        sx={{ fontWeight: 500, textAlign: 'center', fontSize: { xs: '24px', md: '32px' }, lineHeight: '1.2' }}
+      >
         주식 분석,{' '}
         <Box component="span" sx={{ fontWeight: 700 }}>
           리아

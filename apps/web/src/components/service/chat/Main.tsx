@@ -158,19 +158,17 @@ export function ChatMain() {
                 sx={{
                   flex: 1,
                   overflow: 'hidden',
-                  position: 'relative',
                 }}
               >
                 <Box
                   ref={chatContainerRef}
                   sx={{
-                    height: '100%',
+                    height: `calc(100% - 88px)`,
                     overflowY: 'auto',
                     position: 'absolute',
                     top: 0,
                     left: 0,
                     right: 0,
-                    bottom: 0,
                     msOverflowStyle: 'none', // IE, Edge
                     scrollbarWidth: 'none', // Firefox
                     '&::-webkit-scrollbar': {
@@ -219,11 +217,8 @@ function getInputLayerSx(isMobile: boolean): SxProps<Theme> {
     left: 0,
     right: 0,
     px: { xs: 2, md: 11 },
-    pb: { xs: 2, md: 0 },
+    pb: 2,
     pt: 2,
-    bgcolor: 'background.default',
-    borderTop: 1,
-    borderColor: 'divider',
     boxShadow: '0px -4px 10px rgba(0, 0, 0, 0.05)',
   };
 }

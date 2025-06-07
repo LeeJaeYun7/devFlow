@@ -17,6 +17,7 @@ import CallbackMain from '@lia/react/components/login/callback/Main';
 import { ChatMain } from './components/service/chat/Main';
 import { ProfileMain } from './components/service/profile/Main';
 import { FaqMain } from './components/service/faq/Main';
+import { LogoutMain } from './components/service/logout/Main';
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
                   <Route path="/login" element={<LoginMain />} />
                 </Route>
                 <Route path="/login/callback" element={<CallbackMain />} />
+                <Route path="/logout" element={<LogoutMain />} />
               </Routes>
             </Suspense>
           </SnackbarProvider>

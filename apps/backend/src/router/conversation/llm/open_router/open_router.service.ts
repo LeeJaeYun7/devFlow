@@ -28,28 +28,18 @@ export class OpenRouterService {
   }
 
   public async chatStream(body: OpenRouterRequestBody) {
-    this.logger.debug(`chatStream request body: ${JSON.stringify({
-        model: body.model ?? this.model,
-        messages: body.messages,
-        tools: body.tools,
-        tool_choice: 'auto',
-        temperature: this.temperature,
-        stream: true,
-      })}`);
-
-    this.logger.debug(`chatStream headers: ${JSON.stringify({
-        Authorization: `Bearer ${this.openRouterApiKey}`,
-        'Content-Type': 'application/json',
-      })}`);
-
     try {
       return await axios.post<Readable>(
         this.openRouterUrl,
         {
           model: body.model ?? this.model,
           messages: body.messages,
-          tools: body.tools,
-          tool_choice: 'auto',
+          ...(body.tools && body.tools.length > 0
+            ? {
+                tools: body.tools,
+                tool_choice: 'auto',
+              }
+            : {}),
           temperature: this.temperature,
           stream: true,
         },

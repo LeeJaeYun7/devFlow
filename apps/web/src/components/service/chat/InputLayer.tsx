@@ -15,7 +15,7 @@ export default function InputLayer({ isSending, message, setMessage, handleSendM
       elevation={0}
       sx={{
         p: { xs: 1.5, md: 2 },
-        bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'),
+        bgcolor: 'background.paper',
         borderRadius: '16px',
         mx: 'auto',
         width: '100%',
@@ -40,8 +40,6 @@ export default function InputLayer({ isSending, message, setMessage, handleSendM
           sx={{
             bgcolor: 'primary.main',
             color: 'white',
-            '&:hover': { bgcolor: 'primary.dark' },
-            '&.Mui-disabled': { bgcolor: 'action.disabledBackground' },
             width: 32,
             height: 32,
           }}
@@ -78,11 +76,12 @@ function InputTextField(props: TextFieldProps & { isSending: boolean }) {
       multiline
       placeholder={isSending ? `Generating${dots}` : 'Type message'}
       variant="standard"
-      sx={{
-        '& .MuiInputBase-root': {
-          padding: '4px 8px',
-          fontSize: { xs: '0.875rem', md: '1rem' },
+      slotProps={{
+        input: {
+          disableUnderline: true,
         },
+      }}
+      sx={{
         '& .MuiInput-underline:before': { borderBottom: 'none' },
         '& .MuiInput-underline:after': { borderBottom: 'none' },
       }}

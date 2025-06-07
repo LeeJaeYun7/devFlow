@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -13,9 +13,12 @@ import { SystemModelTargetMap } from '@lia/api/admin/system_model/system_model.c
 import { MessageRole, MessageRoleMap } from '@lia/api/conversation/message/message.constant';
 import { SystemError } from '../../../util/base.error';
 import { LlmStreamParserService } from './stream/llm_stream_parser.service';
+import { LlmResponseFailedError } from './llm.error';
 
 @Injectable()
 export class LlmChatFlowService {
+  private readonly logger = new Logger(LlmChatFlowService.name);
+
   constructor(
     @InjectModel(ChatModel.name)
     private readonly chatModel: Model<ChatModel>,
@@ -31,9 +34,7 @@ export class LlmChatFlowService {
   ) {}
 
   public async handleTitleStream({ message, cb, endCb }: LLMStreamParam) {
-    console.log('[handleTitleStream] 시작', { message });
     const systemModel = await this.systemModelModel.findOne({ target: SystemModelTargetMap.title });
-    console.log('[handleTitleStream] systemModel', systemModel);
 
     let title = '';
     let lastSentTitle = '';
@@ -48,27 +49,24 @@ export class LlmChatFlowService {
       },
     ];
 
-    const stream = await this.llmStreamParserService.createStream({
+    void this.llmStreamParserService.handleTitleStream({
       messages,
       model: systemModel?.modelId,
       parserCb: (content) => {
-        console.log('[handleTitleStream] 수신 content', content);
         title += content;
         if (title !== lastSentTitle) {
           lastSentTitle = title;
           cb(title);
         }
       },
-    });
-
-    stream.on('end', () => {
-      console.log('[handleTitleStream] 스트림 종료', { finalTitle: title });
-      if (title && title !== lastSentTitle) {
-        cb(title);
-      }
-      if (title) {
-        endCb?.(title);
-      }
+      endCb: () => {
+        if (title && title !== lastSentTitle) {
+          cb(title);
+        }
+        if (title) {
+          endCb?.(title);
+        }
+      },
     });
   }
 
@@ -78,7 +76,6 @@ export class LlmChatFlowService {
     cb: (content: string) => void,
     endCb: (finalContent: string) => Promise<void>
   ) {
-    console.log('[handleMessageStream] 시작');
     const userMessage = initialMessages[initialMessages.length - 1].content;
 
     const model = await this.systemModelModel
@@ -88,87 +85,93 @@ export class LlmChatFlowService {
       .lean();
 
     if (!model) {
-      console.error('[handleMessageStream] System model not found');
       throw new SystemError('System model not found');
     }
-    console.log('[handleMessageStream] model', model);
 
     let finalContent = '';
     let isToolCall = false;
     const firstResponseTools: OpenRouterStreamChunkToolCall[] = [];
 
-    const firstResponseStream = await this.llmStreamParserService.createStream({
+    const firstStreamPromise = this.llmStreamParserService.handleMessageStream({
       messages: initialMessages,
       tools,
       model: model.modelId,
+      retryStrategy: {
+        count: 3,
+        delay: 200,
+        retryInit: async () => {
+          finalContent = '';
+          isToolCall = false;
+          firstResponseTools.length = 0;
+        },
+      },
       parserCb: (content) => {
-        console.log('[handleMessageStream] 수신 content', content);
         if (!isToolCall) {
           finalContent += content;
           cb(content);
         }
       },
       cb: (chunk) => {
-        console.log('[handleMessageStream] chunk delta', JSON.stringify(chunk.choices[0]?.delta));
         const toolCalls = chunk.choices[0]?.delta?.tool_calls;
-        if (toolCalls) {
-          isToolCall = true;
-          for (const toolCall of toolCalls) {
-            console.log('[handleMessageStream] 수신 toolCall', toolCall);
-            const index = toolCall.index;
-            if (index >= firstResponseTools.length) {
-              firstResponseTools.push({
-                id: toolCall.id,
-                index,
-                type: 'function',
-                function: {
-                  name: toolCall.function.name,
-                  arguments: toolCall.function.arguments,
-                },
-              });
-            } else {
-              const targetToolCall = firstResponseTools[index];
-              targetToolCall.function.arguments += toolCall.function.arguments ?? '';
-            }
+        if (!toolCalls) {
+          return;
+        }
+        isToolCall = true;
+        for (const toolCall of toolCalls) {
+          const index = toolCall.index;
+          if (index >= firstResponseTools.length) {
+            firstResponseTools.push({
+              id: toolCall.id,
+              index,
+              type: 'function',
+              function: {
+                name: toolCall.function.name,
+                arguments: toolCall.function.arguments,
+              },
+            });
+          } else {
+            const targetToolCall = firstResponseTools[index];
+            targetToolCall.function.arguments += toolCall.function.arguments ?? '';
           }
         }
       },
+      endCb: async () => {
+        if (!isToolCall) {
+          await this.saveMessage(chatId, userMessage, MessageRoleMap.user);
+          await this.saveMessage(chatId, finalContent, MessageRoleMap.assistant);
+          endCb(finalContent);
+          return;
+        }
+
+        const newMessages: OpenRouterMessage[] = [
+          ...initialMessages,
+          {
+            role: MessageRoleMap.assistant,
+            content: null,
+            tool_calls: firstResponseTools,
+          },
+        ];
+
+        for (const toolCall of firstResponseTools) {
+          const functionResult = await this.functionCallService.processFunctionCall(toolCall);
+          newMessages.push({
+            role: MessageRoleMap.tool,
+            tool_call_id: toolCall.id,
+            name: toolCall.function.name,
+            content: JSON.stringify(functionResult),
+          });
+        }
+
+        await this.handleSecondStream(newMessages, userMessage, model, chatId, cb, endCb);
+      },
     });
 
-    firstResponseStream.on('end', async () => {
-      console.log('[handleMessageStream] 스트림 종료', { isToolCall, finalContent });
-      if (!isToolCall) {
-        await this.saveMessage(chatId, userMessage, MessageRoleMap.user);
-        await this.saveMessage(chatId, finalContent, MessageRoleMap.assistant);
-        endCb(finalContent);
-        return;
-      }
-
-      console.log('[handleMessageStream] Tool call detected, second round 시작');
-      const newMessages: OpenRouterMessage[] = [
-        ...initialMessages,
-        {
-          role: MessageRoleMap.assistant,
-          content: null,
-          tool_calls: firstResponseTools,
-        },
-      ];
-      console.log('[handleMessageStream] newMessages');
-
-      for (const toolCall of firstResponseTools) {
-        console.log('[handleMessageStream] functionCall 처리', toolCall);
-        const functionResult = await this.functionCallService.processFunctionCall(toolCall);
-        console.log('[handleMessageStream] functionResult', functionResult);
-        newMessages.push({
-          role: MessageRoleMap.tool,
-          tool_call_id: toolCall.id,
-          name: toolCall.function.name,
-          content: JSON.stringify(functionResult),
-        });
-      }
-
-      await this.handleSecondStream(newMessages, userMessage, model, chatId, cb, endCb);
-    });
+    try {
+      await firstStreamPromise;
+    } catch (error) {
+      this.logger.error(`Llm response failed: ${error}`);
+      throw new LlmResponseFailedError('Llm response failed');
+    }
   }
 
   private async handleSecondStream(
@@ -179,30 +182,40 @@ export class LlmChatFlowService {
     cb: (content: string) => void,
     endCb: (finalContent: string) => Promise<void>
   ) {
-    console.log('[handleSecondStream] 시작', { messages, chatId });
     let finalContent = '';
 
-    const secondResponseStream = await this.llmStreamParserService.createStream({
+    const secondStreamPromise = this.llmStreamParserService.handleMessageStream({
       messages,
       tools,
       model: model?.modelId,
+      retryStrategy: {
+        count: 1,
+        delay: 200,
+        retryInit: async () => {
+          finalContent = '';
+        },
+      },
       parserCb: (content) => {
-        console.log('[handleSecondStream] 수신 content', content);
         finalContent += content;
         cb(content);
       },
+      endCb: async () => {
+        await this.saveMessage(chatId, userMessage, MessageRoleMap.user);
+        await this.saveMessage(chatId, finalContent, MessageRoleMap.assistant);
+        endCb(finalContent);
+      },
     });
 
-    secondResponseStream.on('end', async () => {
-      await this.saveMessage(chatId, userMessage, MessageRoleMap.user);
-      await this.saveMessage(chatId, finalContent, MessageRoleMap.assistant);
-      endCb(finalContent);
-    });
+    try {
+      await secondStreamPromise;
+    } catch (error) {
+      this.logger.error(`Llm response failed: ${error}`);
+      throw new LlmResponseFailedError('Llm response failed');
+    }
   }
 
   private async saveMessage(chatId: string, content: string | null, role: MessageRole) {
     if (!content) return;
-    console.log('[saveMessage] 저장', { chatId, role, content });
     await this.messageModel.insertMany([
       {
         chatId,
