@@ -98,6 +98,9 @@ importers:
       finnhub:
         specifier: ^1.2.19
         version: 1.2.19(@babel/core@7.27.1)
+      github-markdown-css:
+        specifier: ^5.8.1
+        version: 5.8.1
       htmlparser2:
         specifier: ^10.0.0
         version: 10.0.0
@@ -5331,6 +5334,10 @@ packages:
   get-uri@6.0.4:
     resolution: {integrity: sha512-E1b1lFFLvLgak2whF2xDBcOy6NLVGZBqqjJjsIhvopKfWWEi64pLVTWWehV8KlLerZkfNTA95sTe2OdJKm1OzQ==}
     engines: {node: '>= 14'}
+
+  github-markdown-css@5.8.1:
+    resolution: {integrity: sha512-8G+PFvqigBQSWLQjyzgpa2ThD9bo7+kDsriUIidGcRhXgmcaAWUIpCZf8DavJgc+xifjbCG+GvMyWr0XMXmc7g==}
+    engines: {node: '>=10'}
 
   glob-parent@5.1.2:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}
@@ -15300,6 +15307,8 @@ snapshots:
       debug: 4.4.1
     transitivePeerDependencies:
       - supports-color
+
+  github-markdown-css@5.8.1: {}
 
   glob-parent@5.1.2:
     dependencies:
