@@ -1,4 +1,5 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import type { ArgumentsHost } from '@nestjs/common';
 import { SlackService } from '../../module/slack/slack.service';
 import { SystemError, UserError } from '../../util/base.error';
 import { HttpAdapterHost } from '@nestjs/core';

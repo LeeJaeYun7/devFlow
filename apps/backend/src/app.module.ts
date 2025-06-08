@@ -14,7 +14,7 @@ import { SlackModule } from './module/slack/slack.module';
 import { CustomRequestContextModule } from './module/custom_request_context/custom_request_context.module';
 import { CustomRequestContextMiddleware } from './common/middleware/custom_request_context.middleware';
 import { BaseConfigModule } from '@lia/config';
-
+import { SentryGlobalFilter } from '@sentry/nestjs/setup';
 @Module({
   imports: [
     BaseConfigModule,
@@ -41,6 +41,10 @@ import { BaseConfigModule } from '@lia/config';
     {
       provide: APP_FILTER,
       useClass: BaseExceptionFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: SentryGlobalFilter,
     },
   ],
 })
