@@ -24,8 +24,6 @@
     "@nestjs/schedule": "^6.0.0",
     "@nestjs/swagger": "^11.1.6",
     "@pinecone-database/pinecone": "^6.0.0",
-    "@sentry/nestjs": "^9.27.0",
-    "@sentry/node": "^9.27.0",
     "@swc/helpers": "~0.5.11",
     "@tanstack/react-query": "^5.75.2",
     "@types/cheerio": "^0.22.35",

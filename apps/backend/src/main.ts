@@ -13,15 +13,9 @@ import { JWT_SECRET } from './constants/jwt.constant';
 import { BaseConfigService } from '@lia/config';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
-import * as Sentry from '@sentry/node';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
-  Sentry.init({
-    dsn: process.env.SENTRY_DSN,
-    tracesSampleRate: 1.0,
-  });
 
   const baseConfigService = app.get(BaseConfigService);
   const config = baseConfigService.getConfig();
