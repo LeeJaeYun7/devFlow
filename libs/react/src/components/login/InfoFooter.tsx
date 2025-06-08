@@ -28,16 +28,16 @@ export default function InfoFooter({ sx }: InfoFooterProps) {
             ©2025 주식회사 리버뱅크
           </Typography>
           <Box display="flex" gap={2}>
-            <Link href="/faq" color="text.secondary" fontSize={12} underline="hover">
+            <Link href="#" color="text.secondary" fontSize={12} underline="hover">
               이용약관
             </Link>
-            <Link href="/faq" color="text.secondary" fontSize={12} underline="hover">
+            <Link href="#" color="text.secondary" fontSize={12} underline="hover">
               개인정보처리방침
             </Link>
-            <Link href="/faq" color="text.secondary" fontSize={12} underline="hover">
+            <Link href="#" color="text.secondary" fontSize={12} underline="hover">
               운영정책
             </Link>
-            <Link href="/faq" color="text.secondary" fontSize={12} underline="hover">
+            <Link href="#" color="text.secondary" fontSize={12} underline="hover">
               청소년보호정책
             </Link>
           </Box>

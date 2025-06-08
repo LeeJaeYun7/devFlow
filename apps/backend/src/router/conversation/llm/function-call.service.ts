@@ -1,15 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { YahooFinanceService } from '../../finance/yahoo/yahoo-finance.service';
-import { NaverFinanceService } from '../../finance/korea/naver/naver-finance.service';
-import { DartFinanceService } from '../../finance/korea/dart/dart-finance.service';
+import { NaverFinanceService } from '../../finance/naver/naver-finance.service';
 import { OpenRouterStreamChunkToolCall } from './open_router/open_router.type';
 
 @Injectable()
 export class FunctionCallService {
   constructor(
     private readonly yahooFinanceService: YahooFinanceService,
-    private readonly naverFinanceService: NaverFinanceService,
-    private readonly dartFinanceService: DartFinanceService,
+    private readonly naverFinanceService: NaverFinanceService
   ) {}
 
   public getToolFunctions(): Record<string, (args: Args) => Promise<any>> {
@@ -28,17 +26,7 @@ export class FunctionCallService {
         const symbol = args.symbol;
         if (this.isKoreanStock(symbol)) {
           const koreanSymbol = symbol.replace(/\.(KS|KQ)$/, '');
-
-          // Naver와 Dart 동시에 호출!
-          const [naverData, dartData] = await Promise.all([
-            this.naverFinanceService.getFundamentalData(koreanSymbol),
-            this.dartFinanceService.getFundamentalData(koreanSymbol),
-          ]);
-
-          return {
-            naver: naverData,
-            dart: dartData,
-          };
+          return this.naverFinanceService.getFundamentalData(koreanSymbol);
         } else {
           const usaSymbol = symbol.replace(/\./g, '-');
           return this.yahooFinanceService.getFundamentalData(usaSymbol);

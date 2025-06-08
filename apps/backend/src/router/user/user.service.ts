@@ -8,7 +8,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UserError } from '../../util/base.error';
 import { DEFAULT_MESSAGE_QUOTA } from '../../constants/message.constant';
-import { UserMetricService } from '../../module/metric/user_metric.service';
 
 @Injectable()
 export class UserService {
@@ -19,9 +18,7 @@ export class UserService {
     private readonly userModel: Model<UserModel>,
 
     @InjectModel(UserMessageQuotaModel.name)
-    private readonly userMessageQuotaModel: Model<UserMessageQuotaModel>,
-
-    private readonly userMetricService: UserMetricService
+    private readonly userMessageQuotaModel: Model<UserMessageQuotaModel>
   ) {}
 
   public async getMySelf(_: UserGetMySelfDto): ServiceReturnType<UserGetMySelfResponse> {
@@ -41,7 +38,6 @@ export class UserService {
       );
     }
 
-    await this.userMetricService.accessToday(userId);
     userData.lastLoginAt = new Date();
     await userData.save();
 

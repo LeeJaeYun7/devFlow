@@ -138,7 +138,7 @@ export function ChatMain() {
                 flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center',
-                gap: { xs: 4, md: 6 },
+                gap: 2,
                 px: { xs: 2, md: 3 },
               }}
             >

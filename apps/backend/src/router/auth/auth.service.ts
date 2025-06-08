@@ -59,6 +59,6 @@ export class AuthService {
   }
 
   public async validateToken(token: string) {
-    return await this.jwtService.verifyAsync<SsoUser>(token);
+    await this.jwtService.verifyAsync<SsoUser>(token);
   }
 }

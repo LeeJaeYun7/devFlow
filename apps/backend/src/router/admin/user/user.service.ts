@@ -42,8 +42,6 @@ export class AdminUserService {
       .limit(limit)
       .lean();
 
-    const total = await this.userModel.countDocuments({});
-
     const userMessageQuota = await this.userMessageQuotaModel.find({
       userId: { $in: data.map((user) => user._id) },
     });
@@ -57,8 +55,8 @@ export class AdminUserService {
         remainingMessages: userMessageQuota.find((quota) => quota.userId === user._id)?.remainingMessages ?? 0,
       })),
       meta: {
-        total,
-        totalPages: Math.ceil(total / limit),
+        total: data.length,
+        totalPages: Math.ceil(data.length / limit),
       },
     };
   }
@@ -87,7 +85,7 @@ export class AdminUserService {
     return {
       totalUser: calculateMetric(TotalMetricMap.totalUser, totalUser, yesterdayTotalUser),
       dau: calculateMetric(DailyMetricMap.dau, dau.yesterday, dau.twoDaysAgo),
-      nru: calculateMetric(DailyMetricMap.nru, nru.yesterday, nru.twoDaysAgo),
+      run: calculateMetric(DailyMetricMap.nru, nru.yesterday, nru.twoDaysAgo),
       d1Retention: calculateMetric(DailyMetricMap.d1Retention, d1Retention.yesterday, d1Retention.twoDaysAgo),
       d7Retention: calculateMetric(DailyMetricMap.d7Retention, d7Retention.yesterday, d7Retention.twoDaysAgo),
     };

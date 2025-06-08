@@ -22,7 +22,7 @@ class UserMetricData {
   dau!: MetricData;
 
   @ApiProperty({ type: MetricData })
-  nru!: MetricData;
+  run!: MetricData;
 
   @ApiProperty({ type: MetricData })
   totalUser!: MetricData;

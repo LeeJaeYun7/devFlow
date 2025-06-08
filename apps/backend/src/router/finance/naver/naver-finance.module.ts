@@ -1,13 +1,10 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import {
-  NaverStockInfo,
-  NaverStockInfoSchema,
-} from '../../../../module/mongo/model/korea/naver/models/naver-stock-info.model';
+import { NaverStockInfo, NaverStockInfoSchema } from '../../../module/mongo/model/naver/models/naver-stock-info.model';
 import {
   NaverStockHistory,
   NaverStockHistorySchema,
-} from '../../../../module/mongo/model/korea/naver/models/naver-stock-history.model';
+} from '../../../module/mongo/model/naver/models/naver-stock-history.model';
 import { NaverFinanceService } from './naver-finance.service';
 import { NaverStockService } from './naver-stock.service';
 import { NaverStockFetcherService } from './fetchers/naver-finance-fetch.service';
