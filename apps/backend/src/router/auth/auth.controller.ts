@@ -1,22 +1,10 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpStatus,
-  Post,
-  Req,
-  Res,
-  UnauthorizedException,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import type { Request, Response } from 'express';
 import { Public } from '../../common/decorator/public.decorator';
 import { AuthClientCallbackDto } from '@lia/api/auth/callback.dto';
-import { SsoUser } from './auth.type';
 
 @ApiTags('Auth')
 @Public()
@@ -67,37 +55,29 @@ export class AuthController {
   }
 
   @Delete('/logout')
-  public async logout(@Req() req: Request, @Res() res: Response) {
-    const session = req.session;
-    session.destroy((err) => {
-      if (err) {
-        console.error('[logout] session destroy error', err);
-      }
-    });
+  public async logout(@Res() res: Response) {
+    res.clearCookie('authorization');
     res.redirect(`${this.redirectMainUrl}/login`);
   }
 
   @Post('/callback')
-  public async callback(@Body() body: AuthClientCallbackDto, @Req() req: Request, @Res() res: Response) {
-    const session = req.session;
+  public async callback(@Body() body: AuthClientCallbackDto, @Res() res: Response) {
+    await this.authService.validateToken(body.token);
 
-    if (session.user) {
-      res.json({ statusCode: HttpStatus.OK });
-      return;
-    }
-
-    const user = await this.authService.validateToken(body.token);
-    session.user = user;
-    session.save(() => {
-      res.json({ statusCode: HttpStatus.CREATED });
+    res.cookie('authorization', body.token, {
+      httpOnly: this.isProd,
+      secure: this.isProd,
+      sameSite: this.isProd ? 'none' : 'lax',
+      path: '/',
+      domain: this.isProd ? '.asklia.io' : undefined,
+      maxAge: 1000 * 60 * 60 * 24 * 30,
     });
+
+    res.json({ statusCode: HttpStatus.CREATED });
   }
 
   private async setTokenCookie(req: Request, res: Response) {
-    const user = req.user as SsoUser;
-    if (!user) {
-      throw new UnauthorizedException('User not found');
-    }
+    const user = req.user;
     const accessToken = await this.authService.loginUser(user);
     res.redirect(`${this.redirectMainUrl}/login/callback?token=${accessToken}`);
   }

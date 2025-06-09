@@ -7,13 +7,11 @@ import {
   UserMessageQuotaModel,
   UserMessageQuotaSchema,
 } from '../../module/mongo/model/user/models/user_message_quota.model';
-import { MetricModule } from '../../module/metric/metric.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: UserModel.name, schema: UserSchema }]),
     MongooseModule.forFeature([{ name: UserMessageQuotaModel.name, schema: UserMessageQuotaSchema }]),
-    MetricModule,
   ],
   controllers: [UserController],
   providers: [UserService],

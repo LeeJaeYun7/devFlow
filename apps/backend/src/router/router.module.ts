@@ -6,9 +6,20 @@ import { MessageModule } from './conversation/message/message.module';
 import { LlmModule } from './conversation/llm/llm.module';
 import { HealthCheckModule } from './health-check/health_check.module';
 import { UserModule } from './user/user.module';
-import { SseModule } from './sse/sse.module';
+import { SseModule } from './sse/sse.module'; 
+import { DartFinanceModule } from './finance/korea/dart/dart-financial.module';
 
 @Module({
-  imports: [AuthModule, AdminModule, ChatModule, MessageModule, LlmModule, HealthCheckModule, UserModule, SseModule],
+  imports: [
+    AuthModule,
+    AdminModule,
+    ChatModule,
+    MessageModule,
+    LlmModule,
+    HealthCheckModule,
+    UserModule,
+    SseModule,
+    DartFinanceModule,
+  ],
 })
 export class RouterModule {}

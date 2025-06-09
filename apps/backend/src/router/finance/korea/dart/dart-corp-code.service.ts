@@ -6,7 +6,7 @@ import AdmZip from 'adm-zip';
 import * as xml2js from 'xml2js';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { DartCorpCode } from '../../../../module/mongo/model/korea/dart/models/dart-corp-code.model';
+import { DartCorpCode } from '../../../../module/mongo/model/korea/dart/models/dart-corp-code-model';
 import { BaseConfigService } from '@lia/config';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class DartCorpCodeService {
     private readonly configService: BaseConfigService
   ) {
     const config = configService.getConfig();
-    this.apiKey = config.dartApiKey;
+    this.apiKey = '0304c13b889649282b75686aa618045d255175eb';
     if (!this.apiKey) {
       throw new Error('DART_API_KEY is not set');
     }

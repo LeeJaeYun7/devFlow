@@ -1,8 +1,10 @@
 import { Box, Paper, useTheme, Typography, Container, useMediaQuery } from '@mui/material';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Message } from '../../../hooks/useMessage';
 import { useEffect, useMemo } from 'react';
+import remarkEmoji from 'remark-emoji';
 import { Loading } from './Loading';
-import ChatContentMarkdown from './Markdown';
 
 interface ChatContentProps {
   messageData: Message[] | undefined;
@@ -158,7 +160,21 @@ export function ChatContent({
                   }}
                 >
                   {isUser && <Typography sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>{time}</Typography>}
-                  <ChatContentMarkdown content={msg.content} isUser={isUser} />
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      maxWidth: isMobile ? '100%' : '70%',
+                      bgcolor: isUser ? 'primary.main' : theme.palette.mode === 'dark' ? 'background.paper' : '#f8f9fb',
+                      color: isUser ? 'primary.contrastText' : 'text.primary',
+                      borderRadius: 2,
+                      '& p': {
+                        m: 0,
+                      },
+                    }}
+                  >
+                    <ReactMarkdown remarkPlugins={[remarkEmoji, remarkGfm]}>{msg.content}</ReactMarkdown>
+                  </Paper>
                   {!isUser && <Typography sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>{time}</Typography>}
                 </Box>
               </Box>

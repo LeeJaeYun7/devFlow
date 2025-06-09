@@ -1,9 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import {
-  NaverStockInfo,
-  NaverStockInfoSchema,
-} from '../../../../module/mongo/model/korea/naver/models/naver-stock-info.model';
+import { NaverStockInfo, NaverStockInfoSchema } from '../../../../module/mongo/model/korea/naver/models/naver-stock-info.model';
 import {
   NaverStockHistory,
   NaverStockHistorySchema,
