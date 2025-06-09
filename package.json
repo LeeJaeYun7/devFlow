@@ -27,6 +27,7 @@
     "@swc/helpers": "~0.5.11",
     "@tanstack/react-query": "^5.75.2",
     "@types/cheerio": "^0.22.35",
+    "adm-zip": "^0.5.16",
     "axios": "^1.9.0",
     "cheerio": "^1.0.0",
     "class-transformer": "^0.5.1",
@@ -56,6 +57,7 @@
     "rxjs": "^7.8.0",
     "source-map-support": "^0.5.21",
     "trading-signals": "^6.8.0",
+    "xml2js": "^0.6.2",
     "yahoo-finance2": "^2.13.3"
   },
   "devDependencies": {
