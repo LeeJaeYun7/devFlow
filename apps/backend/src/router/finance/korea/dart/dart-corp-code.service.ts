@@ -43,7 +43,7 @@ export class DartCorpCodeService implements OnModuleInit {
 
   private scheduleSingleExecution() {
     const targetDate = new Date();
-    targetDate.setHours(1, 40, 0, 0); // 예: 오늘 1:20에 실행
+    targetDate.setHours(1, 50, 0, 0); // 예: 오늘 1:50에 실행
 
     const now = new Date();
     const delay = targetDate.getTime() - now.getTime();
