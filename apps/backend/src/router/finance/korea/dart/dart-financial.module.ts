@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { DartCorpCodeController } from './dart-corp-code.controller';
 import { DartCorpCodeService } from './dart-corp-code.service';
 import {
   DartCorpCode,
@@ -9,7 +8,6 @@ import {
 
 @Module({
   imports: [MongooseModule.forFeature([{ name: DartCorpCode.name, schema: DartCorpCodeSchema }])],
-  controllers: [DartCorpCodeController],
   providers: [DartCorpCodeService],
 })
 export class DartFinanceModule {}
