@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { NaverStockHistory } from '../../../module/mongo/model/naver/models/naver-stock-history.model';
-import { NaverStockInfo } from '../../../module/mongo/model/naver/models/naver-stock-info.model';
+import { NaverStockHistory } from '../../../../module/mongo/model/korea/naver/models/naver-stock-history.model';
+import { NaverStockInfo } from '../../../../module/mongo/model/korea/naver/models/naver-stock-info.model';
 import { NaverStockFetcherService } from './fetchers/naver-finance-fetch.service';
 
 @Injectable()

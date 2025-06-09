@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { YahooFinanceService } from '../../finance/yahoo/yahoo-finance.service';
-import { NaverFinanceService } from '../../finance/naver/naver-finance.service';
+import { NaverFinanceService } from '../../finance/korea/naver/naver-finance.service';
 import { OpenRouterStreamChunkToolCall } from './open_router/open_router.type';
 
 @Injectable()
