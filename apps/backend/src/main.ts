@@ -13,14 +13,19 @@ import { JWT_SECRET } from './constants/jwt.constant';
 import { BaseConfigService } from '@lia/config';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import helmet from 'helmet';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   const baseConfigService = app.get(BaseConfigService);
   const config = baseConfigService.getConfig();
   const isProd = config.nodeEnv === 'production';
   const port = config.apiPort;
+
+  app.set('trust proxy', 1);
+  app.use(helmet());
 
   app.setGlobalPrefix('api');
   app.use(cookieParser());
@@ -50,6 +55,7 @@ async function bootstrap() {
       cookie: {
         maxAge: cookieTime * 1000,
         httpOnly: true,
+        secure: isProd,
       },
     })
   );
