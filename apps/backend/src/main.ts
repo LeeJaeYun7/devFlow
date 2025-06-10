@@ -11,6 +11,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import { JWT_SECRET } from './constants/jwt.constant';
 import { BaseConfigService } from '@lia/config';
+import session from 'express-session';
+import MongoStore from 'connect-mongo';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,7 +23,7 @@ async function bootstrap() {
   const port = config.apiPort;
 
   app.setGlobalPrefix('api');
-  app.use(cookieParser(JWT_SECRET));
+  app.use(cookieParser());
   app.enableCors({
     origin: isProd
       ? ['https://asklia.io', 'https://admin.asklia.io']
@@ -30,6 +32,27 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   });
+
+  const sessionTime = 60 * 60 * 24;
+  const cookieTime = 7 * sessionTime;
+
+  app.use(
+    session({
+      secret: JWT_SECRET,
+      resave: false,
+      saveUninitialized: false,
+      rolling: false,
+      store: MongoStore.create({
+        mongoUrl: config.mongodbUri,
+        collectionName: 'sessions',
+        ttl: sessionTime,
+      }),
+      cookie: {
+        maxAge: cookieTime * 1000,
+        httpOnly: true,
+      },
+    })
+  );
 
   if (!isProd) {
     const config = new DocumentBuilder()
