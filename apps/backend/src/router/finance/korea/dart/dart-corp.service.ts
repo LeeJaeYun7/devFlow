@@ -27,9 +27,12 @@ export class DartCorpService implements OnModuleInit {
     }
   }
 
+  /**
+   * NestJS 애플리케이션 시작 시 매일 오전 11:50에 전체 기업 실적 조회 예약
+   */
   async onModuleInit() {
     const targetDate = new Date();
-    targetDate.setHours(3, 55, 0, 0);
+    targetDate.setHours(16, 10, 0, 0);
 
     const now = new Date();
     let delay = targetDate.getTime() - now.getTime();
@@ -92,17 +95,6 @@ export class DartCorpService implements OnModuleInit {
       this.logger.error(`전체 실적 가져오기 실패: ${error.message}`);
       throw error;
     }
-
-    this.logger.log(`삼성전자 분기별 실적 조회 예약됨: ${targetDate}`);
-    const timeout = setTimeout(async () => {
-      try {
-        await this.getQuarterlyFinancials('005930', 2015, 2025);
-        this.logger.log(`삼성전자 분기별 실적 조회 완료`);
-      } catch (error) {
-        this.logger.error(`삼성전자 분기별 실적 조회 실패: ${error.message}`);
-      }
-    }, delay);
-
   }
 
   /**
@@ -160,7 +152,7 @@ export class DartCorpService implements OnModuleInit {
 
           this.logger.log(
             `${corp.corpName} ${year}년 ${reprtCode} 분기실적 저장 완료 (건수: ${response.data.list?.length ?? 0})`
-         );
+        );
         }
       }
     } catch (error: unknown) {

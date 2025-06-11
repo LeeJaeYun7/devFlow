@@ -11,8 +11,8 @@ import {
 import { DartCorpService } from './dart-corp.service'; // ✅ Service import
 
 @Module({
- imports: [
-    MongooseModule.forFeature([
+  imports: [
+  MongooseModule.forFeature([
       { name: DartCorpCode.name, schema: DartCorpCodeSchema },
       { name: DartCompanyInfo.name, schema: DartCompanyInfoSchema }, // ✅ 회사 실적 모델도 추가
     ]),
