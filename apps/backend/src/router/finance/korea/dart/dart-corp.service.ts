@@ -32,7 +32,7 @@ export class DartCorpService implements OnModuleInit {
    */
   async onModuleInit() {
     const targetDate = new Date();
-    targetDate.setHours(17, 3, 0, 0);
+    targetDate.setHours(17, 15, 0, 0);
 
     const now = new Date();
     let delay = targetDate.getTime() - now.getTime();
@@ -119,7 +119,8 @@ export class DartCorpService implements OnModuleInit {
            await new Promise((resolve) => setTimeout(resolve, 2000));
            
            const response = await axios.get(
-            `https://opendart.fss.or.kr/api/fnlttSinglAcntAll.json`,         {
+            `https://opendart.fss.or.kr/api/fnlttSinglAcntAll.json`,
+            {
               params: {
                 crtfc_key: this.apiKey,
                 corp_code: corpCode,
@@ -154,7 +155,8 @@ export class DartCorpService implements OnModuleInit {
           this.logger.log(
             `${corp.corpName} ${year}년 ${reprtCode} 분기실적 저장 완료 (건수: ${response.data.list?.length ?? 0})`
           );
-     }
+        }
+      }
     } catch (error: unknown) {
       this.logger.error(`분기별 실적 조회 실패: ${error.message}`);
       throw error;
