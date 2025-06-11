@@ -32,7 +32,7 @@ export class DartCorpService implements OnModuleInit {
    */
   async onModuleInit() {
     const targetDate = new Date();
-    targetDate.setHours(16, 10, 0, 0);
+    targetDate.setHours(16, 45, 0, 0);
 
     const now = new Date();
     let delay = targetDate.getTime() - now.getTime();
@@ -116,8 +116,10 @@ export class DartCorpService implements OnModuleInit {
       for (let year = startYear; year <= endYear; year++) {
         const reprtCodes = ['11013', '11012', '11014', '11011']; // 1Q, 반기, 3Q, 사업보고서
         for (const reprtCode of reprtCodes) {
-          const response = await axios.get(
-            `https://opendart.fss.or.kr/api/fnlttSinglAcntAll.json`,
+          await new Promise((resolve) => setTimeout(resolve, 500));
+           
+           const response = await axios.get(
+          `https://opendart.fss.or.kr/api/fnlttSinglAcntAll.json`,
             {
               params: {
                 crtfc_key: this.apiKey,
