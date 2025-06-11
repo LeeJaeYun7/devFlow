@@ -13,7 +13,7 @@ export class ChatModel extends Document<string> {
   @Prop({ required: false, default: false })
   deleted!: boolean;
 
-  @Prop({ required: true, default: 16 })
+  @Prop({ required: true, default: 25 })
   leftMessageCount!: number;
 }
 

@@ -10,10 +10,11 @@ import { ChatModel } from '../../../module/mongo/model/conversation/models/chat.
 import { MessageModel } from '../../../module/mongo/model/conversation/models/message.model';
 import { SystemModelModel } from '../../../module/mongo/model/system_model.model';
 import { SystemModelTargetMap } from '@lia/api/admin/system_model/system_model.constant';
-import { MessageRole, MessageRoleMap } from '@lia/api/conversation/message/message.constant';
+import { MessageRoleMap } from '@lia/api/conversation/message/message.constant';
 import { SystemError } from '../../../util/base.error';
 import { LlmStreamParserService } from './stream/llm_stream_parser.service';
 import { LlmResponseFailedError } from './llm.error';
+import { ChatFlowManager } from './chat_flow_manager';
 
 @Injectable()
 export class LlmChatFlowService {
@@ -76,7 +77,7 @@ export class LlmChatFlowService {
     cb: (content: string) => void,
     endCb: (finalContent: string) => Promise<void>
   ) {
-    const userMessage = initialMessages[initialMessages.length - 1].content;
+    const userMessage = initialMessages[initialMessages.length - 1].content ?? '';
 
     const model = await this.systemModelModel
       .findOne({
@@ -87,6 +88,7 @@ export class LlmChatFlowService {
     if (!model) {
       throw new SystemError('System model not found');
     }
+    const chatFlowManager = ChatFlowManager.createInstance({ chatId, userMessage, llmModel: model.modelId });
 
     let finalContent = '';
     let isToolCall = false;
@@ -95,7 +97,7 @@ export class LlmChatFlowService {
     const firstStreamPromise = this.llmStreamParserService.handleMessageStream({
       messages: initialMessages,
       tools,
-      model: model.modelId,
+      model: chatFlowManager.llmModel,
       retryStrategy: {
         count: 3,
         delay: 200,
@@ -137,8 +139,8 @@ export class LlmChatFlowService {
       },
       endCb: async () => {
         if (!isToolCall) {
-          await this.saveMessage(chatId, userMessage, MessageRoleMap.user);
-          await this.saveMessage(chatId, finalContent, MessageRoleMap.assistant);
+          chatFlowManager.addMessage(finalContent, MessageRoleMap.assistant);
+          await this.saveChatFlow(chatFlowManager);
           endCb(finalContent);
           return;
         }
@@ -162,7 +164,8 @@ export class LlmChatFlowService {
           });
         }
 
-        await this.handleSecondStream(newMessages, userMessage, model, chatId, cb, endCb);
+        chatFlowManager.useFunctionCall();
+        await this.handleSecondStream(chatFlowManager, newMessages, cb, endCb);
       },
     });
 
@@ -175,10 +178,8 @@ export class LlmChatFlowService {
   }
 
   private async handleSecondStream(
+    chatFlowManager: ChatFlowManager,
     messages: OpenRouterMessage[],
-    userMessage: string | null,
-    model: SystemModelModel,
-    chatId: string,
     cb: (content: string) => void,
     endCb: (finalContent: string) => Promise<void>
   ) {
@@ -187,7 +188,7 @@ export class LlmChatFlowService {
     const secondStreamPromise = this.llmStreamParserService.handleMessageStream({
       messages,
       tools,
-      model: model?.modelId,
+      model: chatFlowManager.llmModel,
       retryStrategy: {
         count: 1,
         delay: 200,
@@ -200,8 +201,8 @@ export class LlmChatFlowService {
         cb(content);
       },
       endCb: async () => {
-        await this.saveMessage(chatId, userMessage, MessageRoleMap.user);
-        await this.saveMessage(chatId, finalContent, MessageRoleMap.assistant);
+        chatFlowManager.addMessage(finalContent, MessageRoleMap.assistant);
+        await this.saveChatFlow(chatFlowManager);
         endCb(finalContent);
       },
     });
@@ -214,18 +215,13 @@ export class LlmChatFlowService {
     }
   }
 
-  private async saveMessage(chatId: string, content: string | null, role: MessageRole) {
-    if (!content) return;
-    await this.messageModel.insertMany([
-      {
-        chatId,
-        content,
-        role,
-        createdAt: new Date(),
-      },
-    ]);
+  private async saveChatFlow(chatFlowManager: ChatFlowManager) {
+    const { chatId, newMessages, isUsingFunctionCall } = chatFlowManager.getChatFlow();
 
-    await this.chatModel.updateOne({ _id: chatId }, { $inc: { leftMessageCount: -1 } });
+    await this.messageModel.insertMany(newMessages);
+    if (isUsingFunctionCall) {
+      await this.chatModel.updateOne({ _id: chatId }, { $inc: { leftMessageCount: -1 } });
+    }
   }
 }
 
