@@ -4,7 +4,10 @@ import {
   DartCorpCode,
   DartCorpCodeSchema,
 } from '../../../../module/mongo/model/korea/dart/models/dart-corp-code-model';
-import { DartCompanyInfo, DartCompanyInfoSchema } from '../../../../module/mongo/model/korea/dart/models/dart-company-info.model';
+import {
+  DartCompanyInfo,
+  DartCompanyInfoSchema,
+} from '../../../../module/mongo/model/korea/dart/models/dart-company-info.model';
 import { DartCorpService } from './dart-corp.service'; // ✅ Service import
 
 @Module({
