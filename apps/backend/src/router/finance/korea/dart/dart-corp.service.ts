@@ -51,8 +51,6 @@ export class DartCorpService implements OnModuleInit {
       } catch (error) {
         this.logger.error(`전체 기업 실적 조회 실패: ${error.message}`);
       }
-
-      // 다음날 예약 반복
       this.onModuleInit();
     }, delay);
 

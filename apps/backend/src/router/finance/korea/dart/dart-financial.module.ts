@@ -17,7 +17,7 @@ import { DartCorpService } from './dart-corp.service'; // ✅ Service import
       { name: DartCompanyInfo.name, schema: DartCompanyInfoSchema }, // ✅ 회사 실적 모델도 추가
     ]),
   ],
-  providers: [DartCorpService], // ✅ Service 등록
-  exports: [DartCorpService], // ✅ (선택) 다른 모듈에서 주입 가능하게 export
+  providers: [], // ✅ Service 등록
+  exports: [], // ✅ (선택) 다른 모듈에서 주입 가능하게 export
 })
 export class DartFinanceModule {}
