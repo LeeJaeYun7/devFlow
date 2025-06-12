@@ -32,7 +32,7 @@ export class DartCorpService implements OnModuleInit {
    */
   async onModuleInit() {
     const targetDate = new Date();
-    targetDate.setHours(17, 15, 0, 0);
+    targetDate.setHours(1, 0, 0, 0);
 
     const now = new Date();
     let delay = targetDate.getTime() - now.getTime();
