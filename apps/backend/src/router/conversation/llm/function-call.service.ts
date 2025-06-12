@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { YahooFinanceService } from '../../finance/yahoo/yahoo-finance.service';
 import { NaverFinanceService } from '../../finance/korea/naver/naver-finance.service';
 import { OpenRouterStreamChunkToolCall } from './open_router/open_router.type';
+import { DartService } from '../../finance/korea/dart/dart.service';
 
 @Injectable()
 export class FunctionCallService {
   constructor(
     private readonly yahooFinanceService: YahooFinanceService,
-    private readonly naverFinanceService: NaverFinanceService
+    private readonly naverFinanceService: NaverFinanceService,
+    private readonly dartService: DartService
   ) {}
 
   public getToolFunctions(): Record<string, (args: Args) => Promise<any>> {
@@ -31,6 +33,12 @@ export class FunctionCallService {
           const usaSymbol = symbol.replace(/\./g, '-');
           return this.yahooFinanceService.getFundamentalData(usaSymbol);
         }
+      },
+      get_all_dart_financials: async (args: Args) => {
+        console.log('get_all_dart_financials 실행');
+        const symbol = args.symbol;
+        const koreanSymbol = symbol.replace(/\.(KS|KQ)$/, '');
+        return this.dartService.getAllFinancialSummaries(koreanSymbol);
       },
     };
   }

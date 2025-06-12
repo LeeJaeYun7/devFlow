@@ -9,6 +9,7 @@ import {
   DartCompanyInfoSchema,
 } from '../../../../module/mongo/model/korea/dart/models/dart-company-info.model';
 import { DartCorpService } from './dart-corp.service'; // ✅ Service import
+import { DartService } from './dart.service';
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import { DartCorpService } from './dart-corp.service'; // ✅ Service import
       { name: DartCompanyInfo.name, schema: DartCompanyInfoSchema }, // ✅ 회사 실적 모델도 추가
     ]),
   ],
-  providers: [], // ✅ Service 등록
-  exports: [], // ✅ (선택) 다른 모듈에서 주입 가능하게 export
+  providers: [DartService], // ✅ Service 등록
+  exports: [DartService], // ✅ (선택) 다른 모듈에서 주입 가능하게 export
 })
 export class DartFinanceModule {}

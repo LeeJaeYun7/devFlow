@@ -27,9 +27,6 @@ export class DartCorpService implements OnModuleInit {
     }
   }
 
-  /**
-   * NestJS 애플리케이션 시작 시 매일 오전 11:50에 전체 기업 실적 조회 예약
-   */
   async onModuleInit() {
     const targetDate = new Date();
     targetDate.setHours(1, 0, 0, 0);
