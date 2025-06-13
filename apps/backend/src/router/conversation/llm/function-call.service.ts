@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { YahooFinanceService } from '../../finance/yahoo/yahoo-finance.service';
-import { NaverFinanceService } from '../../finance/korea/naver/naver-finance.service';
 import { OpenRouterStreamChunkToolCall } from './open_router/open_router.type';
+import { KisStockService } from '../../finance/korea/kis/kis.stock.service';
 import { DartService } from '../../finance/korea/dart/dart.service';
 
 @Injectable()
 export class FunctionCallService {
   constructor(
     private readonly yahooFinanceService: YahooFinanceService,
-    private readonly naverFinanceService: NaverFinanceService,
+    private readonly kisStockService: KisStockService,
     private readonly dartService: DartService
   ) {}
 
@@ -18,7 +18,7 @@ export class FunctionCallService {
         const symbol = args.symbol;
         if (this.isKoreanStock(symbol)) {
           const koreanSymbol = symbol.replace(/\.(KS|KQ)$/, '');
-          return this.naverFinanceService.getTechnicalData(koreanSymbol);
+          return this.kisStockService.fetchTechnical(koreanSymbol);
         } else {
           const usaSymbol = symbol.replace(/\./g, '-');
           return this.yahooFinanceService.getTechnicalData(usaSymbol);
@@ -28,7 +28,7 @@ export class FunctionCallService {
         const symbol = args.symbol;
         if (this.isKoreanStock(symbol)) {
           const koreanSymbol = symbol.replace(/\.(KS|KQ)$/, '');
-          return this.naverFinanceService.getFundamentalData(koreanSymbol);
+          return this.kisStockService.fetchFundamental(koreanSymbol);
         } else {
           const usaSymbol = symbol.replace(/\./g, '-');
           return this.yahooFinanceService.getFundamentalData(usaSymbol);
