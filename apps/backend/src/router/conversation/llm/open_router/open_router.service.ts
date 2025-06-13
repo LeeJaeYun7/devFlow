@@ -54,6 +54,7 @@ export class OpenRouterService {
     } catch (e) {
       if (e instanceof AxiosError) {
         this.logger.error(`LLM Error: ${e.response?.status} ${e.response?.statusText}`);
+        this.logger.error(`LLM Error response data: ${JSON.stringify(e.response?.data)}`);
       } else {
         this.logger.error(e);
       }

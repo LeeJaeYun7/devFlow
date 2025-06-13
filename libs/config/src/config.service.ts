@@ -14,15 +14,12 @@ export class BaseConfigService {
       jwtSecret: this.configService.get('JWT_SECRET'),
       dartApiKey: this.configService.get('DART_API_KEY'),
       mongodbUri: this.configService.get('MONGODB_URI'),
-      kisAppKey: 'PScTCzaCu2tiLDuRmf31ODws2ZjAn9y0Po7Y',
-      kisAppSecret: 'VRhRfPaEUtA4ta/V0DDOd+fYqT2JZdmovDpKkGcs9R5fjfZY2SwmH4h7uuHGwZlH0+0JfQF16ectYxNro61iETy9eMUlxQWAOIZzSJWWgLXcw4mHXSsehDkFTSzzRaBWm1G7dv/KqG9E3z+T9GAk2UKnHYroqPd6MuqaJPkFG8w3r3e5jsY=',
-      kisBaseUrl: 'https://openapi.koreainvestment.com:9443',
 
       openRouter: {
         url: this.configService.get('OPENROUTER_URL'),
         apiKey: this.configService.get('OPENROUTER_API_KEY'),
         model: this.configService.get('OPENROUTER_MODEL'),
-        temperature: this.configService.get('OPENROUTER_TEMPERATURE'),
+        temperature: +this.configService.get('OPENROUTER_TEMPERATURE'),
       },
       googleOauth: {
         clientId: this.configService.get('GOOGLE_OAUTH_CLIENT_ID'),

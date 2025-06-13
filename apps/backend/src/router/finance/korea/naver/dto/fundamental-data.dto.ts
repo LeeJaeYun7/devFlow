@@ -1,9 +1,9 @@
-export class KisStockFundamentalDto {
+export class NaverStockFundamentalDto {
   currentPrice!: number;
   PER!: number;
   EPS!: number;
   VOLUME!: number;
-  marketCap!: number; // 원 단위
+  marketCap!: number;
   sharesOutstanding!: number;
   capital!: number;
-} 
+}

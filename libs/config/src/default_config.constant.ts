@@ -7,9 +7,6 @@ export const DefaultBaseConfig = {
   jwtSecret: '0196d973-16f1-7ad1-aa37-693870c00af8',
 
   dartApiKey: '',
-  kisAppKey: '',
-  kisAppSecret: '',
-  kisBaseUrl: 'https://openapi.koreainvestment.com:9443',
 
   openRouter: {
     url: 'https://api.openrouter.ai/api/v1/chat/completions',

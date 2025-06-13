@@ -8,6 +8,7 @@ import {
   DartCompanyInfo,
   DartCompanyInfoSchema,
 } from '../../../../module/mongo/model/korea/dart/models/dart-company-info.model';
+import { DartCorpService } from './dart-corp.service'; // ✅ Service import
 import { DartService } from './dart.service';
 
 @Module({

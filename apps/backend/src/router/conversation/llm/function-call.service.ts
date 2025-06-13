@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { YahooFinanceService } from '../../finance/yahoo/yahoo-finance.service';
-import { KisStockService } from '../../finance/korea/kis/kis.stock.service';
+import { NaverFinanceService } from '../../finance/korea/naver/naver-finance.service';
 import { OpenRouterStreamChunkToolCall } from './open_router/open_router.type';
 import { DartService } from '../../finance/korea/dart/dart.service';
 
@@ -8,7 +8,7 @@ import { DartService } from '../../finance/korea/dart/dart.service';
 export class FunctionCallService {
   constructor(
     private readonly yahooFinanceService: YahooFinanceService,
-    private readonly kisStockService: KisStockService,
+    private readonly naverFinanceService: NaverFinanceService,
     private readonly dartService: DartService
   ) {}
 
@@ -18,9 +18,7 @@ export class FunctionCallService {
         const symbol = args.symbol;
         if (this.isKoreanStock(symbol)) {
           const koreanSymbol = symbol.replace(/\.(KS|KQ)$/, '');
-          const result = this.kisStockService.fetchTechnical(koreanSymbol);
-          console.log('fetch kis technical result', result);
-          return this.kisStockService.fetchTechnical(koreanSymbol);
+          return this.naverFinanceService.getTechnicalData(koreanSymbol);
         } else {
           const usaSymbol = symbol.replace(/\./g, '-');
           return this.yahooFinanceService.getTechnicalData(usaSymbol);
@@ -30,9 +28,7 @@ export class FunctionCallService {
         const symbol = args.symbol;
         if (this.isKoreanStock(symbol)) {
           const koreanSymbol = symbol.replace(/\.(KS|KQ)$/, '');
-          const result = this.kisStockService.fetchFundamental(koreanSymbol);
-          console.log('fetch kis fundamental result', result);
-          return result;
+          return this.naverFinanceService.getFundamentalData(koreanSymbol);
         } else {
           const usaSymbol = symbol.replace(/\./g, '-');
           return this.yahooFinanceService.getFundamentalData(usaSymbol);
