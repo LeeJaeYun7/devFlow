@@ -48,8 +48,8 @@ export class DartCorpService implements OnModuleInit {
       } catch (error) {
         this.logger.error(`전체 기업 실적 조회 실패: ${error.message}`);
       }
-      this.onModuleInit();
-    }, delay);
+     //this.onModuleInit();
+   }, delay);
 
     this.schedulerRegistry.addTimeout('allQuarterlyFinancials', timeout);
   }

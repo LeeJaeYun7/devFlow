@@ -7,7 +7,7 @@ import { LlmModule } from './conversation/llm/llm.module';
 import { HealthCheckModule } from './health-check/health_check.module';
 import { UserModule } from './user/user.module';
 import { SseModule } from './sse/sse.module'; 
-import { DartFinanceModule } from './finance/korea/dart/dart-financial.module';
+import { KoreaFinanceModule } from './finance/korea/korea-finance.module';
 
 @Module({
   imports: [
@@ -19,7 +19,7 @@ import { DartFinanceModule } from './finance/korea/dart/dart-financial.module';
     HealthCheckModule,
     UserModule,
     SseModule,
-    DartFinanceModule,
+    KoreaFinanceModule,
   ],
 })
 export class RouterModule {}
