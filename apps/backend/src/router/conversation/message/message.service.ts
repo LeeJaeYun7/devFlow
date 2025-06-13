@@ -78,7 +78,6 @@ export class MessageService {
         chatId,
         message: dto.content,
         cb: (content) => {
-          this.logger.debug(`Received chunk from LLM: ${content}`);
           this.sseService.sendEvent({ type: 'chatMessage', data: { chatId, content } });
         },
         endCb: async () => {
@@ -87,7 +86,6 @@ export class MessageService {
         },
         titleParam: {
           cb: (title) => {
-            this.logger.debug(`Title generated: ${title}`);
             this.sseService.sendEvent({ type: 'chatTitle', data: { chatId, title } });
           },
           endCb: async (title) => {

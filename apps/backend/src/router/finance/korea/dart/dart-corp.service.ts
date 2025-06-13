@@ -30,9 +30,9 @@ export class DartCorpService implements OnModuleInit {
   /**
    * NestJS 애플리케이션 시작 시 오늘 20:30에 삼성전자 실적 조회 예약
    */
-  async onModuleInit() {
+   async onModuleInit() {
     const targetDate = new Date();
-    targetDate.setHours(11, 50, 0, 0); 
+    targetDate.setHours(1, 0, 0, 0);
 
     const now = new Date();
     let delay = targetDate.getTime() - now.getTime();
@@ -42,17 +42,57 @@ export class DartCorpService implements OnModuleInit {
       delay = targetDate.getTime() - now.getTime();
     }
 
-    this.logger.log(`삼성전자 분기별 실적 조회 예약됨: ${targetDate}`);
+    this.logger.log(`전체 기업 실적 조회 예약됨: ${targetDate}`);
+
     const timeout = setTimeout(async () => {
       try {
-        await this.getQuarterlyFinancials('005930', 2015, 2025);
-        this.logger.log(`삼성전자 분기별 실적 조회 완료`);
+        await this.fetchAllQuarterlyFinancials(2015, 2025);
+        this.logger.log(`전체 기업 실적 조회 완료`);
       } catch (error) {
-        this.logger.error(`삼성전자 분기별 실적 조회 실패: ${error.message}`);
+        this.logger.error(`전체 기업 실적 조회 실패: ${error.message}`);
       }
-    }, delay);
+     //this.onModuleInit();
+   }, delay);
 
-    this.schedulerRegistry.addTimeout('samsungQuarterlyFinancials', timeout);
+    this.schedulerRegistry.addTimeout('allQuarterlyFinancials', timeout);
+  }
+
+  /**
+   * stockCode가 6자리인 기업들을 순회하며 분기별 실적을 조회
+   * @param startYear
+   * @param endYear
+   */
+  async fetchAllQuarterlyFinancials(startYear: number, endYear: number) {
+    try {
+      // stockCode가 6자리인 기업만 필터링
+      const companies = await this.dartCorpCodeModel.find({
+        stockCode: { $regex: /^\d{6}$/ }
+      });
+
+      this.logger.log(`총 ${companies.length}개의 기업 실적을 가져옵니다.`);
+
+      for (const company of companies) {
+        const { stockCode } = company;
+        if (!stockCode) {
+          continue;
+        }
+
+        this.logger.log(`기업 [${company.corpName}] (${stockCode}) 실적 가져오기 시작`);
+        try {
+          await this.getQuarterlyFinancials(stockCode, startYear, endYear);
+          this.logger.log(`기업 [${company.corpName}] (${stockCode}) 실적 가져오기 완료`);
+        } catch (error) {
+          this.logger.error(
+            `기업 [${company.corpName}] (${stockCode}) 실적 가져오기 실패: ${error.message}`
+          );
+        }
+      }
+
+      this.logger.log(`모든 기업 실적 가져오기 완료`);
+    } catch (error) {
+      this.logger.error(`전체 실적 가져오기 실패: ${error.message}`);
+      throw error;
+    }
   }
 
   /**
@@ -73,8 +113,8 @@ export class DartCorpService implements OnModuleInit {
 
       for (let year = startYear; year <= endYear; year++) {
         const reprtCodes = ['11013', '11012', '11014', '11011']; // 1Q, 반기, 3Q, 사업보고서
-        for (const reprtCode of reprtCodes) {
-          const response = await axios.get(
+        for (const reprtCode of reprtCodes) {           
+           const response = await axios.get(
             `https://opendart.fss.or.kr/api/fnlttSinglAcntAll.json`,
             {
               params: {
@@ -109,8 +149,8 @@ export class DartCorpService implements OnModuleInit {
           );
 
           this.logger.log(
-            `삼성전자 ${year}년 ${reprtCode} 분기실적 저장 완료 (건수: ${response.data.list?.length ?? 0})`
-          );
+            `${corp.corpName} ${year}년 ${reprtCode} 분기실적 저장 완료 (건수: ${response.data.list?.length ?? 0})`
+      );
         }
       }
     } catch (error: unknown) {

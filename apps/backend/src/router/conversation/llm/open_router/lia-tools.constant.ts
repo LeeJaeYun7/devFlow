@@ -31,4 +31,21 @@ export const tools: OpenRouterTool[] = [
       },
     },
   },
+  {
+    type: 'function',
+    function: {
+      name: 'get_all_dart_financials',
+      description: 'Fetch all available DART quarterly financial summaries (revenue, operating profit, net income) for a given Korean stock symbol.',
+      parameters: {
+        type: 'object',
+        properties: {
+          symbol: {
+            type: 'string',
+            description: 'Korean stock code (e.g., "005930.KS" for Samsung Electronics)',
+          },
+        },
+        required: ['symbol'],
+      },
+    },
+  }
 ];
