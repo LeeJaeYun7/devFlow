@@ -20,7 +20,7 @@ export function FirstRecommend() {
       <Typography
         sx={{ fontWeight: 500, textAlign: 'center', fontSize: { xs: '24px', md: '32px' }, lineHeight: '1.2' }}
       >
-        주식 분석,{' '}
+        전기료 예측,{' '}
         <Box component="span" sx={{ fontWeight: 700 }}>
           리아
         </Box>

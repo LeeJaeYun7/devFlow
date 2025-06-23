@@ -19,10 +19,10 @@ export class BaseConfigService {
       kisBaseUrl: 'https://openapi.koreainvestment.com:9443',
 
       openRouter: {
-        url: this.configService.get('OPENROUTER_URL'),
-        apiKey: this.configService.get('OPENROUTER_API_KEY'),
-        model: this.configService.get('OPENROUTER_MODEL'),
-        temperature: +this.configService.get('OPENROUTER_TEMPERATURE'),
+        url: 'https://openrouter.ai/api/v1/chat/completions',
+        apiKey: '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',
+        model: 'meta-llama/llama-3-8b-instruct',
+        temperature: 0.7,
       },
       googleOauth: {
         clientId: this.configService.get('GOOGLE_OAUTH_CLIENT_ID'),
