@@ -3,7 +3,7 @@ export const DefaultBaseConfig = {
   apiPort: 4600,
   dataCollectorPort: 4700,
 
-  mongodbUri: 'mongodb://root:password@localhost:27017/lia?authSource=admin',
+  mongodbUri: 'mongodb://localhost:27017/lia?authSource=admin',
   jwtSecret: '0196d973-16f1-7ad1-aa37-693870c00af8',
 
   dartApiKey: '',

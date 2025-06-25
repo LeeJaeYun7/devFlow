@@ -1,20 +1,14 @@
-import { MetricData, UserMetricDto, UserMetricResponse } from '@lia/api/admin/user/metric.dto';
-import { UserListDto, UserListResponse } from '@lia/api/admin/user/list.dto';
-import { ServiceReturnType } from '@lia/api/types/base.type';
 import { Injectable } from '@nestjs/common';
-import { UserModel } from '../../../module/mongo/model/user/models/user.model';
-import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { UserModel } from '../../../module/mongo/model/user/models/user.model';
 import { DailyMetricModel } from '../../../module/mongo/model/metric/models/daily_metric.model';
 import { TotalMetricModel } from '../../../module/mongo/model/metric/models/total_metric.model';
-import {
-  DailyMetric,
-  DailyMetricList,
-  DailyMetricMap,
-  TotalMetricMap,
-} from '../../../module/mongo/model/metric/interfaces/metric.constant';
-import { getDateKey } from '../../../util/date';
 import { UserMessageQuotaModel } from '../../../module/mongo/model/user/models/user_message_quota.model';
+import { UserListDto, UserListResponse } from '@lia/api/admin/user/list.dto';
+import { UserMetricDto, UserMetricResponse } from '@lia/api/admin/user/metric.dto';
+import { DailyMetricList, DailyMetricMap, TotalMetricMap } from '../../../module/mongo/model/metric/interfaces/metric.constant';
+import { getDateKey } from '../../../util/date';
 
 @Injectable()
 export class AdminUserService {
@@ -32,7 +26,7 @@ export class AdminUserService {
     private readonly userMessageQuotaModel: Model<UserMessageQuotaModel>
   ) {}
 
-  public async listUser(dto: UserListDto): ServiceReturnType<UserListResponse> {
+  public async listUser(dto: UserListDto): Promise<UserListResponse['data']> {
     const { page, limit } = dto;
 
     const data = await this.userModel
@@ -63,7 +57,7 @@ export class AdminUserService {
     };
   }
 
-  public async getUserMetric(_: UserMetricDto): ServiceReturnType<UserMetricResponse> {
+  public async getUserMetric(_: UserMetricDto): Promise<UserMetricResponse['data']> {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayDateKey = getDateKey(yesterday);
@@ -85,15 +79,15 @@ export class AdminUserService {
     );
 
     return {
-      totalUser: calculateMetric(TotalMetricMap.totalUser, totalUser, yesterdayTotalUser),
-      dau: calculateMetric(DailyMetricMap.dau, dau.yesterday, dau.twoDaysAgo),
-      nru: calculateMetric(DailyMetricMap.nru, nru.yesterday, nru.twoDaysAgo),
-      d1Retention: calculateMetric(DailyMetricMap.d1Retention, d1Retention.yesterday, d1Retention.twoDaysAgo),
-      d7Retention: calculateMetric(DailyMetricMap.d7Retention, d7Retention.yesterday, d7Retention.twoDaysAgo),
+      totalUser: this.calculateMetric(TotalMetricMap.totalUser, totalUser, yesterdayTotalUser),
+      dau: this.calculateMetric(DailyMetricMap.dau, dau.yesterday, dau.twoDaysAgo),
+      nru: this.calculateMetric(DailyMetricMap.nru, nru.yesterday, nru.twoDaysAgo),
+      d1Retention: this.calculateMetric(DailyMetricMap.d1Retention, d1Retention.yesterday, d1Retention.twoDaysAgo),
+      d7Retention: this.calculateMetric(DailyMetricMap.d7Retention, d7Retention.yesterday, d7Retention.twoDaysAgo),
     };
   }
 
-  private getDailyMetricResult(metricKey: DailyMetric, metricList: DailyMetricModel[]) {
+  private getDailyMetricResult(metricKey: string, metricList: DailyMetricModel[]) {
     const metric = metricList.filter((metric) => metric.metric === metricKey);
 
     const yesterday = metric[1];
@@ -104,23 +98,19 @@ export class AdminUserService {
       twoDaysAgo,
     };
   }
-}
 
-function calculateMetric(key: string, metric?: Metric | null, prevMetric?: Metric | null): MetricData {
-  const currentValue = metric?.value ?? 0;
-  const prevValue = prevMetric?.value ?? 0;
+  private calculateMetric(key: string, metric?: any, prevMetric?: any) {
+    const currentValue = metric?.value ?? 0;
+    const prevValue = prevMetric?.value ?? 0;
 
-  const diff = currentValue - prevValue;
-  const diffRate = prevValue ? +((diff / prevValue) * 100).toFixed(2) : 0;
+    const diff = currentValue - prevValue;
+    const diffRate = prevValue ? +((diff / prevValue) * 100).toFixed(2) : 0;
 
-  return {
-    metric: key,
-    value: currentValue,
-    diff,
-    diffRate,
-  };
-}
-
-interface Metric {
-  value?: number;
+    return {
+      metric: key,
+      value: currentValue,
+      diff,
+      diffRate,
+    };
+  }
 }
