@@ -24,7 +24,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::731219764596:role/GitHubAction
+          role-to-assume: arn:aws:iam::058264441782:role/GitHubAction
           aws-region: ap-northeast-2
 
       - name: Setup Node 22.13
@@ -63,7 +63,7 @@ jobs:
         with:
           task-definition: .github/workflows/task-definition.json 
           container-name: mathai-backend-container 
-          image: 731219764596.dkr.ecr.ap-northeast-2.amazonaws.com/mathai:${{ github.sha }}
+          image: 058264441782.dkr.ecr.ap-northeast-2.amazonaws.com/mathai:${{ github.sha }}
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
