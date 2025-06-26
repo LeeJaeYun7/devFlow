@@ -22,7 +22,7 @@ export class BaseConfigService {
         url: this.configService.get('OPENROUTER_URL'),
         apiKey: this.configService.get('OPENROUTER_API_KEY'),
         model: this.configService.get('OPENROUTER_MODEL'),
-        temperature: +this.configService.get('OPENROUTER_TEMPERATURE'),
+        temperature: this.configService.get('OPENROUTER_TEMPERATURE'),
       },
       googleOauth: {
         clientId: this.configService.get('GOOGLE_OAUTH_CLIENT_ID'),
