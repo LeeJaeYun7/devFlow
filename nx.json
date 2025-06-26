@@ -108,5 +108,43 @@
         "unitTestRunner": "none"
       }
     }
+  },
+  "projects": {
+    "backend": { 
+      "root": "apps/backend", 
+      "projectType": "application", 
+      "sourceRoot": "apps/backend/src", 
+      "targets": {
+        "build": {
+          "executor": "@nx/webpack:webpack", 
+          "outputs": ["{options.outputPath}"],
+          "options": {
+            "outputPath": "dist/apps/backend", 
+            "main": "apps/backend/src/main.ts", 
+            "tsConfig": "apps/backend/tsconfig.app.json", 
+            "assets": ["apps/backend/src/assets"] 
+          },
+          "configurations": {
+            "production": {
+             
+            }
+          }
+        },
+        "serve": { 
+          "executor": "@nx/webpack:webpack", 
+          "options": {
+            "buildTarget": "backend:build"
+          }
+        },
+        "deploy": { 
+          "executor": "nx:run-commands",
+          "options": {
+            "command": "docker build -t 058264441782.dkr.ecr.ap-northeast-2.amazonaws.com/devtrack:${{ github.sha }} . && docker push 058264441782.dkr.ecr.ap-northeast-2.amazonaws.com/devtrack:${{ github.sha }}",
+            "cwd": "apps/backend"
+          },
+          "dependsOn": ["build"] 
+        }
+      }
+    }
   }
 }

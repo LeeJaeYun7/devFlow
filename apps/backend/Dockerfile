@@ -3,9 +3,6 @@ FROM node:22.13-alpine AS base
 
 WORKDIR /app
 
-# Chromium 설치
-RUN apk add --no-cache chromium && apk info -L chromium
-
 # pnpm 설치
 RUN npm install -g pnpm@9.15
 
@@ -21,9 +18,6 @@ ENV NODE_ENV=production
 ENV PORT=4600
 
 WORKDIR /app
-
-# 🔥 Chromium 설치 추가!
-RUN apk add --no-cache chromium && apk info -L chromium
 
 RUN addgroup --system backend && \
   adduser --system -G backend backend

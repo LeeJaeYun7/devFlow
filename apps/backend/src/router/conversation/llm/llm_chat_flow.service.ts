@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { FunctionCallService } from './function-call.service';
-import { tools } from './open_router/lia-tools.constant';
+import { tools } from './open_router/mathai-tools.constant';
 
 import { OpenRouterMessage, OpenRouterStreamChunkToolCall } from './open_router/open_router.type';
 import { ChatModel } from '../../../module/mongo/model/conversation/models/chat.model';
