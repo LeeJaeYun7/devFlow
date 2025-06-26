@@ -9,9 +9,9 @@ export const DefaultBaseConfig = {
   dartApiKey: '',
 
   openRouter: {
-    url: 'https://api.openrouter.ai/api/v1/chat/completions',
-    apiKey: '',
-    model: '',
+    url: 'https://openrouter.ai/api/v1/chat/completions',
+    apiKey: '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',
+    model: 'openai/gpt-3.5-turbo',
     temperature: 0.7,
   },
 

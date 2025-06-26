@@ -1,0 +1,16 @@
+{
+    "name": "@lia/api",
+    "sourceRoot": "libs/api/src",
+    "projectType": "library",
+    "targets": {
+      "build": {
+        "executor": "@nx/js:swc",
+        "options": {
+          "main": "libs/api/src/index.ts",
+          "outputPath": "dist/libs/api",
+          "tsConfig": "libs/api/tsconfig.lib.json",
+          "skipTypeCheck": true
+        }
+      }
+    }
+  }

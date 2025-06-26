@@ -1,0 +1,6 @@
+{
+    "name": "@lia/react",
+    "projectType": "library",
+    "sourceRoot": "libs/react/src",
+    "targets": {}
+  }
