@@ -50,7 +50,7 @@ jobs:
             ${{ runner.os }}-buildx-
 
       - name: ECR Login
-        run: aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 731219764596.dkr.ecr.ap-northeast-2.amazonaws.com
+        run: aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 05826441782.dkr.ecr.ap-northeast-2.amazonaws.com/devtrack
         
       - name: Build and Deploy
         run: pnpm dlx nx run-many --target=build,deploy
