@@ -55,20 +55,20 @@ jobs:
       - name: Build and Push Docker Image (via Nx deploy target)
         run: pnpm dlx nx run-many --target=build,deploy --parallel --projects=mathai  
         env:
-          ECR_REPOSITORY_NAME: mathai
+          ECR_REPOSITORY_NAME: devflow
  
       - name: Fill in the new image ID in the ECS task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: .github/workflows/task-definition.json 
-          container-name: mathai-backend-container 
-          image: 058264441782.dkr.ecr.ap-northeast-2.amazonaws.com/mathai:${{ github.sha }}
+          container-name: devflow-backend-container 
+          image: 058264441782.dkr.ecr.ap-northeast-2.amazonaws.com/devflow:${{ github.sha }}
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: mathai-service 
-          cluster: mathai-cluster
+          service: devflow-service 
+          cluster: devflow-cluster
           wait-for-service-stability: true
