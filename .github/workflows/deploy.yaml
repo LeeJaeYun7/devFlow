@@ -16,7 +16,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -25,7 +25,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::731219764596:role/GitHubAction
-          aws-region: ap-northeast-2        
+          aws-region: ap-northeast-2
 
       - name: Setup Node 22.13
         uses: actions/setup-node@v2
@@ -51,7 +51,24 @@ jobs:
 
       - name: ECR Login
         run: aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 731219764596.dkr.ecr.ap-northeast-2.amazonaws.com
-        
-      - name: Build and Deploy
-        run: pnpm dlx nx run-many --target=build,deploy
 
+      - name: Build and Push Docker Image (via Nx deploy target)
+        run: pnpm dlx nx run-many --target=build,deploy --parallel --projects=mathai  
+        env:
+          ECR_REPOSITORY_NAME: mathai
+ 
+      - name: Fill in the new image ID in the ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: .github/workflows/task-definition.json 
+          container-name: mathai-backend-container 
+          image: 731219764596.dkr.ecr.ap-northeast-2.amazonaws.com/mathai:${{ github.sha }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: mathai-service 
+          cluster: mathai-cluster
+          wait-for-service-stability: true

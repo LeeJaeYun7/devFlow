@@ -1,0 +1,16 @@
+{
+  "family": "your-task-definition-family",
+  "containerDefinitions": [
+    {
+      "name": "mathai-backend-container", 
+      "image": "some-initial-image:latest",
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "hostPort": 0,
+          "protocol": "tcp"
+        }
+      ]
+    }
+  ]
+}
