@@ -7,7 +7,7 @@ export class SlackService {
 
   constructor() {
     if (process.env['NODE_ENV'] === 'production') {
-      this.webhookUrl = 'https://hooks.slack.com/services/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';
+      this.webhookUrl = '';
     } else {
       this.webhookUrl = '';
     }
