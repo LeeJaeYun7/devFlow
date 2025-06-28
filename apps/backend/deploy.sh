@@ -1,6 +1,6 @@
 #!/bin/bash
 
-REPO=731219764596.dkr.ecr.ap-northeast-2.amazonaws.com/backend
+REPO=058264441782.dkr.ecr.ap-northeast-2.amazonaws.com/devflow
 SHA_TAG=$(git rev-parse --short HEAD)
 
 docker buildx build \
@@ -13,13 +13,3 @@ docker buildx build \
   --push \
   .
   
-## 배포 후, ECS Task 재시작
-CLUSTER_NAME=api-cluster
-SERVICE_NAME=api-service
-REGION=ap-northeast-2
-
-aws ecs update-service \
-  --cluster $CLUSTER_NAME \
-  --service $SERVICE_NAME \
-  --force-new-deployment \
-  --region $REGION
