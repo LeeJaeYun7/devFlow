@@ -139,7 +139,7 @@
         "deploy": { 
           "executor": "nx:run-commands",
           "options": {
-            "command": "docker build -t 058264441782.dkr.ecr.ap-northeast-2.amazonaws.com/devtrack:${{ github.sha }} . && docker push 058264441782.dkr.ecr.ap-northeast-2.amazonaws.com/devtrack:${{ github.sha }}",
+            "command": "docker build -t 058264441782.dkr.ecr.ap-northeast-2.amazonaws.com/${ECR_REPOSITORY_NAME}:${{ github.sha }} . && docker push 058264441782.dkr.ecr.ap-northeast-2.amazonaws.com/${ECR_REPOSITORY_NAME}:${{ github.sha }}",
             "cwd": "apps/backend"
           },
           "dependsOn": ["build"] 
