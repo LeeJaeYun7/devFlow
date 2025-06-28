@@ -12,7 +12,16 @@
         }
       ],
       "cpu": 256, 
-      "memory": 512 
+      "memory": 512,
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "ecs/devflow-task-definition",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-stream-prefix": "devflow-backend-container"
+        }
+      },
+      "essential": true
     }
   ],
   "requiresCompatibilities": [ "FARGATE" ],
