@@ -6,8 +6,8 @@
       "image": "058264441782.dkr.ecr.ap-northeast-2.amazonaws.com/devflow",
       "portMappings": [
         {
-          "containerPort": 3000,
-          "hostPort": 3000,
+          "containerPort": 4600,
+          "hostPort": 4600,
           "protocol": "tcp"
         }
       ],
