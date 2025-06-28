@@ -2,8 +2,8 @@
   "family": "your-task-definition-family",
   "containerDefinitions": [
     {
-      "name": "mathai-backend-container", 
-      "image": "some-initial-image:latest",
+      "name": "devflow-backend-container", 
+      "image": "058264441782.dkr.ecr.ap-northeast-2.amazonaws.com/devflow",
       "portMappings": [
         {
           "containerPort": 3000,
