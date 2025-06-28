@@ -28,4 +28,4 @@ RUN chown -R backend:backend .
 
 EXPOSE 4600
 
-ENTRYPOINT [ "node", "backend" ]
+ENTRYPOINT [ "node", "backend/main.js" ]
