@@ -16,7 +16,7 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "ecs/devflow-task-definition",
+          "awslogs-group": "/ecs/devflow-task-definition",
           "awslogs-region": "ap-northeast-2",
           "awslogs-stream-prefix": "devflow-backend-container"
         }
