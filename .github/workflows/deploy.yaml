@@ -72,3 +72,16 @@ jobs:
           service: devflow-service 
           cluster: devflow-cluster
           wait-for-service-stability: true
+
+      # --- Frontend Build & Deploy to S3 ---
+      - name: Build frontend
+        run: pnpm build --filter=frontend
+
+      - name: Upload frontend to S3
+        run: aws s3 sync ./dist s3://devflow-frontend --delete
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id E1M5DEDTE5NQZX \
+            --paths "/*"
