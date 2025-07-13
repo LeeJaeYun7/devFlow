@@ -9,11 +9,6 @@
           "containerPort": 4600,
           "hostPort": 4600,
           "protocol": "tcp"
-        },
-        {
-          "containerPort": 80,
-          "hostPort": 4600,
-          "protocol": "tcp"
         }
       ],
       "cpu": 256, 
