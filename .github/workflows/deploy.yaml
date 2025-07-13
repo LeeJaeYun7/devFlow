@@ -78,7 +78,7 @@ jobs:
         run: pnpm nx build web
 
       - name: Upload frontend to S3
-        run: aws s3 sync ./dist/apps/web s3://devflow-frontend --delete
+        run: aws s3 sync ./apps/web/dist s3://devflow-frontend --delete
 
       - name: Invalidate CloudFront cache
         run: |
