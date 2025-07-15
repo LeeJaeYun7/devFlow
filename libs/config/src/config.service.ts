@@ -24,16 +24,9 @@ export class BaseConfigService {
         model: this.configService.get('OPENROUTER_MODEL'),
         temperature: this.configService.get('OPENROUTER_TEMPERATURE'),
       },
-      googleOauth: {
-        clientId: this.configService.get('GOOGLE_OAUTH_CLIENT_ID'),
-        clientSecret: this.configService.get('GOOGLE_OAUTH_CLIENT_SECRET'),
-      },
-      kakaoOauth: {
-        clientId: this.configService.get('KAKAO_OAUTH_CLIENT_ID'),
-      },
-      naverOauth: {
-        clientId: this.configService.get('NAVER_OAUTH_CLIENT_ID'),
-        clientSecret: this.configService.get('NAVER_OAUTH_CLIENT_SECRET'),
+      githubOauth: {
+        clientId: this.configService.get('GITHUB_OAUTH_CLIENT_ID'),
+        clientSecret: this.configService.get('GITHUB_OAUTH_CLIENT_SECRET'),
       },
     } as Partial<BaseConfig>;
 

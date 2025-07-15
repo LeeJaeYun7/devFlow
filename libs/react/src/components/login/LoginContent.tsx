@@ -1,10 +1,8 @@
 import { Box, Link, Typography, useTheme } from '@mui/material';
 import { Stack } from '@mui/material';
 import { Button } from '@mui/material';
-import KakaoIcon from './KakaoIcon';
-import NaverIcon from './NaverIcon';
 import { BASE_API_URL } from '../../constants/api.constant';
-import GoogleIcon from './GoogleIcon';
+import { GithubIcon } from './GithubIcon';
 
 interface LoginContentProps {
   logoWidth?: number;
@@ -21,55 +19,20 @@ export default function LoginContent({ logoWidth = 135 }: LoginContentProps) {
       <Stack spacing={2} width={320}>
         <Button
           variant="contained"
-          startIcon={<KakaoIcon />}
+          startIcon={<GithubIcon />}
           sx={{
-            bgcolor: '#FEE500',
-            color: '#3C1E1E',
-            '&:hover': { bgcolor: '#e6c800' },
-            borderRadius: '8px',
-            py: 1.5,
-          }}
-          fullWidth
-          onClick={() => {
-            window.location.href = `${BASE_API_URL}/api/auth/kakao`;
-          }}
-        >
-          Kakao로 로그인하기
-        </Button>
-        <Button
-          variant="contained"
-          startIcon={<NaverIcon />}
-          sx={{
-            bgcolor: '#03C75A',
+            bgcolor: '#24292e',
             color: '#fff',
-            '&:hover': { bgcolor: '#029e48' },
+            '&:hover': { bgcolor: '#1b1f23' },
             borderRadius: '8px',
             py: 1.5,
           }}
           fullWidth
           onClick={() => {
-            window.location.href = `${BASE_API_URL}/api/auth/naver`;
+            window.location.href = `${BASE_API_URL}/api/auth/github`;
           }}
         >
-          네이버로 로그인하기
-        </Button>
-        <Button
-          variant="contained"
-          startIcon={<GoogleIcon />}
-          sx={{
-            bgcolor: '#fff',
-            color: '#222',
-            border: '1px solid #ddd',
-            '&:hover': { bgcolor: '#f5f5f5' },
-            borderRadius: '8px',
-            py: 1.5,
-          }}
-          fullWidth
-          onClick={() => {
-            window.location.href = `${BASE_API_URL}/api/auth/google`;
-          }}
-        >
-          Google로 로그인하기
+          GitHub로 로그인하기
         </Button>
       </Stack>
 

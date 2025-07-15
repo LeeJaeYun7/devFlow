@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { PassportModule } from '@nestjs/passport';
-import { SsoGoogleStrategy } from './sso_strategy/google.strategy';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserModel, UserSchema } from '../../module/mongo/model/user/models/user.model';
 import { AuthService } from './auth.service';
-import { SsoKakaoStrategy } from './sso_strategy/kakao.strategy';
-import { SsoNaverStrategy } from './sso_strategy/naver.strategy';
+import { SsoGithubStrategy } from './sso_strategy/github.strategy';
+import { GithubWebhookController } from './github-webhook.controller';
 import { MetricModule } from '../../module/metric/metric.module';
 import { UserMessageQuotaModel } from '../../module/mongo/model/user/models/user_message_quota.model';
 import { UserMessageQuotaSchema } from '../../module/mongo/model/user/models/user_message_quota.model';
@@ -18,8 +17,8 @@ import { UserMessageQuotaSchema } from '../../module/mongo/model/user/models/use
     PassportModule,
     MetricModule,
   ],
-  controllers: [AuthController],
-  providers: [SsoGoogleStrategy, SsoNaverStrategy, SsoKakaoStrategy, AuthService],
+  controllers: [AuthController, GithubWebhookController],
+  providers: [SsoGithubStrategy, AuthService],
   exports: [AuthService],
 })
 export class AuthModule {}

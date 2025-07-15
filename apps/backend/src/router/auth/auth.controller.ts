@@ -30,39 +30,15 @@ export class AuthController {
     this.redirectMainUrl = this.isProd ? 'https://asklia.io' : 'http://localhost:4500';
   }
 
-  @Get('/google')
-  @UseGuards(AuthGuard('google'))
-  public async googleAuth() {
-    // Redirect to the Google authentication page
+  @Get('/github')
+  @UseGuards(AuthGuard('github'))
+  public async githubAuth() {
+    // Redirect to the GitHub authentication page
   }
 
-  @Get('/google/callback')
-  @UseGuards(AuthGuard('google'))
-  public async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
-    await this.setTokenCookie(req, res);
-  }
-
-  @Get('/kakao')
-  @UseGuards(AuthGuard('kakao'))
-  public async kakaoAuth() {
-    // Redirect to the Kakao authentication page
-  }
-
-  @Get('/kakao/callback')
-  @UseGuards(AuthGuard('kakao'))
-  public async kakaoAuthRedirect(@Req() req: Request, @Res() res: Response) {
-    await this.setTokenCookie(req, res);
-  }
-
-  @Get('/naver')
-  @UseGuards(AuthGuard('naver'))
-  public async naverAuth() {
-    // Redirect to the Naver authentication page
-  }
-
-  @Get('/naver/callback')
-  @UseGuards(AuthGuard('naver'))
-  public async naverAuthRedirect(@Req() req: Request, @Res() res: Response) {
+  @Get('/github/callback')
+  @UseGuards(AuthGuard('github'))
+  public async githubAuthRedirect(@Req() req: Request, @Res() res: Response) {
     await this.setTokenCookie(req, res);
   }
 

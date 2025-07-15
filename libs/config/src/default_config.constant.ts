@@ -3,7 +3,7 @@ export const DefaultBaseConfig = {
   apiPort: 4600,
   dataCollectorPort: 4700,
 
-  mongodbUri: 'mongodb+srv://devflow:1234@devflow.wterl7u.mongodb.net/?retryWrites=true&w=majority&appName=devflow',
+  mongodbUri: 'mongodb://localhost:27017/devflow',
   jwtSecret: '0196d973-16f1-7ad1-aa37-693870c00af8',
 
   dartApiKey: '',
@@ -15,15 +15,8 @@ export const DefaultBaseConfig = {
     temperature: 0.7,
   },
 
-  googleOauth: {
-    clientId: 'default',
-    clientSecret: '',
-  },
-  kakaoOauth: {
-    clientId: 'default',
-  },
-  naverOauth: {
-    clientId: 'default',
-    clientSecret: '',
+  githubOauth: {
+    clientId: 'Iv23lij6z2GojB8OffFO',
+    clientSecret: '57ad2fe28062ef8a9944c8b87bfd91d6649ee556',
   },
 };
