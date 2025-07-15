@@ -1,7 +1,5 @@
 export const AuthSsoMap = {
-  kakao: 'kakao',
-  google: 'google',
-  naver: 'naver',
+  github: 'github',
 } as const;
 
 export const AuthSsoList = Object.values(AuthSsoMap);
